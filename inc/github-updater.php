@@ -14,6 +14,11 @@ if (!defined('ABSPATH')) {
  * GitHub Theme Updater Class
  */
 class GitHub_Theme_Updater {
+    
+    /**
+     * Static flag to prevent multiple instances
+     */
+    private static $instance = null;
 
     /**
      * GitHub repository owner
@@ -54,6 +59,12 @@ class GitHub_Theme_Updater {
      * Constructor
      */
     public function __construct() {
+        // Prevent multiple instances
+        if (self::$instance !== null) {
+            return;
+        }
+        self::$instance = $this;
+        
         $this->theme_slug = get_template();
         $this->current_version = $this->get_theme_version();
         
@@ -98,14 +109,27 @@ class GitHub_Theme_Updater {
      */
     private function get_github_theme_uri(): ?string {
         $theme_data = wp_get_theme();
+        
+        // Try different ways to get GitHub URI
         $github_uri = $theme_data->get('GitHub Theme URI');
         
         if (!$github_uri) {
-            // Fallback: try to extract from Theme URI
+            // Try Theme URI
             $theme_uri = $theme_data->get('Theme URI');
-            if (strpos($theme_uri, 'github.com') !== false) {
+            if ($theme_uri && strpos($theme_uri, 'github.com') !== false) {
                 $path = parse_url($theme_uri, PHP_URL_PATH);
                 return ltrim($path, '/');
+            }
+        }
+        
+        // If still not found, try reading style.css directly
+        if (!$github_uri) {
+            $style_css_path = get_template_directory() . '/style.css';
+            if (file_exists($style_css_path)) {
+                $style_content = file_get_contents($style_css_path);
+                if (preg_match('/GitHub Theme URI:\s*(.+)/i', $style_content, $matches)) {
+                    $github_uri = trim($matches[1]);
+                }
             }
         }
         
@@ -243,7 +267,17 @@ class GitHub_Theme_Updater {
             }
         }
     }
+
 }
 
-// Initialize the updater
-new GitHub_Theme_Updater();
+// Initialize the updater only once
+if (!class_exists('GitHub_Theme_Updater_Initialized')) {
+    add_action('init', function() {
+        if (is_admin() && get_template() === 'wp-theme') {
+            new GitHub_Theme_Updater();
+        }
+    });
+    
+    // Mark as initialized to prevent multiple instances
+    class GitHub_Theme_Updater_Initialized {}
+}
