@@ -43,6 +43,14 @@ add_action(
             $wp_rewrite->set_permalink_structure( $desired_structure );
             flush_rewrite_rules();
         }
+
+        // Update ACF show_in_rest settings if Headless CMS is enabled
+        if (function_exists('wp_theme_get_settings')) {
+            $settings = wp_theme_get_settings();
+            if (isset($settings['headless']) && $settings['headless'] && function_exists('wp_theme_update_all_acf_show_in_rest')) {
+                wp_theme_update_all_acf_show_in_rest(true);
+            }
+        }
     }
 );
 

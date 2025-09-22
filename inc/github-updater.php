@@ -18,17 +18,17 @@ class GitHub_Theme_Updater {
     /**
      * Static flag to prevent multiple instances
      */
-    private static $instance = null;
+    private static ?self $instance = null;
 
     /**
      * GitHub repository owner
      */
-    private $owner;
+    private ?string $owner = null;
 
     /**
      * GitHub repository name
      */
-    private $repo;
+    private ?string $repo = null;
 
     /**
      * Theme slug
@@ -45,7 +45,7 @@ class GitHub_Theme_Updater {
     /**
      * GitHub API URL
      */
-    private $api_url;
+    private readonly string $api_url;
 
 
     /**
@@ -65,7 +65,7 @@ class GitHub_Theme_Updater {
         // Extract GitHub info from style.css
         $github_uri = $this->get_github_theme_uri();
         if ($github_uri) {
-            $parts = explode('/', $github_uri);
+            $parts = explode('/', (string) $github_uri);
             $this->owner = $parts[0] ?? '';
             $this->repo = $parts[1] ?? '';
         }
@@ -81,7 +81,7 @@ class GitHub_Theme_Updater {
     /**
      * Initialize WordPress hooks
      */
-    private function init_hooks() {
+    private function init_hooks(): void {
         add_filter('pre_set_site_transient_update_themes', $this->check_for_updates(...));
         add_filter('themes_api', $this->theme_api_call(...), 10, 3);
         add_action('upgrader_process_complete', $this->after_theme_update(...), 10, 2);
@@ -159,7 +159,7 @@ class GitHub_Theme_Updater {
     /**
      * Get remote version from GitHub API
      */
-    private function get_remote_version() {
+    private function get_remote_version(): ?string {
         $response = wp_remote_get($this->api_url, [
             'timeout' => 10,
             'headers' => [
@@ -186,7 +186,7 @@ class GitHub_Theme_Updater {
     /**
      * Get download URL for specific version
      */
-    private function get_download_url($version) {
+    private function get_download_url(string $version): string {
         return "https://github.com/{$this->owner}/{$this->repo}/archive/refs/tags/v{$version}.zip";
     }
 
@@ -247,7 +247,7 @@ class GitHub_Theme_Updater {
      * @param object $upgrader_object
      * @param array $options
      */
-    public function after_theme_update($upgrader_object, $options) {
+    public function after_theme_update($upgrader_object, $options): void {
         if ($options['action'] === 'update' && $options['type'] === 'theme' && (isset($options['themes']) && in_array($this->theme_slug, $options['themes']))) {
             // Clear any caches
             if (function_exists('wp_cache_flush')) {
