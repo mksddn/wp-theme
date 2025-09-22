@@ -143,6 +143,35 @@ function wp_theme_get_translated_slug(string $slug, string $target_language): ?s
 
 
 /**
+ * Get translated post ID for a given post ID and language.
+ *
+ * @param int $post_id Original post ID.
+ * @param string $target_language Target language code.
+ * @return int|null Translated post ID or null if not found.
+ */
+function wp_theme_get_translated_post_id(int $post_id, string $target_language): ?int {
+    if (!wp_theme_is_polylang_active()) {
+        return null;
+    }
+
+    // Get translated post ID using pll_get_post
+    $translated_post_id = pll_get_post($post_id, $target_language);
+
+    if (!$translated_post_id) {
+        return null;
+    }
+
+    // Verify the translated post exists and is published
+    $translated_post = get_post($translated_post_id);
+    if (!$translated_post || $translated_post->post_status !== 'publish') {
+        return null;
+    }
+
+    return $translated_post_id;
+}
+
+
+/**
  * Initialize language detection for REST API requests.
  */
 function wp_theme_init_rest_language_detection(): void {
@@ -487,6 +516,63 @@ function wp_theme_handle_translated_slug_request($result, $server, $request) {
 add_filter('rest_prepare_post', 'wp_theme_add_language_to_rest_response', 10, 3);
 add_filter('rest_prepare_page', 'wp_theme_add_language_to_rest_response', 10, 3);
 
+
+/**
+ * Switch language for REST API responses based on Accept-Language header.
+ */
+function wp_theme_switch_language_for_rest_response($response, $post, $request) {
+    // Only handle if Polylang is active
+    if (!wp_theme_is_polylang_active()) {
+        return $response;
+    }
+
+    // Get language from Accept-Language header
+    $detected_language = wp_theme_get_language_from_header();
+    if (!$detected_language) {
+        return $response;
+    }
+
+    // Switch language
+    wp_theme_switch_polylang_language($detected_language);
+
+    // Get translated post ID
+    $translated_post_id = wp_theme_get_translated_post_id($post->ID, $detected_language);
+
+    if ($translated_post_id && $translated_post_id !== $post->ID) {
+        // Get the translated post
+        $translated_post = get_post($translated_post_id);
+
+        if ($translated_post) {
+            // Create new response with translated post data
+            $new_response = new WP_REST_Response();
+
+            // Get the original response data
+            $data = $response->get_data();
+
+            // Update with translated post data
+            $data['title']['rendered'] = $translated_post->post_title;
+            $data['content']['rendered'] = apply_filters('the_content', $translated_post->post_content);
+
+            $new_response->set_data($data);
+            $new_response->set_status($response->get_status());
+
+            // Copy headers
+            foreach ($response->get_headers() as $key => $value) {
+                $new_response->header($key, $value);
+            }
+
+            return $new_response;
+        }
+    }
+
+    return $response;
+}
+
+
+// Apply language switching to posts and pages
+add_filter('rest_prepare_post', 'wp_theme_switch_language_for_rest_response', 5, 3);
+add_filter('rest_prepare_page', 'wp_theme_switch_language_for_rest_response', 5, 3);
+
 // Handle empty results for slug-based requests - removed due to recursion issues
 
 // Handle empty results for slug-based requests - removed due to recursion issues
@@ -512,13 +598,33 @@ function wp_theme_add_language_to_rest_query($args, $request) {
         // Add language filter to query
         $args['lang'] = $detected_language;
 
-        // If searching by slug, try to find the translated version
+        // Handle slug-based requests
         if (isset($args['post_name__in']) && !empty($args['post_name__in'])) {
             $original_slug = $args['post_name__in'][0];
             $translated_slug = wp_theme_get_translated_slug($original_slug, $detected_language);
             if ($translated_slug && $translated_slug !== $original_slug) {
                 $args['post_name__in'] = [$translated_slug];
             }
+        }
+
+        // Handle ID-based requests
+        if (isset($args['p']) && !empty($args['p'])) {
+            $original_id = (int) $args['p'];
+            $translated_id = wp_theme_get_translated_post_id($original_id, $detected_language);
+            if ($translated_id && $translated_id !== $original_id) {
+                $args['p'] = $translated_id;
+            }
+        }
+
+        // Handle post__in requests (multiple IDs)
+        if (isset($args['post__in']) && !empty($args['post__in'])) {
+            $translated_ids = [];
+            foreach ($args['post__in'] as $original_id) {
+                $translated_id = wp_theme_get_translated_post_id((int) $original_id, $detected_language);
+                $translated_ids[] = $translated_id ?: $original_id;
+            }
+
+            $args['post__in'] = $translated_ids;
         }
     }
 
@@ -548,6 +654,35 @@ function wp_theme_add_language_to_cpt_rest_query(array $args, $request): array {
 
         // Add language filter to query
         $args['lang'] = $detected_language;
+
+        // Handle slug-based requests
+        if (isset($args['post_name__in']) && !empty($args['post_name__in'])) {
+            $original_slug = $args['post_name__in'][0];
+            $translated_slug = wp_theme_get_translated_slug($original_slug, $detected_language);
+            if ($translated_slug && $translated_slug !== $original_slug) {
+                $args['post_name__in'] = [$translated_slug];
+            }
+        }
+
+        // Handle ID-based requests
+        if (isset($args['p']) && !empty($args['p'])) {
+            $original_id = (int) $args['p'];
+            $translated_id = wp_theme_get_translated_post_id($original_id, $detected_language);
+            if ($translated_id && $translated_id !== $original_id) {
+                $args['p'] = $translated_id;
+            }
+        }
+
+        // Handle post__in requests (multiple IDs)
+        if (isset($args['post__in']) && !empty($args['post__in'])) {
+            $translated_ids = [];
+            foreach ($args['post__in'] as $original_id) {
+                $translated_id = wp_theme_get_translated_post_id((int) $original_id, $detected_language);
+                $translated_ids[] = $translated_id ?: $original_id;
+            }
+
+            $args['post__in'] = $translated_ids;
+        }
     }
 
     return $args;
@@ -568,3 +703,65 @@ add_action('rest_api_init', function(): void {
         add_filter("rest_{$post_type}_query", 'wp_theme_add_language_to_cpt_rest_query', 10, 2);
     }
 });
+
+
+/**
+ * Handle language switching for direct ID requests by modifying the route.
+ */
+function wp_theme_handle_id_route_modification($result, $server, $request) {
+    // Only handle GET requests
+    if ($request->get_method() !== 'GET') {
+        return $result;
+    }
+
+    // Check if this is a direct ID request (e.g., /wp/v2/posts/123)
+    $route = $request->get_route();
+    if (!preg_match('/^\/wp\/v2\/([^\/]+)\/(\d+)$/', (string) $route, $matches)) {
+        return $result;
+    }
+
+    $post_type = $matches[1];
+    $post_id = (int) $matches[2];
+
+    // Only handle if Polylang is active
+    if (!wp_theme_is_polylang_active()) {
+        return $result;
+    }
+
+    // Get language from Accept-Language header
+    $detected_language = wp_theme_get_language_from_header();
+    if (!$detected_language) {
+        return $result;
+    }
+
+    // Switch language
+    wp_theme_switch_polylang_language($detected_language);
+
+    // Try to get translated post ID
+    $translated_post_id = wp_theme_get_translated_post_id($post_id, $detected_language);
+
+    if ($translated_post_id && $translated_post_id !== $post_id) {
+        // Create new request with translated post ID
+        $new_route = "/wp/v2/{$post_type}/{$translated_post_id}";
+        $new_request = new WP_REST_Request('GET', $new_route);
+
+        // Copy all parameters
+        foreach ($request->get_params() as $key => $value) {
+            $new_request->set_param($key, $value);
+        }
+
+        // Execute the new request
+        $new_result = rest_do_request($new_request);
+
+        // If we found results, return them
+        if (!is_wp_error($new_result) && !empty($new_result->get_data())) {
+            return $new_result;
+        }
+    }
+
+    return $result;
+}
+
+
+// Hook into REST API requests to handle direct ID requests
+add_filter('rest_request_before_callbacks', 'wp_theme_handle_id_route_modification', 5, 3);
