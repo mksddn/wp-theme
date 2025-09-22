@@ -3,4 +3,5 @@
 vendor/
 node_modules/
 .DS_Store
-__MACOSX
+__MACOSX.DS_Store
+**/.DS_Store
