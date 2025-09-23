@@ -60,6 +60,11 @@ class GitHub_Theme_Updater {
         self::$instance = $this;
 
         $this->theme_slug = get_template();
+        
+        // If theme directory has version suffix, use the base name for GitHub updater
+        if (preg_match('/^(.+)-[\d\.]+$/', $this->theme_slug, $matches)) {
+            $this->theme_slug = $matches[1];
+        }
         $this->current_version = $this->get_theme_version();
 
         // Extract GitHub info from style.css
@@ -85,6 +90,12 @@ class GitHub_Theme_Updater {
         add_filter('pre_set_site_transient_update_themes', $this->check_for_updates(...));
         add_filter('themes_api', $this->theme_api_call(...), 10, 3);
         add_action('upgrader_process_complete', $this->after_theme_update(...), 10, 2);
+        
+        // Add admin notice for manual update check
+        add_action('admin_notices', $this->admin_notice_for_updates(...));
+        
+        // Handle force check updates
+        add_action('admin_init', $this->handle_force_check(...));
     }
 
 
@@ -260,13 +271,58 @@ class GitHub_Theme_Updater {
     }
 
 
+    /**
+     * Show admin notice with update check button
+     */
+    public function admin_notice_for_updates(): void {
+        if (!current_user_can('update_themes')) {
+            return;
+        }
+
+        $screen = get_current_screen();
+        if ($screen && $screen->id === 'themes') {
+            $remote_version = $this->get_remote_version();
+            
+            if ($remote_version && version_compare($this->current_version, $remote_version, '<')) {
+                echo '<div class="notice notice-warning is-dismissible">';
+                echo '<p><strong>Theme Update Available:</strong> ';
+                echo "Version {$remote_version} is available. ";
+                echo '<a href="' . admin_url('update-core.php') . '">Check for updates</a>';
+                echo '</p></div>';
+            } else {
+                echo '<div class="notice notice-info is-dismissible">';
+                echo '<p><a href="' . admin_url('themes.php?force_check_updates=1') . '">Check for theme updates</a></p>';
+                echo '</div>';
+            }
+        }
+    }
+
+
+    /**
+     * Handle force check updates
+     */
+    public function handle_force_check(): void {
+        if (isset($_GET['force_check_updates']) && $_GET['force_check_updates'] === '1') {
+            delete_site_transient('update_themes');
+            delete_transient('update_themes');
+            wp_update_themes();
+            wp_redirect(admin_url('themes.php?updated=1'));
+            exit;
+        }
+    }
+
+
 }
 
 // Initialize the updater only once
 if (!class_exists('GitHub_Theme_Updater_Initialized')) {
     add_action('init', function(): void {
-        if (is_admin() && get_template() === 'wp-theme') {
-            new GitHub_Theme_Updater();
+        if (is_admin()) {
+            $current_theme = get_template();
+            // Check if current theme is wp-theme (with or without version suffix)
+            if ($current_theme === 'wp-theme' || preg_match('/^wp-theme-[\d\.]+$/', $current_theme)) {
+                new GitHub_Theme_Updater();
+            }
         }
     });
 

@@ -99,7 +99,7 @@ function category_thumbnail_admin_scripts(): void {
     $screen = get_current_screen();
     if ($screen && in_array($screen->id, ['edit-category', 'category'])) {
         wp_enqueue_media();
-        wp_enqueue_script('category-thumbnail-admin', get_template_directory_uri() . '/js/category-thumbnail-admin.js', ['jquery'], '1.0.0', true);
+        wp_enqueue_script('category-thumbnail-admin', get_template_directory_uri() . '/js/category-thumbnail-admin.js', ['jquery'], wp_get_theme()->get('Version'), true);
     }
 }
 
