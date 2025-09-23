@@ -60,11 +60,12 @@ class GitHub_Theme_Updater {
         self::$instance = $this;
 
         $this->theme_slug = get_template();
-        
+
         // If theme directory has version suffix, use the base name for GitHub updater
         if (preg_match('/^(.+)-[\d\.]+$/', $this->theme_slug, $matches)) {
             $this->theme_slug = $matches[1];
         }
+
         $this->current_version = $this->get_theme_version();
 
         // Extract GitHub info from style.css
@@ -90,10 +91,11 @@ class GitHub_Theme_Updater {
         add_filter('pre_set_site_transient_update_themes', $this->check_for_updates(...));
         add_filter('themes_api', $this->theme_api_call(...), 10, 3);
         add_action('upgrader_process_complete', $this->after_theme_update(...), 10, 2);
-        
+        add_action('upgrader_post_install', $this->after_theme_install(...), 10, 2);
+
         // Add admin notice for manual update check
         add_action('admin_notices', $this->admin_notice_for_updates(...));
-        
+
         // Handle force check updates
         add_action('admin_init', $this->handle_force_check(...));
     }
@@ -265,8 +267,52 @@ class GitHub_Theme_Updater {
                 wp_cache_flush();
             }
 
-            // Log the update
-            error_log("Theme {$this->theme_slug} updated successfully via GitHub");
+            // Rename theme directory to remove version suffix
+            $this->rename_theme_directory();
+        }
+    }
+
+
+    /**
+     * Actions after theme install
+     *
+     * @param object $upgrader_object
+     * @param array $options
+     */
+    public function after_theme_install($upgrader_object, $options): void {
+        if ($options['type'] === 'theme' && isset($options['themes'])) {
+            foreach ($options['themes'] as $theme) {
+                if (str_starts_with((string) $theme, $this->theme_slug)) {
+                    $this->rename_theme_directory();
+                    break;
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Rename theme directory to remove version suffix
+     */
+    private function rename_theme_directory(): void {
+        $themes_dir = WP_CONTENT_DIR . '/themes/';
+        $current_theme = get_template();
+
+        // If theme directory has version suffix, rename it
+        if (preg_match('/^(.+)-[\d\.]+$/', $current_theme, $matches)) {
+            $base_name = $matches[1];
+            $old_path = $themes_dir . $current_theme;
+            $new_path = $themes_dir . $base_name;
+
+            // Create backup of old directory if it exists
+            if (is_dir($new_path)) {
+                rename($new_path, $new_path . '-backup-' . time());
+            }
+
+            // Rename new directory to base name
+            if (is_dir($old_path)) {
+                rename($old_path, $new_path);
+            }
         }
     }
 
@@ -282,7 +328,7 @@ class GitHub_Theme_Updater {
         $screen = get_current_screen();
         if ($screen && $screen->id === 'themes') {
             $remote_version = $this->get_remote_version();
-            
+
             if ($remote_version && version_compare($this->current_version, $remote_version, '<')) {
                 echo '<div class="notice notice-warning is-dismissible">';
                 echo '<p><strong>Theme Update Available:</strong> ';

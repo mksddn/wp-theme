@@ -53,9 +53,14 @@ function wp_theme_apply_performance_optimizations(): void {
 
     if (isset($settings['performance_limit_revisions']) && $settings['performance_limit_revisions']) {
         $limit = $settings['performance_revisions_limit'] ?? 3;
+
+        // Set constant for backward compatibility
         if (!defined('WP_POST_REVISIONS')) {
             define('WP_POST_REVISIONS', $limit);
         }
+
+        // Use filter for more reliable control over all post types
+        add_filter('wp_revisions_to_keep', fn($num, $post) => $limit, 10, 2);
     }
 
 }
@@ -63,3 +68,4 @@ function wp_theme_apply_performance_optimizations(): void {
 
 // Hook into theme settings system
 add_action('wp_theme_apply_settings', 'wp_theme_apply_performance_optimizations');
+

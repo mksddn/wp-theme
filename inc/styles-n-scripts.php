@@ -9,7 +9,7 @@
 function wp_starter_scripts(): void {
     // Get theme version for cache busting
     $theme_version = wp_get_theme()->get('Version');
-    
+
     // wp_enqueue_style( $handle, $src = false, $deps = array(), $ver = false, $media = 'all' ).
     wp_enqueue_style( 'my-styles', get_template_directory_uri() . '/css/index.css', [], $theme_version ); // Enqueue custom styles.
 
