@@ -60,6 +60,16 @@ require get_template_directory() . '/inc/api/custom-route-options.php';
  */
 require get_template_directory() . '/inc/api/search-enhancements.php';
 
+/**
+ * Add enhanced featured_media support to posts REST API.
+ */
+require get_template_directory() . '/inc/api/featured-media-enhancements.php';
+
+/**
+ * Add enhanced categories and tags support to posts REST API.
+ */
+require get_template_directory() . '/inc/api/categories-tags-enhancements.php';
+
 
 /**
  * Complete REST API disable for unauthorized users.

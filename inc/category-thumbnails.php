@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+
 /**
  * Add thumbnail field to category forms.
  */
@@ -23,6 +24,7 @@ function add_category_thumbnail_field(): void {
     </div>
     <?php
 }
+
 
 function edit_category_thumbnail_field($term): void {
     $thumbnail_id = get_term_meta($term->term_id, 'category_thumbnail', true);
@@ -45,6 +47,7 @@ function edit_category_thumbnail_field($term): void {
     <?php
 }
 
+
 /**
  * Save category thumbnail.
  */
@@ -55,21 +58,23 @@ function save_category_thumbnail($term_id): void {
     }
 }
 
+
 /**
  * Get category thumbnail.
  */
 function get_category_thumbnail($term_id, $size = 'medium'): ?string {
     $thumbnail_id = get_term_meta($term_id, 'category_thumbnail', true);
-    
+
     if (!$thumbnail_id) {
         return null;
     }
-    
+
     return wp_get_attachment_image($thumbnail_id, $size, false, [
         'alt' => get_term($term_id)->name ?? '',
         'class' => 'category-thumbnail'
     ]);
 }
+
 
 /**
  * Display category thumbnail.
@@ -78,12 +83,14 @@ function the_category_thumbnail($term_id, $size = 'medium'): void {
     echo get_category_thumbnail($term_id, $size);
 }
 
+
 /**
  * Check if category has thumbnail.
  */
 function category_has_thumbnail($term_id): bool {
     return !empty(get_term_meta($term_id, 'category_thumbnail', true));
 }
+
 
 /**
  * Admin scripts for media uploader.
@@ -127,21 +134,22 @@ function register_category_thumbnail_rest_field(): void {
     ]);
 }
 
+
 /**
  * Get category thumbnail for REST API.
  */
-function get_category_thumbnail_rest($object): ?array {
+function get_category_thumbnail_rest(array $object): ?array {
     $thumbnail_id = get_term_meta($object['id'], 'category_thumbnail', true);
-    
+
     if (!$thumbnail_id) {
         return null;
     }
-    
+
     $image = wp_get_attachment_image_src($thumbnail_id, 'full');
     if (!$image) {
         return null;
     }
-    
+
     return [
         'id' => (int) $thumbnail_id,
         'url' => $image[0],
@@ -154,6 +162,7 @@ function get_category_thumbnail_rest($object): ?array {
     ];
 }
 
+
 /**
  * Update category thumbnail via REST API.
  */
@@ -161,16 +170,17 @@ function update_category_thumbnail_rest($value, $object): bool {
     if (!isset($value['id'])) {
         return false;
     }
-    
+
     $thumbnail_id = (int) $value['id'];
-    
+
     // Verify the attachment exists
     if (!wp_get_attachment_image_src($thumbnail_id)) {
         return false;
     }
-    
+
     return update_term_meta($object->term_id, 'category_thumbnail', $thumbnail_id);
 }
+
 
 // Hooks
 add_action('category_add_form_fields', 'add_category_thumbnail_field');
