@@ -82,6 +82,7 @@ if (class_exists( 'ACF' )) {
  */
 require_once get_template_directory() . '/inc/theme-features.php';
 
+
 /**
  * GitHub Theme Updater.
  */
@@ -104,5 +105,6 @@ require_once get_template_directory() . '/inc/github-updater.php';
 // 'main_menu' => esc_html__('Main Menu'),
 // 'footer_menu' => esc_html__('Footer Menu'),
 // ));
+
 
 

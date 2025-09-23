@@ -23,6 +23,7 @@ function wp_theme_get_default_settings(): array {
         'page_excerpt'       => true,
         'clean_archive_title'=> false,
         'clean_pagination'   => false,
+        'category_thumbnails'=> false,
         // Headless CMS
         'headless'           => true,
         // SEO Features
@@ -295,7 +296,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         // Admin Features
         'disable_comments', 'cyr2lat', 'woocommerce_support', 'plugins_logger', 'duplicate_post', 'thumbnail_column', 'polylang_rest_api',
         // Content Features
-        'disable_gutenberg', 'page_excerpt', 'clean_archive_title', 'clean_pagination',
+        'disable_gutenberg', 'page_excerpt', 'clean_archive_title', 'clean_pagination', 'category_thumbnails',
         // Headless CMS
         'headless',
         // SEO Features
@@ -452,6 +453,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         'clean_archive_title'=> '<b>Remove "Category: ", "Tag: " etc. from archive title</b> - Shows only the term name',
         'clean_pagination'  => '<b>Remove H2 from pagination template</b> - Removes default heading wrapper from pagination',
         'thumbnail_column'  => '<b>Posts list: thumbnail column</b> - Shows featured image thumbnails in posts list',
+        'category_thumbnails'=> '<b>Category thumbnails</b> - Adds thumbnail support for categories with admin interface and REST API',
         'schema_markup'     => '<b>Schema.org structured data markup</b> - Adds structured data for better SEO',
         ];
         wp_theme_render_checkboxes($features, $opts);
@@ -763,6 +765,13 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
      * Image optimization features (controlled via Theme Settings)
      */
     require_once get_template_directory() . '/inc/image-optimization.php';
+
+    /**
+     * Category thumbnails features (controlled via Theme Settings)
+     */
+    if ($settings['category_thumbnails']) {
+        require_once get_template_directory() . '/inc/category-thumbnails.php';
+    }
 
     /**
      * Polylang REST API features (controlled via Theme Settings)
