@@ -92,6 +92,7 @@ class GitHub_Theme_Updater {
         add_filter('themes_api', $this->theme_api_call(...), 10, 3);
         add_action('upgrader_process_complete', $this->after_theme_update(...), 10, 2);
         add_action('upgrader_post_install', $this->after_theme_install(...), 10, 2);
+        add_action('setup_theme', $this->ensure_consistent_theme_options(...), 1);
 
         // Add admin notice for manual update check
         add_action('admin_notices', $this->admin_notice_for_updates(...));
@@ -173,7 +174,29 @@ class GitHub_Theme_Updater {
      * Get remote version from GitHub API
      */
     private function get_remote_version(): ?string {
-        $response = wp_remote_get($this->api_url, [
+        $data = $this->get_latest_release_data();
+        if (isset($data['tag_name'])) {
+            return ltrim((string) $data['tag_name'], 'v');
+        }
+        return null;
+    }
+
+
+    /**
+     * Fetch latest release data from GitHub with transient caching
+     */
+    private function get_latest_release_data(): ?array {
+        if (!$this->owner || !$this->repo) {
+            return null;
+        }
+
+        $cache_key = 'github_release_' . md5($this->owner . '/' . $this->repo);
+        $cached = get_transient($cache_key);
+        if (is_array($cached)) {
+            return $cached;
+        }
+
+        $response = wp_safe_remote_get($this->api_url, [
             'timeout' => 10,
             'headers' => [
                 'Accept' => 'application/vnd.github.v3+json',
@@ -185,11 +208,20 @@ class GitHub_Theme_Updater {
             return null;
         }
 
+        $code = wp_remote_retrieve_response_code($response);
+        if ($code === 403) {
+            $remaining = wp_remote_retrieve_header($response, 'x-ratelimit-remaining');
+            if ($remaining !== null && (int) $remaining === 0) {
+                set_transient($cache_key, [], 15 * MINUTE_IN_SECONDS);
+                return null;
+            }
+        }
+
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
-
-        if (isset($data['tag_name'])) {
-            return ltrim((string) $data['tag_name'], 'v');
+        if (is_array($data) && isset($data['tag_name'])) {
+            set_transient($cache_key, $data, 10 * MINUTE_IN_SECONDS);
+            return $data;
         }
 
         return null;
@@ -217,25 +249,11 @@ class GitHub_Theme_Updater {
             return $result;
         }
 
-        $remote_version = $this->get_remote_version();
-        if (!$remote_version) {
+        $data = $this->get_latest_release_data();
+        if (!$data || empty($data['tag_name'])) {
             return $result;
         }
-
-        $response = wp_remote_get($this->api_url, [
-            'timeout' => 10,
-            'headers' => [
-                'Accept' => 'application/vnd.github.v3+json',
-                'User-Agent' => 'WordPress-Theme-Updater',
-            ],
-        ]);
-
-        if (is_wp_error($response)) {
-            return $result;
-        }
-
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
+        $remote_version = ltrim((string) $data['tag_name'], 'v');
 
         $result = [
             'name' => $this->repo,
@@ -296,12 +314,27 @@ class GitHub_Theme_Updater {
      */
     private function rename_theme_directory(): void {
         $themes_dir = WP_CONTENT_DIR . '/themes/';
-        $current_theme = get_template();
+        $base_name = $this->theme_slug;
 
-        // If theme directory has version suffix, rename it
-        if (preg_match('/^(.+)-[\d\.]+$/', $current_theme, $matches)) {
-            $base_name = $matches[1];
-            $old_path = $themes_dir . $current_theme;
+        // Detect any directory with version suffix for this theme
+        $dir_handle = @opendir($themes_dir);
+        $versioned_dir = null;
+        if ($dir_handle) {
+            while (($entry = readdir($dir_handle)) !== false) {
+                if ($entry === '.' || $entry === '..') {
+                    continue;
+                }
+                if (is_dir($themes_dir . $entry) && preg_match('/^' . preg_quote($base_name, '/') . '-[\d\.]+$/', (string) $entry)) {
+                    $versioned_dir = $entry;
+                    break;
+                }
+            }
+            closedir($dir_handle);
+        }
+
+        // If versioned dir exists, rename to base name
+        if ($versioned_dir) {
+            $old_path = $themes_dir . $versioned_dir;
             $new_path = $themes_dir . $base_name;
 
             // Create backup of old directory if it exists
@@ -315,7 +348,7 @@ class GitHub_Theme_Updater {
 
                 if ($renamed) {
                     // Ensure WP options point to the new base theme directory
-                    $old_stylesheet = $current_theme;
+                    $old_stylesheet = $versioned_dir;
                     $new_stylesheet = $base_name;
 
                     $stylesheet_option = get_option('stylesheet');
@@ -352,6 +385,59 @@ class GitHub_Theme_Updater {
 
 
     /**
+     * Ensure template/stylesheet options and theme_mods do not point to a versioned directory
+     * Runs early on every request to self-heal after updates
+     */
+    public function ensure_consistent_theme_options(): void {
+        $base_name = $this->theme_slug;
+        $themes_dir = WP_CONTENT_DIR . '/themes/';
+        $base_exists = is_dir($themes_dir . $base_name);
+        if (!$base_exists) {
+            return;
+        }
+
+        $stylesheet_option = get_option('stylesheet');
+        $template_option = get_option('template');
+
+        $updated = false;
+
+        if (is_string($stylesheet_option) && preg_match('/^' . preg_quote($base_name, '/') . '-[\d\.]+$/', $stylesheet_option)) {
+            $old = $stylesheet_option;
+            update_option('stylesheet', $base_name);
+            $this->migrate_theme_mods($old, $base_name);
+            $updated = true;
+        }
+
+        if (is_string($template_option) && preg_match('/^' . preg_quote($base_name, '/') . '-[\d\.]+$/', $template_option)) {
+            $old = $template_option;
+            update_option('template', $base_name);
+            $this->migrate_theme_mods($old, $base_name);
+            $updated = true;
+        }
+
+        if ($updated && function_exists('wp_clean_themes_cache')) {
+            wp_clean_themes_cache(true);
+        }
+    }
+
+    /**
+     * Migrate theme_mods from old key to new key
+     */
+    private function migrate_theme_mods(string $old_stylesheet, string $new_stylesheet): void {
+        $old_mods_key = 'theme_mods_' . $old_stylesheet;
+        $new_mods_key = 'theme_mods_' . $new_stylesheet;
+        $old_mods = get_option($old_mods_key);
+        if ($old_mods !== false) {
+            $new_mods = get_option($new_mods_key);
+            if ($new_mods === false) {
+                update_option($new_mods_key, $old_mods);
+            }
+            delete_option($old_mods_key);
+        }
+    }
+
+
+    /**
      * Show admin notice with update check button
      */
     public function admin_notice_for_updates(): void {
@@ -370,8 +456,9 @@ class GitHub_Theme_Updater {
                 echo '<a href="' . esc_url(admin_url('update-core.php')) . '">Check for updates</a>';
                 echo '</p></div>';
             } else {
+                $force_url = wp_nonce_url(admin_url('themes.php?force_check_updates=1'), 'force_check_updates');
                 echo '<div class="notice notice-info is-dismissible">';
-                echo '<p><a href="' . esc_url(admin_url('themes.php?force_check_updates=1')) . '">Check for theme updates</a></p>';
+                echo '<p><a href="' . esc_url($force_url) . '">Check for theme updates</a></p>';
                 echo '</div>';
             }
         }
@@ -383,6 +470,9 @@ class GitHub_Theme_Updater {
      */
     public function handle_force_check(): void {
         if (isset($_GET['force_check_updates']) && $_GET['force_check_updates'] === '1') {
+            if (!isset($_GET['_wpnonce']) || !wp_verify_nonce((string) $_GET['_wpnonce'], 'force_check_updates')) {
+                wp_die(__('Security check failed', 'wp-theme'));
+            }
             delete_site_transient('update_themes');
             delete_transient('update_themes');
             wp_update_themes();
