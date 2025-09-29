@@ -178,6 +178,7 @@ class GitHub_Theme_Updater {
         if (isset($data['tag_name'])) {
             return ltrim((string) $data['tag_name'], 'v');
         }
+
         return null;
     }
 
@@ -253,6 +254,7 @@ class GitHub_Theme_Updater {
         if (!$data || empty($data['tag_name'])) {
             return $result;
         }
+
         $remote_version = ltrim((string) $data['tag_name'], 'v');
 
         $result = [
@@ -324,11 +326,13 @@ class GitHub_Theme_Updater {
                 if ($entry === '.' || $entry === '..') {
                     continue;
                 }
-                if (is_dir($themes_dir . $entry) && preg_match('/^' . preg_quote($base_name, '/') . '-[\d\.]+$/', (string) $entry)) {
+
+                if (is_dir($themes_dir . $entry) && preg_match('/^' . preg_quote($base_name, '/') . '-[\d\.]+$/', $entry)) {
                     $versioned_dir = $entry;
                     break;
                 }
             }
+
             closedir($dir_handle);
         }
 
@@ -420,6 +424,7 @@ class GitHub_Theme_Updater {
         }
     }
 
+
     /**
      * Migrate theme_mods from old key to new key
      */
@@ -432,6 +437,7 @@ class GitHub_Theme_Updater {
             if ($new_mods === false) {
                 update_option($new_mods_key, $old_mods);
             }
+
             delete_option($old_mods_key);
         }
     }
@@ -473,6 +479,7 @@ class GitHub_Theme_Updater {
             if (!isset($_GET['_wpnonce']) || !wp_verify_nonce((string) $_GET['_wpnonce'], 'force_check_updates')) {
                 wp_die(__('Security check failed', 'wp-theme'));
             }
+
             delete_site_transient('update_themes');
             delete_transient('update_themes');
             wp_update_themes();
