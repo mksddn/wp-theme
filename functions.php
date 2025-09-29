@@ -88,6 +88,17 @@ require_once get_template_directory() . '/inc/theme-features.php';
  */
 require_once get_template_directory() . '/inc/github-updater.php';
 
+
+/**
+ * Child theme compatibility: ignore parent front-page.php when a child theme is active.
+ */
+add_filter('frontpage_template', function ($template) {
+    if ( get_template() !== get_stylesheet() ) {
+        return '';
+    }
+    return $template;
+}, 100);
+
 /**
  * Register new image sizes.
  */
