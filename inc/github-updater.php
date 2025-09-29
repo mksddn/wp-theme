@@ -311,7 +311,41 @@ class GitHub_Theme_Updater {
 
             // Rename new directory to base name
             if (is_dir($old_path)) {
-                rename($old_path, $new_path);
+                $renamed = rename($old_path, $new_path);
+
+                if ($renamed) {
+                    // Ensure WP options point to the new base theme directory
+                    $old_stylesheet = $current_theme;
+                    $new_stylesheet = $base_name;
+
+                    $stylesheet_option = get_option('stylesheet');
+                    if ($stylesheet_option === $old_stylesheet) {
+                        update_option('stylesheet', $new_stylesheet);
+                    }
+
+                    $template_option = get_option('template');
+                    if ($template_option === $old_stylesheet) {
+                        update_option('template', $new_stylesheet);
+                    }
+
+                    // Migrate theme mods to preserve Customizer settings
+                    $old_mods_key = 'theme_mods_' . $old_stylesheet;
+                    $new_mods_key = 'theme_mods_' . $new_stylesheet;
+                    $old_mods = get_option($old_mods_key);
+                    if ($old_mods !== false) {
+                        $new_mods = get_option($new_mods_key);
+                        if ($new_mods === false) {
+                            update_option($new_mods_key, $old_mods);
+                        }
+
+                        delete_option($old_mods_key);
+                    }
+
+                    // Clean themes cache so WP immediately sees the new directory
+                    if (function_exists('wp_clean_themes_cache')) {
+                        wp_clean_themes_cache(true);
+                    }
+                }
             }
         }
     }

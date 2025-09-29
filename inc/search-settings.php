@@ -51,21 +51,19 @@ if (wp_theme_settings()['search_post_types']) {
 /**
  * Exclude specific posts/pages from search (controlled via Theme Settings).
  */
-if (true) {
-    add_filter(
-        'pre_get_posts',
-        function ( $query ) {
-            if ($query->is_search() && !is_admin() && $query->is_main_query()) {
-                $exclude_ids = wp_theme_get_excluded_post_ids_from_settings();
-                if (!empty($exclude_ids)) {
-                    $query->set('post__not_in', $exclude_ids);
-                }
+add_filter(
+    'pre_get_posts',
+    function ( $query ) {
+        if ($query->is_search() && !is_admin() && $query->is_main_query()) {
+            $exclude_ids = wp_theme_get_excluded_post_ids_from_settings();
+            if ($exclude_ids !== []) {
+                $query->set('post__not_in', $exclude_ids);
             }
-
-            return $query;
         }
-    );
-}
+
+        return $query;
+    }
+);
 
 /**
  * Apply search settings to REST API queries.
@@ -141,7 +139,7 @@ function wp_theme_apply_search_settings_to_rest_query($args, $request) {
 
     // Exclude posts by IDs/slugs using a single helper
     $exclude_ids = wp_theme_get_excluded_post_ids_from_settings();
-    if (!empty($exclude_ids)) {
+    if ($exclude_ids !== []) {
         if (isset($args['post__not_in']) && is_array($args['post__not_in'])) {
             $args['post__not_in'] = array_merge($args['post__not_in'], $exclude_ids);
         } else {
@@ -151,6 +149,7 @@ function wp_theme_apply_search_settings_to_rest_query($args, $request) {
 
     return $args;
 }
+
 
 /**
  * Helper: collect excluded post IDs from settings (IDs + slugs).
@@ -166,7 +165,7 @@ function wp_theme_get_excluded_post_ids_from_settings(): array {
     if (!empty($opts['search_exclude_slugs_list'])) {
         $slugs = (array) $opts['search_exclude_slugs_list'];
         $slugs = array_values(array_filter(array_map('sanitize_title', $slugs)));
-        if (!empty($slugs)) {
+        if ($slugs !== []) {
             $posts = get_posts([
                 'name' => '',
                 'post_type' => 'any',
@@ -189,22 +188,23 @@ function wp_theme_get_excluded_post_ids_from_settings(): array {
     return array_filter($exclude_ids, fn($id): bool => $id > 0);
 }
 
+
 /**
  * Fallback: filter unified search endpoint response to remove excluded IDs.
  */
 add_filter( 'rest_post_dispatch', function( $result, $server, $request ) {
     // Apply only to WP_REST_Response and only for the unified search endpoint
-    if ( ! ( $result instanceof WP_REST_Response ) ) {
+    if (! ( $result instanceof WP_REST_Response )) {
         return $result;
     }
 
     $route = (string) $request->get_route();
-    if ( strpos( $route, '/wp/v2/search' ) !== 0 ) {
+    if (!str_starts_with($route, '/wp/v2/search')) {
         return $result;
     }
 
     $data = $result->get_data();
-    if ( ! is_array( $data ) ) {
+    if (! is_array( $data )) {
         return $result;
     }
 
@@ -212,8 +212,8 @@ add_filter( 'rest_post_dispatch', function( $result, $server, $request ) {
     $excluded = wp_theme_get_excluded_post_ids_from_settings();
     $filtered = [];
 
-    foreach ( $data as $item ) {
-        if ( ! is_array( $item ) || ! isset( $item['id'] ) ) {
+    foreach ($data as $item) {
+        if (! is_array( $item ) || ! isset( $item['id'] )) {
             $filtered[] = $item;
             continue;
         }
@@ -221,25 +221,23 @@ add_filter( 'rest_post_dispatch', function( $result, $server, $request ) {
         $id = (int) $item['id'];
 
         // Skip excluded IDs configured in settings
-        if ( in_array( $id, $excluded, true ) ) {
+        if (in_array( $id, $excluded, true )) {
             continue;
         }
 
         // Enrich response fields with additional data
         $post = get_post( $id );
-        if ( $post ) {
+        if ($post) {
             $item['slug'] = $post->post_name;
 
-            if ( 'post' === $post->post_type ) {
+            if ('post' === $post->post_type) {
                 $terms = get_the_terms( $post->ID, 'category' );
-                if ( $terms && ! is_wp_error( $terms ) ) {
-                    $item['categories'] = array_map( function( $t ) {
-                        return [
-                            'id'   => (int) $t->term_id,
-                            'name' => $t->name,
-                            'slug' => $t->slug,
-                        ];
-                    }, $terms );
+                if ($terms && ! is_wp_error( $terms )) {
+                    $item['categories'] = array_map( fn($t): array => [
+                        'id'   => (int) $t->term_id,
+                        'name' => $t->name,
+                        'slug' => $t->slug,
+                    ], $terms );
                 } else {
                     $item['categories'] = [];
                 }
@@ -247,7 +245,7 @@ add_filter( 'rest_post_dispatch', function( $result, $server, $request ) {
                 $item['categories'] = [];
             }
 
-            if ( function_exists( 'pll_get_post_language' ) ) {
+            if (function_exists( 'pll_get_post_language' )) {
                 $item['lang'] = pll_get_post_language( $post->ID ); // напр. "en"
             } else {
                 $item['lang'] = null;
