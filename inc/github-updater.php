@@ -332,12 +332,12 @@ class GitHub_Theme_Updater {
             if ($remote_version && version_compare($this->current_version, $remote_version, '<')) {
                 echo '<div class="notice notice-warning is-dismissible">';
                 echo '<p><strong>Theme Update Available:</strong> ';
-                echo "Version {$remote_version} is available. ";
-                echo '<a href="' . admin_url('update-core.php') . '">Check for updates</a>';
+                echo esc_html("Version {$remote_version} is available. ");
+                echo '<a href="' . esc_url(admin_url('update-core.php')) . '">Check for updates</a>';
                 echo '</p></div>';
             } else {
                 echo '<div class="notice notice-info is-dismissible">';
-                echo '<p><a href="' . admin_url('themes.php?force_check_updates=1') . '">Check for theme updates</a></p>';
+                echo '<p><a href="' . esc_url(admin_url('themes.php?force_check_updates=1')) . '">Check for theme updates</a></p>';
                 echo '</div>';
             }
         }

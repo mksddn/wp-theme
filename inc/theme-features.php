@@ -25,7 +25,7 @@ function wp_theme_get_default_settings(): array {
         'clean_pagination'   => false,
         'category_thumbnails'=> false,
         // Headless CMS
-        'headless'           => true,
+        'headless'           => false,
         // SEO Features
         'schema_markup'      => false,
         // Security features
@@ -34,6 +34,7 @@ function wp_theme_get_default_settings(): array {
         'security_hide_version'     => true,
         'security_disable_editing'  => true,
         'security_disable_enumeration' => true,
+        'security_csp_header'       => true,
         'security_headers'          => true,
         'security_directory_browsing' => true,
         'security_login_limits'     => true,
@@ -41,8 +42,8 @@ function wp_theme_get_default_settings(): array {
         'search_empty_handling'     => true,
         'search_post_types'         => false,
         'search_post_types_list'    => ['post', 'page'],
-        'search_exclude_ids'        => false,
         'search_exclude_ids_list'   => [],
+        'search_exclude_slugs_list' => [],
         // ACF features
         'acf_local_json'            => true,
         // Performance features
@@ -303,9 +304,9 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         'schema_markup',
         // Security Features
         'security_xmlrpc', 'security_x_pingback', 'security_hide_version', 'security_disable_editing',
-        'security_disable_enumeration', 'security_headers', 'security_directory_browsing', 'security_login_limits',
+        'security_disable_enumeration', 'security_headers', 'security_csp_header', 'security_directory_browsing', 'security_login_limits',
         // Search Features
-        'search_empty_handling', 'search_post_types', 'search_exclude_ids',
+        'search_empty_handling', 'search_post_types',
         // ACF Features
         'acf_local_json',
         // Performance Features
@@ -336,6 +337,16 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         }
 
         $output['search_exclude_ids_list'] = array_filter($exclude_ids, fn($id): bool => $id > 0); // Only positive integers
+
+        // Search exclude slugs sanitization
+        $exclude_slugs_input = $output['search_exclude_slugs_list'] ?? '';
+        if (is_string($exclude_slugs_input)) {
+            $exclude_slugs = array_map('sanitize_title', array_filter(array_map('trim', explode(',', $exclude_slugs_input))));
+        } else {
+            $exclude_slugs = is_array($exclude_slugs_input) ? array_map('sanitize_title', array_filter(array_map('trim', $exclude_slugs_input))) : [];
+        }
+
+        $output['search_exclude_slugs_list'] = array_values(array_filter($exclude_slugs, fn($slug): bool => $slug !== ''));
 
         // Numeric settings sanitization
         $numeric_settings = [
@@ -485,7 +496,8 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         'security_hide_version'     => '<b>Hide WordPress version</b> - Removes version info from head and RSS feeds',
         'security_disable_editing'  => '<b>Disable file editing in admin</b> - Prevents theme/plugin editing via admin',
         'security_disable_enumeration' => '<b>Disable user enumeration</b> - Blocks user discovery via author archives',
-        'security_headers'          => '<b>Add security headers</b> - Adds X-Frame-Options and other security headers',
+        'security_headers'          => '<b>Add security headers (except CSP)</b> - Adds X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS',
+        'security_csp_header'       => '<b>Add Content-Security-Policy (CSP) header</b> - Sends CSP header to restrict resource loading',
         'security_directory_browsing' => '<b>Disable directory browsing</b> - Prevents directory listing on server',
         'security_login_limits'     => '<b>Limit login attempts</b> - Adds basic login attempt limiting',
         ];
@@ -519,18 +531,25 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
             );
         }
 
-        // Content exclusion
-        $exclude_checked = ($opts['search_exclude_ids'] === true) ? 'checked' : '';
-        echo wp_kses(
-        '<p><label><input type="checkbox" name="wp_theme_settings[search_exclude_ids]" value="1" ' . esc_attr($exclude_checked) . '> Exclude specific posts/pages from search - Hides selected content from search results</label></p>',
-        ['p' => [], 'label' => [], 'input' => ['type' => true, 'name' => true, 'value' => true, 'checked' => true]]
-        );
-
-        echo '<div style="margin-left: 20px; margin-top: 10px;">';
+        // Content exclusion by IDs
+        echo '<div style="margin-top: 10px;">';
         echo '<p><strong>Post/Page IDs to exclude:</strong></p>';
         $exclude_ids_text = implode(', ', $opts['search_exclude_ids_list']);
         echo wp_kses(
             '<p><input type="text" name="wp_theme_settings[search_exclude_ids_list]" value="' . esc_attr($exclude_ids_text) . '" placeholder="1, 5, 10" style="width: 200px;"> <small>Enter IDs separated by commas</small></p>',
+            [
+            'p' => [], 'input' => ['type' => true, 'name' => true, 'value' => true, 'placeholder' => true, 'style' => true],
+            'small' => []
+            ]
+        );
+        echo '</div>';
+
+        // Content exclusion by slugs
+        echo '<div style="margin-top: 10px;">';
+        echo '<p><strong>Slugs to exclude:</strong></p>';
+        $exclude_slugs_text = implode(', ', $opts['search_exclude_slugs_list']);
+        echo wp_kses(
+            '<p><input type="text" name="wp_theme_settings[search_exclude_slugs_list]" value="' . esc_attr($exclude_slugs_text) . '" placeholder="about-us, contact" style="width: 200px;"> <small>Enter slugs separated by commas</small></p>',
             [
             'p' => [], 'input' => ['type' => true, 'name' => true, 'value' => true, 'placeholder' => true, 'style' => true],
             'small' => []

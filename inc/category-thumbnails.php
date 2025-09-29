@@ -19,8 +19,8 @@ function add_category_thumbnail_field(): void {
         <label for="category_thumbnail"><?php esc_html_e('Category Thumbnail', 'wp-theme'); ?></label>
         <input type="hidden" id="category_thumbnail" name="category_thumbnail" value="" />
         <div id="category_thumbnail_preview" style="margin-top: 10px;"></div>
-        <button type="button" class="button" id="upload_category_thumbnail"><?php esc_html_e('Upload Image', 'wp-theme'); ?></button>
-        <button type="button" class="button" id="remove_category_thumbnail" style="display: none;"><?php esc_html_e('Remove Image', 'wp-theme'); ?></button>
+        <button type="button" class="button" id="upload_category_thumbnail" aria-label="<?php esc_attr_e('Upload category thumbnail image', 'wp-theme'); ?>"><?php esc_html_e('Upload Image', 'wp-theme'); ?>Upload Image</button>
+        <button type="button" class="button" id="remove_category_thumbnail" style="display: none;" aria-label="<?php esc_attr_e('Remove category thumbnail image', 'wp-theme'); ?>"><?php esc_html_e('Remove Image', 'wp-theme'); ?>Remove Image</button>
     </div>
     <?php
 }
@@ -30,7 +30,7 @@ function edit_category_thumbnail_field($term): void {
     $thumbnail_id = get_term_meta($term->term_id, 'category_thumbnail', true);
     ?>
     <tr class="form-field">
-        <th scope="row" valign="top">
+        <th scope="row">
             <label for="category_thumbnail"><?php esc_html_e('Category Thumbnail', 'wp-theme'); ?></label>
         </th>
         <td>
@@ -40,8 +40,12 @@ function edit_category_thumbnail_field($term): void {
                     <?php echo wp_get_attachment_image($thumbnail_id, 'thumbnail'); ?>
                 <?php endif; ?>
             </div>
-            <button type="button" class="button" id="upload_category_thumbnail"><?php esc_html_e('Upload Image', 'wp-theme'); ?></button>
-            <button type="button" class="button" id="remove_category_thumbnail" <?php echo $thumbnail_id ? '' : 'style="display: none;"'; ?>><?php esc_html_e('Remove Image', 'wp-theme'); ?></button>
+            <button type="button" class="button" id="upload_category_thumbnail" aria-label="<?php esc_attr_e('Upload category thumbnail image', 'wp-theme'); ?>"><?php esc_html_e('Upload Image', 'wp-theme'); ?>Upload Image</button>
+            <button type="button" class="button" id="remove_category_thumbnail" 
+                <?php echo $thumbnail_id ? '' : 'style="display: none;"'; ?> 
+                aria-label="<?php esc_attr_e('Remove category thumbnail image', 'wp-theme'); ?>">
+                <?php esc_html_e('Remove Image', 'wp-theme'); ?>Remove Image
+            </button>
         </td>
     </tr>
     <?php
@@ -51,7 +55,12 @@ function edit_category_thumbnail_field($term): void {
 /**
  * Save category thumbnail.
  */
-function save_category_thumbnail($term_id): void {
+function save_category_thumbnail(string $term_id): void {
+    // Verify nonce for security
+    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'update-tag_' . $term_id)) {
+        return;
+    }
+
     if (isset($_POST['category_thumbnail'])) {
         $thumbnail_id = sanitize_text_field(wp_unslash($_POST['category_thumbnail']));
         update_term_meta($term_id, 'category_thumbnail', $thumbnail_id);
@@ -80,7 +89,10 @@ function get_category_thumbnail($term_id, $size = 'medium'): ?string {
  * Display category thumbnail.
  */
 function the_category_thumbnail($term_id, $size = 'medium'): void {
-    echo get_category_thumbnail($term_id, $size);
+    $thumbnail = get_category_thumbnail($term_id, $size);
+    if ($thumbnail) {
+        echo wp_kses_post($thumbnail);
+    }
 }
 
 
@@ -99,7 +111,8 @@ function category_thumbnail_admin_scripts(): void {
     $screen = get_current_screen();
     if ($screen && in_array($screen->id, ['edit-category', 'category'])) {
         wp_enqueue_media();
-        wp_enqueue_script('category-thumbnail-admin', get_template_directory_uri() . '/js/category-thumbnail-admin.js', ['jquery'], wp_get_theme()->get('Version'), true);
+        $admin_js_uri = get_theme_file_uri( 'js/category-thumbnail-admin.js' );
+        wp_enqueue_script('category-thumbnail-admin', $admin_js_uri, ['jquery'], wp_get_theme( get_stylesheet() )->get('Version'), true);
     }
 }
 

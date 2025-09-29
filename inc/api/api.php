@@ -169,6 +169,9 @@ function wp_theme_update_all_acf_show_in_rest( bool $enable ): void {
 
     // Clear ACF cache
     if (function_exists('acf_get_store')) {
-        acf_get_store('field-groups')->reset();
+        $store = acf_get_store('field-groups');
+        if ($store !== null) {
+            $store->reset();
+        }
     }
 }

@@ -51,14 +51,14 @@ if (wp_theme_settings()['search_post_types']) {
 /**
  * Exclude specific posts/pages from search (controlled via Theme Settings).
  */
-if (wp_theme_settings()['search_exclude_ids']) {
+if (true) {
     add_filter(
         'pre_get_posts',
         function ( $query ) {
             if ($query->is_search() && !is_admin() && $query->is_main_query()) {
-                $opts = wp_theme_get_settings();
-                if (!empty($opts['search_exclude_ids_list'])) {
-                    $query->set('post__not_in', $opts['search_exclude_ids_list']);
+                $exclude_ids = wp_theme_get_excluded_post_ids_from_settings();
+                if (!empty($exclude_ids)) {
+                    $query->set('post__not_in', $exclude_ids);
                 }
             }
 
@@ -70,9 +70,7 @@ if (wp_theme_settings()['search_exclude_ids']) {
 /**
  * Apply search settings to REST API queries.
  */
-// Temporarily disabled to debug REST API issues
-/*
-if (wp_theme_settings()['search_empty_handling'] || wp_theme_settings()['search_post_types'] || wp_theme_settings()['search_exclude_ids']) {
+if (wp_theme_settings()['search_empty_handling'] || wp_theme_settings()['search_post_types'] || !empty(wp_theme_settings()['search_exclude_ids_list']) || !empty(wp_theme_settings()['search_exclude_slugs_list'])) {
     add_filter(
         'rest_post_query',
         fn($args, $request) => wp_theme_apply_search_settings_to_rest_query($args, $request),
@@ -86,16 +84,21 @@ if (wp_theme_settings()['search_empty_handling'] || wp_theme_settings()['search_
         10,
         2
     );
+
+    // Apply to the unified search endpoint /wp/v2/search
+    add_filter(
+        'rest_search_query',
+        fn($args, $request) => wp_theme_apply_search_settings_to_rest_query($args, $request),
+        10,
+        2
+    );
 }
-*/
 
 /**
  * Apply search settings to all custom post types REST API queries.
  */
-// Temporarily disabled to debug REST API issues
-/*
 add_action('rest_api_init', function(): void {
-    if (wp_theme_settings()['search_empty_handling'] || wp_theme_settings()['search_post_types'] || wp_theme_settings()['search_exclude_ids']) {
+    if (wp_theme_settings()['search_empty_handling'] || wp_theme_settings()['search_post_types'] || !empty(wp_theme_settings()['search_exclude_ids_list']) || !empty(wp_theme_settings()['search_exclude_slugs_list'])) {
         $post_types = get_post_types(['public' => true, 'show_in_rest' => true], 'names');
 
         foreach ($post_types as $post_type) {
@@ -103,7 +106,6 @@ add_action('rest_api_init', function(): void {
         }
     }
 });
-*/
 
 
 /**
@@ -114,17 +116,17 @@ add_action('rest_api_init', function(): void {
  * @return array Modified query arguments.
  */
 function wp_theme_apply_search_settings_to_rest_query($args, $request) {
-    // Check if this is a search request
-    $search = $request->get_param('search');
-
-    // Only apply search settings if there's actually a search parameter
+    // Only apply when explicit search param is present
     if (!$request->has_param('search')) {
         return $args;
     }
 
-    // Handle empty search - check for empty string or whitespace only
+    $search = $request->get_param('search');
+    $settings = wp_theme_get_settings();
+
+    // Handle empty search by returning no results
     if (wp_theme_settings()['search_empty_handling'] && (empty($search) || trim((string) $search) === '')) {
-        $args['post__in'] = [0]; // Return no results for empty search
+        $args['post__in'] = [0];
         return $args;
     }
 
@@ -132,18 +134,14 @@ function wp_theme_apply_search_settings_to_rest_query($args, $request) {
         return $args;
     }
 
-    $opts = wp_theme_get_settings();
-
-    // Apply post type restrictions
-    if (wp_theme_settings()['search_post_types'] && !empty($opts['search_post_types_list'])) {
-        $args['post_type'] = $opts['search_post_types_list'];
+    // Restrict post types if configured
+    if (wp_theme_settings()['search_post_types'] && !empty($settings['search_post_types_list'])) {
+        $args['post_type'] = $settings['search_post_types_list'];
     }
 
-    // Apply post exclusion
-    if (wp_theme_settings()['search_exclude_ids'] && !empty($opts['search_exclude_ids_list'])) {
-        $exclude_ids = $opts['search_exclude_ids_list'];
-
-        // Merge with existing exclusions if any
+    // Exclude posts by IDs/slugs using a single helper
+    $exclude_ids = wp_theme_get_excluded_post_ids_from_settings();
+    if (!empty($exclude_ids)) {
         if (isset($args['post__not_in']) && is_array($args['post__not_in'])) {
             $args['post__not_in'] = array_merge($args['post__not_in'], $exclude_ids);
         } else {
@@ -153,4 +151,113 @@ function wp_theme_apply_search_settings_to_rest_query($args, $request) {
 
     return $args;
 }
+
+/**
+ * Helper: collect excluded post IDs from settings (IDs + slugs).
+ */
+function wp_theme_get_excluded_post_ids_from_settings(): array {
+    $opts = wp_theme_get_settings();
+    $exclude_ids = [];
+
+    if (!empty($opts['search_exclude_ids_list'])) {
+        $exclude_ids = array_merge($exclude_ids, (array) $opts['search_exclude_ids_list']);
+    }
+
+    if (!empty($opts['search_exclude_slugs_list'])) {
+        $slugs = (array) $opts['search_exclude_slugs_list'];
+        $slugs = array_values(array_filter(array_map('sanitize_title', $slugs)));
+        if (!empty($slugs)) {
+            $posts = get_posts([
+                'name' => '',
+                'post_type' => 'any',
+                'post_status' => 'any',
+                'fields' => 'ids',
+                'numberposts' => -1,
+                'post_name__in' => $slugs,
+                'suppress_filters' => true,
+                'no_found_rows' => true,
+                'update_post_meta_cache' => false,
+                'update_post_term_cache' => false,
+            ]);
+            if (is_array($posts)) {
+                $exclude_ids = array_merge($exclude_ids, $posts);
+            }
+        }
+    }
+
+    $exclude_ids = array_values(array_unique(array_map('intval', $exclude_ids)));
+    return array_filter($exclude_ids, fn($id): bool => $id > 0);
+}
+
+/**
+ * Fallback: filter unified search endpoint response to remove excluded IDs.
+ */
+add_filter( 'rest_post_dispatch', function( $result, $server, $request ) {
+    // Apply only to WP_REST_Response and only for the unified search endpoint
+    if ( ! ( $result instanceof WP_REST_Response ) ) {
+        return $result;
+    }
+
+    $route = (string) $request->get_route();
+    if ( strpos( $route, '/wp/v2/search' ) !== 0 ) {
+        return $result;
+    }
+
+    $data = $result->get_data();
+    if ( ! is_array( $data ) ) {
+        return $result;
+    }
+
+    // Apply current exclusion logic
+    $excluded = wp_theme_get_excluded_post_ids_from_settings();
+    $filtered = [];
+
+    foreach ( $data as $item ) {
+        if ( ! is_array( $item ) || ! isset( $item['id'] ) ) {
+            $filtered[] = $item;
+            continue;
+        }
+
+        $id = (int) $item['id'];
+
+        // Skip excluded IDs configured in settings
+        if ( in_array( $id, $excluded, true ) ) {
+            continue;
+        }
+
+        // Enrich response fields with additional data
+        $post = get_post( $id );
+        if ( $post ) {
+            $item['slug'] = $post->post_name;
+
+            if ( 'post' === $post->post_type ) {
+                $terms = get_the_terms( $post->ID, 'category' );
+                if ( $terms && ! is_wp_error( $terms ) ) {
+                    $item['categories'] = array_map( function( $t ) {
+                        return [
+                            'id'   => (int) $t->term_id,
+                            'name' => $t->name,
+                            'slug' => $t->slug,
+                        ];
+                    }, $terms );
+                } else {
+                    $item['categories'] = [];
+                }
+            } else {
+                $item['categories'] = [];
+            }
+
+            if ( function_exists( 'pll_get_post_language' ) ) {
+                $item['lang'] = pll_get_post_language( $post->ID ); // напр. "en"
+            } else {
+                $item['lang'] = null;
+            }
+        }
+
+        $filtered[] = $item;
+    }
+
+    $result->set_data( array_values( $filtered ) );
+    return $result;
+}, 10, 3 );
 
