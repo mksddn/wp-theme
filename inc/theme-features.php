@@ -112,6 +112,137 @@ function wp_theme_clear_settings_cache(): void {
 }
 
 
+/**
+ * Ensure theme settings exist in database.
+ * This helps prevent settings loss during migration.
+ *
+ * @since 1.0.0
+ */
+function wp_theme_ensure_settings_exist(): void {
+    $existing_settings = get_option('wp_theme_settings', null);
+
+    // If settings don't exist or are empty, initialize with defaults
+    if ($existing_settings === null || $existing_settings === false || $existing_settings === []) {
+        $defaults = wp_theme_get_default_settings();
+        update_option('wp_theme_settings', $defaults, true);
+        wp_theme_clear_settings_cache();
+    }
+}
+
+
+/**
+ * Hook to ensure settings exist after migration or theme switch.
+ */
+add_action('after_switch_theme', 'wp_theme_ensure_settings_exist');
+add_action('init', 'wp_theme_ensure_settings_exist', 5);
+
+/**
+ * Hook for All-in-One WP Migration plugin.
+ * Ensures settings are preserved or recreated after migration.
+ */
+add_action('ai1wm_import_completed', 'wp_theme_ensure_settings_exist');
+add_action('ai1wm_restore_completed', 'wp_theme_ensure_settings_exist');
+
+
+/**
+ * Handle theme settings export.
+ *
+ * @since 1.0.0
+ */
+function wp_theme_handle_export_settings(): void {
+    if (!isset($_POST['wp_theme_export_settings'])) {
+        return;
+    }
+
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized');
+    }
+
+    if (!isset($_POST['wp_theme_export_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash((string) $_POST['wp_theme_export_nonce'])), 'wp_theme_export_settings')) {
+        wp_die('Invalid nonce');
+    }
+
+    $settings = get_option('wp_theme_settings', wp_theme_get_default_settings());
+    $json = wp_json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+    if ($json === false) {
+        wp_die('Failed to encode settings');
+    }
+
+    $filename = 'wp-theme-settings-' . gmdate('Y-m-d-His') . '.json';
+
+    header('Content-Type: application/json');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Content-Length: ' . strlen($json));
+
+    echo $json;
+    exit;
+}
+
+
+add_action('admin_init', 'wp_theme_handle_export_settings');
+
+
+/**
+ * Handle theme settings import.
+ *
+ * @since 1.0.0
+ */
+function wp_theme_handle_import_settings(): void {
+    if (!isset($_POST['wp_theme_import_settings'])) {
+        return;
+    }
+
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized');
+    }
+
+    if (!isset($_POST['wp_theme_import_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash((string) $_POST['wp_theme_import_nonce'])), 'wp_theme_import_settings')) {
+        wp_die('Invalid nonce');
+    }
+
+    if (!isset($_FILES['wp_theme_settings_file']) || $_FILES['wp_theme_settings_file']['error'] !== UPLOAD_ERR_OK) {
+        add_action('admin_notices', function(): void {
+            echo wp_kses_post('<div class="notice notice-error"><p>File upload error. Please try again.</p></div>');
+        });
+        return;
+    }
+
+    $file = $_FILES['wp_theme_settings_file'];
+    $file_content = file_get_contents($file['tmp_name']);
+
+    if ($file_content === false) {
+        add_action('admin_notices', function(): void {
+            echo wp_kses_post('<div class="notice notice-error"><p>Failed to read file.</p></div>');
+        });
+        return;
+    }
+
+    $settings = json_decode($file_content, true);
+
+    if (!is_array($settings)) {
+        add_action('admin_notices', function(): void {
+            echo wp_kses_post('<div class="notice notice-error"><p>Invalid JSON format.</p></div>');
+        });
+        return;
+    }
+
+    // Sanitize imported settings
+    $sanitized_settings = wp_theme_settings_sanitize($settings);
+
+    // Update settings
+    update_option('wp_theme_settings', $sanitized_settings);
+    wp_theme_clear_settings_cache();
+
+    add_action('admin_notices', function(): void {
+        echo wp_kses_post('<div class="notice notice-success"><p>Settings imported successfully!</p></div>');
+    });
+}
+
+
+add_action('admin_init', 'wp_theme_handle_import_settings');
+
+
 function wp_theme_settings_admin_menu(): void {
     add_options_page(
         'Theme Features',
@@ -383,10 +514,20 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         if (! current_user_can('manage_options')) {
             return;
         }
+
+        // Check if settings are loaded from database or using defaults
+        $db_settings = get_option('wp_theme_settings', false);
+        $settings_source = $db_settings !== false ? 'database' : 'defaults';
         ?>
     <div class="wrap">
         <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
         <p>Configure theme features and functionality. Enable or disable specific features based on your needs.</p>
+        
+        <?php if ($settings_source === 'defaults'): ?>
+        <div class="notice notice-warning">
+            <p><strong>Warning:</strong> Settings are using default values. Database option 'wp_theme_settings' not found. Save settings to create the option.</p>
+        </div>
+        <?php endif; ?>
         
         <form method="post" action="options.php">
             <?php
@@ -400,6 +541,30 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
             <h3>About Theme Features</h3>
             <p>This page allows you to enable or disable various theme features. Changes take effect immediately after saving.</p>
             <p><strong>Note:</strong> Some features require specific plugins to be installed and activated.</p>
+            <p><strong>Settings source:</strong> <code><?php echo esc_html($settings_source); ?></code></p>
+        </div>
+        
+        <div class="wp-theme-settings-backup" style="margin-top: 20px; padding: 15px; background: #fff; border: 1px solid #ccc;">
+            <h3>Backup & Restore Settings</h3>
+            <p>Use these tools to backup or restore theme settings. Useful for migrations.</p>
+            
+            <div style="margin-bottom: 15px;">
+                <h4>Export Settings</h4>
+                <form method="post" action="">
+                    <?php wp_nonce_field('wp_theme_export_settings', 'wp_theme_export_nonce'); ?>
+                    <input type="hidden" name="wp_theme_export_settings" value="1">
+                    <button type="submit" class="button">Export Settings as JSON</button>
+                </form>
+            </div>
+            
+            <div>
+                <h4>Import Settings</h4>
+                <form method="post" action="" enctype="multipart/form-data">
+                    <?php wp_nonce_field('wp_theme_import_settings', 'wp_theme_import_nonce'); ?>
+                    <input type="file" name="wp_theme_settings_file" accept=".json">
+                    <button type="submit" name="wp_theme_import_settings" class="button">Import Settings from JSON</button>
+                </form>
+            </div>
         </div>
     </div>
         <?php
@@ -800,5 +965,4 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
     }
 
     // Allow other modules to apply their settings
-    do_action('wp_theme_apply_settings');
     do_action('wp_theme_apply_settings');
