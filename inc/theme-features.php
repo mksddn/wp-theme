@@ -175,7 +175,7 @@ function wp_theme_handle_export_settings(): void {
     header('Content-Disposition: attachment; filename="' . $filename . '"');
     header('Content-Length: ' . strlen($json));
 
-    echo $json;
+    echo esc_html( $json );
     exit;
 }
 
@@ -201,15 +201,22 @@ function wp_theme_handle_import_settings(): void {
         wp_die('Invalid nonce');
     }
 
-    if (!isset($_FILES['wp_theme_settings_file']) || $_FILES['wp_theme_settings_file']['error'] !== UPLOAD_ERR_OK) {
+    if (!isset($_FILES['wp_theme_settings_file']) || !isset($_FILES['wp_theme_settings_file']['error']) || $_FILES['wp_theme_settings_file']['error'] !== UPLOAD_ERR_OK) {
         add_action('admin_notices', function(): void {
             echo wp_kses_post('<div class="notice notice-error"><p>File upload error. Please try again.</p></div>');
         });
         return;
     }
 
-    $file = $_FILES['wp_theme_settings_file'];
-    $file_content = file_get_contents($file['tmp_name']);
+    if (!isset($_FILES['wp_theme_settings_file']['tmp_name'])) {
+        add_action('admin_notices', function(): void {
+            echo wp_kses_post('<div class="notice notice-error"><p>File upload error. Please try again.</p></div>');
+        });
+        return;
+    }
+
+    $tmp_name = sanitize_text_field($_FILES['wp_theme_settings_file']['tmp_name']);
+    $file_content = file_get_contents($tmp_name);
 
     if ($file_content === false) {
         add_action('admin_notices', function(): void {
@@ -221,8 +228,9 @@ function wp_theme_handle_import_settings(): void {
     $settings = json_decode($file_content, true);
 
     if (!is_array($settings)) {
-        add_action('admin_notices', function(): void {
-            echo wp_kses_post('<div class="notice notice-error"><p>Invalid JSON format.</p></div>');
+        $json_error = json_last_error_msg();
+        add_action('admin_notices', function() use ($json_error): void {
+            echo wp_kses_post('<div class="notice notice-error"><p>Invalid JSON format. Error: ' . esc_html($json_error) . '</p></div>');
         });
         return;
     }
@@ -545,7 +553,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         </div>
         
         <div class="wp-theme-settings-backup" style="margin-top: 20px; padding: 15px; background: #fff; border: 1px solid #ccc;">
-            <h3>Backup & Restore Settings</h3>
+            <h3>Backup &amp; Restore Settings</h3>
             <p>Use these tools to backup or restore theme settings. Useful for migrations.</p>
             
             <div style="margin-bottom: 15px;">
