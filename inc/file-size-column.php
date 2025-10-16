@@ -54,7 +54,7 @@ function make_filesize_column_sortable( array $sortable_columns ): array {
 add_filter( 'manage_upload_sortable_columns', 'make_filesize_column_sortable' );
 
 
-function sort_filesize_column( $vars ) {
+function sort_filesize_column( array $vars ) {
     if (isset( $vars['orderby'] ) && $vars['orderby'] === 'filesize') {
         return array_merge(
             $vars,

@@ -122,7 +122,7 @@ function wp_theme_ensure_settings_exist(): void {
     $existing_settings = get_option('wp_theme_settings', null);
 
     // If settings don't exist or are empty, initialize with defaults
-    if ($existing_settings === null || $existing_settings === false || $existing_settings === []) {
+    if (in_array($existing_settings, [null, false, []], true)) {
         $defaults = wp_theme_get_default_settings();
         update_option('wp_theme_settings', $defaults, true);
         wp_theme_clear_settings_cache();

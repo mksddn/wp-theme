@@ -83,7 +83,7 @@ function wp_theme_disable_user_enumeration(): void {
     }
 
     // Block user enumeration via REST API
-    add_filter('rest_endpoints', function ($endpoints) {
+    add_filter('rest_endpoints', function (array $endpoints): array {
         if (isset($endpoints['/wp/v2/users'])) {
             unset($endpoints['/wp/v2/users']);
         }

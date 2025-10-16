@@ -156,7 +156,7 @@ function my_cyr_to_lat( $text ): string|array {
 
 
 // Process only ACF field names during load
-function my_cyr_to_lat_acf_field_names( $field ) {
+function my_cyr_to_lat_acf_field_names( array $field ): array {
     if (isset( $field['name'] )) {
         $field['name'] = my_cyr_to_lat( $field['name'] );
     }

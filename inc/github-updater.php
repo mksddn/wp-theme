@@ -278,9 +278,8 @@ class GitHub_Theme_Updater {
      * Actions after theme update
      *
      * @param object $upgrader_object
-     * @param array $options
      */
-    public function after_theme_update($upgrader_object, $options): void {
+    public function after_theme_update($upgrader_object, array $options): void {
         if ($options['action'] === 'update' && $options['type'] === 'theme' && (isset($options['themes']) && in_array($this->theme_slug, $options['themes']))) {
             // Clear any caches
             if (function_exists('wp_cache_flush')) {
@@ -297,9 +296,8 @@ class GitHub_Theme_Updater {
      * Actions after theme install
      *
      * @param object $upgrader_object
-     * @param array $options
      */
-    public function after_theme_install($upgrader_object, $options): void {
+    public function after_theme_install($upgrader_object, array $options): void {
         if ($options['type'] === 'theme' && isset($options['themes'])) {
             foreach ($options['themes'] as $theme) {
                 if (str_starts_with((string) $theme, $this->theme_slug)) {

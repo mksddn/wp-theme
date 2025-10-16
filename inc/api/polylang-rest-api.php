@@ -583,7 +583,7 @@ add_filter('rest_prepare_page', 'wp_theme_switch_language_for_rest_response', 5,
 /**
  * Add language parameter to standard WordPress REST API endpoints.
  */
-function wp_theme_add_language_to_rest_query($args, $request) {
+function wp_theme_add_language_to_rest_query(array $args, $request): array {
     if (!wp_theme_is_polylang_active()) {
         return $args;
     }

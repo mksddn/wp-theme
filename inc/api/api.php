@@ -32,7 +32,7 @@ add_action('template_redirect', function (): void {
  */
 add_filter(
     'rest_endpoints',
-    function ( $endpoints ) {
+    function ( array $endpoints ): array {
         // Remove endpoint for getting users.
         if (isset( $endpoints['/wp/v2/users'] )) {
             unset( $endpoints['/wp/v2/users'] );
@@ -275,7 +275,7 @@ function wp_theme_filter_empty_acf_fields($acf_fields) {
  * @param array $old_value Previous settings.
  * @param array $new_value New settings.
  */
-function wp_theme_update_acf_show_in_rest_on_setting_change( $old_value, $new_value ): void {
+function wp_theme_update_acf_show_in_rest_on_setting_change( array $old_value, array $new_value ): void {
     // Check if headless setting changed
     $old_headless = isset($old_value['headless']) && (bool) $old_value['headless'];
     $new_headless = isset($new_value['headless']) && (bool) $new_value['headless'];

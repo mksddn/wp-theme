@@ -179,7 +179,7 @@ function get_category_thumbnail_rest(array $object): ?array {
 /**
  * Update category thumbnail via REST API.
  */
-function update_category_thumbnail_rest($value, $object): bool {
+function update_category_thumbnail_rest(array $value, $object): bool {
     if (!isset($value['id'])) {
         return false;
     }

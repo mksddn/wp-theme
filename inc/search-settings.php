@@ -71,14 +71,14 @@ add_filter(
 if (wp_theme_settings()['search_empty_handling'] || wp_theme_settings()['search_post_types'] || !empty(wp_theme_settings()['search_exclude_ids_list']) || !empty(wp_theme_settings()['search_exclude_slugs_list'])) {
     add_filter(
         'rest_post_query',
-        fn($args, $request) => wp_theme_apply_search_settings_to_rest_query($args, $request),
+        fn($args, $request): array => wp_theme_apply_search_settings_to_rest_query($args, $request),
         10,
         2
     );
 
     add_filter(
         'rest_page_query',
-        fn($args, $request) => wp_theme_apply_search_settings_to_rest_query($args, $request),
+        fn($args, $request): array => wp_theme_apply_search_settings_to_rest_query($args, $request),
         10,
         2
     );
@@ -86,7 +86,7 @@ if (wp_theme_settings()['search_empty_handling'] || wp_theme_settings()['search_
     // Apply to the unified search endpoint /wp/v2/search
     add_filter(
         'rest_search_query',
-        fn($args, $request) => wp_theme_apply_search_settings_to_rest_query($args, $request),
+        fn($args, $request): array => wp_theme_apply_search_settings_to_rest_query($args, $request),
         10,
         2
     );
@@ -113,7 +113,7 @@ add_action('rest_api_init', function(): void {
  * @param WP_REST_Request $request REST request object.
  * @return array Modified query arguments.
  */
-function wp_theme_apply_search_settings_to_rest_query($args, $request) {
+function wp_theme_apply_search_settings_to_rest_query(array $args, $request): array {
     // Only apply when explicit search param is present
     if (!$request->has_param('search')) {
         return $args;

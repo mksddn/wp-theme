@@ -163,7 +163,7 @@ function wp_theme_optimize_image_upload(array $file): array {
  *
  * @since 1.0.0
  */
-function wp_theme_add_priority_loading($attr, $attachment, $size): array {
+function wp_theme_add_priority_loading(array $attr, $attachment, $size): array {
     // Add fetchpriority="high" for above-the-fold images
     if (is_singular() && has_post_thumbnail() && $attachment->ID === get_post_thumbnail_id()) {
         $attr['fetchpriority'] = 'high';
