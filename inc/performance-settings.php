@@ -60,7 +60,7 @@ function wp_theme_apply_performance_optimizations(): void {
         }
 
         // Use filter for more reliable control over all post types
-        add_filter('wp_revisions_to_keep', fn($num, $post) => $limit, 10, 2);
+        add_filter('wp_revisions_to_keep', fn($_num, $_post) => $limit, 10, 2);
     }
 
 }

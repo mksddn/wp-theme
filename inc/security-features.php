@@ -164,9 +164,9 @@ function wp_theme_limit_login_attempts(): void {
 /**
  * Track failed login attempts.
  *
- * @param string $username Username that failed to login.
+ * @param string $_username Username that failed to login.
  */
-function wp_theme_track_failed_login(string $username): void {
+function wp_theme_track_failed_login(string $_username): void {
     $ip = wp_theme_get_client_ip();
     $attempts = get_transient("login_attempts_{$ip}") ?: 0;
     $attempts++;
@@ -183,11 +183,11 @@ function wp_theme_track_failed_login(string $username): void {
  * Check if IP is blocked from login attempts.
  *
  * @param WP_User|WP_Error|null $user User object or error.
- * @param string $username Username.
- * @param string $password Password.
+ * @param string $_username Username.
+ * @param string $_password Password.
  * @return WP_User|WP_Error|null User object, error, or null.
  */
-function wp_theme_check_login_attempts($user, string $username, string $password) {
+function wp_theme_check_login_attempts($user, string $_username, string $_password) {
     $ip = wp_theme_get_client_ip();
 
     if (get_transient("login_blocked_{$ip}")) {

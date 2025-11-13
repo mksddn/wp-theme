@@ -464,15 +464,15 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
 
         // Search post types sanitization
         $allowed_post_types = get_post_types(['public' => true], 'names');
-        $selected_post_types = isset($output['search_post_types_list']) && is_array($output['search_post_types_list']) ? array_values(array_intersect($allowed_post_types, array_map('sanitize_text_field', $output['search_post_types_list']))) : [];
+        $selected_post_types = isset($output['search_post_types_list']) && is_array($output['search_post_types_list']) ? array_values(array_intersect($allowed_post_types, array_map(sanitize_text_field(...), $output['search_post_types_list']))) : [];
         $output['search_post_types_list'] = $selected_post_types;
 
         // Search exclude IDs sanitization
         $exclude_ids_input = $output['search_exclude_ids_list'] ?? '';
         if (is_string($exclude_ids_input)) {
-            $exclude_ids = array_map('intval', array_filter(explode(',', $exclude_ids_input)));
+            $exclude_ids = array_map(intval(...), array_filter(explode(',', $exclude_ids_input)));
         } else {
-            $exclude_ids = is_array($exclude_ids_input) ? array_map('intval', $exclude_ids_input) : [];
+            $exclude_ids = is_array($exclude_ids_input) ? array_map(intval(...), $exclude_ids_input) : [];
         }
 
         $output['search_exclude_ids_list'] = array_filter($exclude_ids, fn(int $id): bool => $id > 0); // Only positive integers
@@ -480,9 +480,9 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         // Search exclude slugs sanitization
         $exclude_slugs_input = $output['search_exclude_slugs_list'] ?? '';
         if (is_string($exclude_slugs_input)) {
-            $exclude_slugs = array_map('sanitize_title', array_filter(array_map('trim', explode(',', $exclude_slugs_input))));
+            $exclude_slugs = array_map(sanitize_title(...), array_filter(array_map(trim(...), explode(',', $exclude_slugs_input))));
         } else {
-            $exclude_slugs = is_array($exclude_slugs_input) ? array_map('sanitize_title', array_filter(array_map('trim', $exclude_slugs_input))) : [];
+            $exclude_slugs = is_array($exclude_slugs_input) ? array_map(sanitize_title(...), array_filter(array_map(trim(...), $exclude_slugs_input))) : [];
         }
 
         $output['search_exclude_slugs_list'] = array_values(array_filter($exclude_slugs, fn($slug): bool => $slug !== ''));
@@ -503,7 +503,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         // Image optimization sizes list sanitization
         $allowed_remove_sizes = ['thumbnail', 'medium', 'medium_large', 'large', '1536x1536', '2048x2048'];
         $selected_remove_sizes = isset($output['image_opt_remove_sizes_list']) && is_array($output['image_opt_remove_sizes_list']) ?
-        array_values(array_intersect($allowed_remove_sizes, array_map('sanitize_text_field', $output['image_opt_remove_sizes_list']))) : [];
+        array_values(array_intersect($allowed_remove_sizes, array_map(sanitize_text_field(...), $output['image_opt_remove_sizes_list']))) : [];
         $output['image_opt_remove_sizes_list'] = $selected_remove_sizes;
 
         // Allow other modules to sanitize their settings
@@ -896,7 +896,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         add_filter('navigation_markup_template', 'wp_theme_navigation_template', 10, 2);
 
 
-        function wp_theme_navigation_template($template, $class): string {
+        function wp_theme_navigation_template($_template, $_class): string {
             return '
 <nav class="navigation %1$s" role="navigation">
 <div class="nav-links">%3$s</div>

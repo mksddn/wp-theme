@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * GitHub Theme Updater Class
  */
-class GitHub_Theme_Updater {
+final class GitHub_Theme_Updater {
 
     /**
      * Static flag to prevent multiple instances
@@ -277,9 +277,9 @@ class GitHub_Theme_Updater {
     /**
      * Actions after theme update
      *
-     * @param object $upgrader_object
+     * @param object $_upgrader_object
      */
-    public function after_theme_update($upgrader_object, array $options): void {
+    public function after_theme_update($_upgrader_object, array $options): void {
         if ($options['action'] === 'update' && $options['type'] === 'theme' && (isset($options['themes']) && in_array($this->theme_slug, $options['themes']))) {
             // Clear any caches
             if (function_exists('wp_cache_flush')) {
@@ -295,9 +295,9 @@ class GitHub_Theme_Updater {
     /**
      * Actions after theme install
      *
-     * @param object $upgrader_object
+     * @param object $_upgrader_object
      */
-    public function after_theme_install($upgrader_object, array $options): void {
+    public function after_theme_install($_upgrader_object, array $options): void {
         if ($options['type'] === 'theme' && isset($options['themes'])) {
             foreach ($options['themes'] as $theme) {
                 if (str_starts_with((string) $theme, $this->theme_slug)) {
@@ -503,6 +503,7 @@ if (!class_exists('GitHub_Theme_Updater_Initialized')) {
     });
 
     // Mark as initialized to prevent multiple instances
-    class GitHub_Theme_Updater_Initialized {
+    /** @psalm-suppress UnusedClass */
+    final class GitHub_Theme_Updater_Initialized {
     }
 }

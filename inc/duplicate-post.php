@@ -81,7 +81,12 @@ add_action('admin_init', 'theme_dp_handle_action');
 
 /**
  * Duplicate post with meta, taxonomies, thumbnail and attachments.
+ *
+ * @psalm-suppress UnusedVariable
+ * @psalm-suppress UnusedForeachValue
  */
+
+
 function theme_dp_duplicate_post($original_post) {
     $post_data = [
         'post_title'            => $original_post->post_title . ' (copy)',
@@ -129,8 +134,8 @@ function theme_dp_duplicate_post($original_post) {
     if (function_exists('get_fields') && function_exists('update_field')) {
         $acf_fields = get_fields($original_post->ID);
         if ($acf_fields) {
-            foreach ($acf_fields as $field_key => $field_value) {
-                update_field($field_key, $field_value, $duplicate_id);
+            foreach ($acf_fields as $acf_field_key => $acf_field_value) {
+                update_field($acf_field_key, $acf_field_value, $duplicate_id);
             }
         }
     }

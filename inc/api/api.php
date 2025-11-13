@@ -139,10 +139,10 @@ add_filter('rest_prepare_page', 'wp_theme_decode_acf_html_entities', 25, 3);
  * Decode HTML entities in REST API responses.
  *
  * @param WP_REST_Response $response
- * @param WP_Post $post
- * @param WP_REST_Request $request
+ * @param WP_Post $_post
+ * @param WP_REST_Request $_request
  */
-function wp_theme_decode_html_entities_in_rest_response($response, $post, $request): WP_REST_Response {
+function wp_theme_decode_html_entities_in_rest_response($response, $_post, $_request): WP_REST_Response {
     if (!$response instanceof WP_REST_Response) {
         return $response;
     }
@@ -174,9 +174,9 @@ function wp_theme_decode_html_entities_in_rest_response($response, $post, $reque
  *
  * @param WP_REST_Response $response
  * @param WP_Post $post
- * @param WP_REST_Request $request
+ * @param WP_REST_Request $_request
  */
-function wp_theme_decode_acf_html_entities($response, $post, $request): WP_REST_Response {
+function wp_theme_decode_acf_html_entities($response, $post, $_request): WP_REST_Response {
     if (!$response instanceof WP_REST_Response) {
         return $response;
     }
@@ -210,7 +210,7 @@ function wp_theme_decode_html_entities_recursive($data) {
     }
 
     if (is_array($data)) {
-        return array_map('wp_theme_decode_html_entities_recursive', $data);
+        return array_map(wp_theme_decode_html_entities_recursive(...), $data);
     }
 
     if (is_object($data)) {
@@ -290,7 +290,10 @@ function wp_theme_update_acf_show_in_rest_on_setting_change( array $old_value, a
  * Updates show_in_rest for all ACF field groups.
  *
  * @param bool $enable Whether to enable show_in_rest.
+ * @psalm-suppress UnusedForeachValue
  */
+
+
 function wp_theme_update_all_acf_show_in_rest( bool $enable ): void {
     if (!function_exists('acf_get_field_groups')) {
         return;
@@ -298,8 +301,8 @@ function wp_theme_update_all_acf_show_in_rest( bool $enable ): void {
 
     $field_groups = acf_get_field_groups();
 
-    foreach ($field_groups as $group) {
-        $group_data = acf_get_field_group($group['key']);
+    foreach ($field_groups as $group_item) {
+        $group_data = acf_get_field_group($group_item['key']);
 
         if ($group_data) {
             // Update show_in_rest setting

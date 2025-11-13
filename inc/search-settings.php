@@ -71,14 +71,14 @@ add_filter(
 if (wp_theme_settings()['search_empty_handling'] || wp_theme_settings()['search_post_types'] || !empty(wp_theme_settings()['search_exclude_ids_list']) || !empty(wp_theme_settings()['search_exclude_slugs_list'])) {
     add_filter(
         'rest_post_query',
-        fn($args, $request): array => wp_theme_apply_search_settings_to_rest_query($args, $request),
+        fn(array $args, $request): array => wp_theme_apply_search_settings_to_rest_query($args, $request),
         10,
         2
     );
 
     add_filter(
         'rest_page_query',
-        fn($args, $request): array => wp_theme_apply_search_settings_to_rest_query($args, $request),
+        fn(array $args, $request): array => wp_theme_apply_search_settings_to_rest_query($args, $request),
         10,
         2
     );
@@ -86,7 +86,7 @@ if (wp_theme_settings()['search_empty_handling'] || wp_theme_settings()['search_
     // Apply to the unified search endpoint /wp/v2/search
     add_filter(
         'rest_search_query',
-        fn($args, $request): array => wp_theme_apply_search_settings_to_rest_query($args, $request),
+        fn(array $args, $request): array => wp_theme_apply_search_settings_to_rest_query($args, $request),
         10,
         2
     );
@@ -164,7 +164,7 @@ function wp_theme_get_excluded_post_ids_from_settings(): array {
 
     if (!empty($opts['search_exclude_slugs_list'])) {
         $slugs = (array) $opts['search_exclude_slugs_list'];
-        $slugs = array_values(array_filter(array_map('sanitize_title', $slugs)));
+        $slugs = array_values(array_filter(array_map(sanitize_title(...), $slugs)));
         if ($slugs !== []) {
             $posts = get_posts([
                 'name' => '',
@@ -184,7 +184,7 @@ function wp_theme_get_excluded_post_ids_from_settings(): array {
         }
     }
 
-    $exclude_ids = array_values(array_unique(array_map('intval', $exclude_ids)));
+    $exclude_ids = array_values(array_unique(array_map(intval(...), $exclude_ids)));
     return array_filter($exclude_ids, fn(int $id): bool => $id > 0);
 }
 
