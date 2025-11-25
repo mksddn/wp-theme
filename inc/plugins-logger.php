@@ -24,7 +24,7 @@ function log_plugin_activation( string $plugin ): void {
         $lines = @file( $log_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
 
         // If the text domain already exists in the file, do not add it again
-        if (in_array( $plugin_text_domain, $lines )) {
+        if (is_array($lines) && in_array( $plugin_text_domain, $lines )) {
             return;
         }
     } else {

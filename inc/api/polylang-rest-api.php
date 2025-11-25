@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Polylang REST API language detection and switching.
  *
@@ -14,8 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Check if Polylang plugin is active.
  */
-function wp_theme_is_polylang_active(): bool
-{
+function wp_theme_is_polylang_active(): bool {
     return function_exists('pll_languages_list') && function_exists('pll_current_language');
 }
 
@@ -23,8 +21,7 @@ function wp_theme_is_polylang_active(): bool
 /**
  * Get language from Accept-Language header.
  */
-function wp_theme_get_language_from_header(): ?string
-{
+function wp_theme_get_language_from_header(): ?string {
     if (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
         return null;
     }
@@ -76,8 +73,7 @@ function wp_theme_get_language_from_header(): ?string
  *
  * @param string $language_code Language code to switch to.
  */
-function wp_theme_switch_polylang_language(string $language_code): bool
-{
+function wp_theme_switch_polylang_language(string $language_code): bool {
     if (!wp_theme_is_polylang_active()) {
         return false;
     }
@@ -108,8 +104,7 @@ function wp_theme_switch_polylang_language(string $language_code): bool
  * @param string $target_language Target language code.
  * @return string|null Translated slug or null if not found.
  */
-function wp_theme_get_translated_slug(string $slug, string $target_language): ?string
-{
+function wp_theme_get_translated_slug(string $slug, string $target_language): ?string {
     if (!wp_theme_is_polylang_active()) {
         return null;
     }
@@ -154,8 +149,7 @@ function wp_theme_get_translated_slug(string $slug, string $target_language): ?s
  * @param string $target_language Target language code.
  * @return int|null Translated post ID or null if not found.
  */
-function wp_theme_get_translated_post_id(int $post_id, string $target_language): ?int
-{
+function wp_theme_get_translated_post_id(int $post_id, string $target_language): ?int {
     if (!wp_theme_is_polylang_active()) {
         return null;
     }
@@ -178,60 +172,9 @@ function wp_theme_get_translated_post_id(int $post_id, string $target_language):
 
 
 /**
- * Check if REST API request is from Gutenberg editor.
- *
- * @param WP_REST_Request|null $request Optional request object.
- * @return bool True if request is from editor.
- */
-function wp_theme_is_editor_rest_request($request = null): bool
-{
-    // Check if user is logged in and can edit posts
-    if (!is_user_logged_in() || !current_user_can('edit_posts')) {
-        return false;
-    }
-
-    // If request object is provided, check context parameter
-    if ($request instanceof WP_REST_Request) {
-        $context = $request->get_param('context');
-        if ($context === 'edit') {
-            return true;
-        }
-
-        // Check if this is a direct ID request (editor loads posts by ID)
-        $route = $request->get_route();
-        if (preg_match('/^\/wp\/v2\/(posts|pages)\/(\d+)$/', (string) $route)) {
-            return true;
-        }
-    }
-
-    // Check if request has context=edit parameter in GET or POST
-    if (isset($_GET['context']) && $_GET['context'] === 'edit') {
-        return true;
-    }
-
-    // Verify nonce for POST data
-    if (isset($_POST['context']) && $_POST['context'] === 'edit' && (isset($_POST['_wpnonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'wp_rest'))) {
-        return true;
-    }
-
-    // Check HTTP_REFERER header if available
-    if (isset($_SERVER['HTTP_REFERER'])) {
-        $referer = sanitize_text_field(wp_unslash($_SERVER['HTTP_REFERER']));
-        $admin_url = admin_url();
-        if (str_starts_with($referer, $admin_url)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-/**
  * Initialize language detection for REST API requests.
  */
-function wp_theme_init_rest_language_detection(): void
-{
+function wp_theme_init_rest_language_detection(): void {
     // Only run for REST API requests
     if (!defined('REST_REQUEST') || !REST_REQUEST) {
         return;
@@ -239,11 +182,6 @@ function wp_theme_init_rest_language_detection(): void
 
     // Only run if Polylang is active
     if (!wp_theme_is_polylang_active()) {
-        return;
-    }
-
-    // Skip language switching for editor requests
-    if (wp_theme_is_editor_rest_request()) {
         return;
     }
 
@@ -268,8 +206,7 @@ add_action('rest_api_init', 'wp_theme_init_rest_language_detection', 1);
  * @param WP_REST_Request $_request
  * @return WP_REST_Response
  */
-function wp_theme_add_language_to_rest_response($response, $_post, $_request)
-{
+function wp_theme_add_language_to_rest_response($response, $_post, $_request) {
     if (!wp_theme_is_polylang_active()) {
         return $response;
     }
@@ -284,8 +221,7 @@ function wp_theme_add_language_to_rest_response($response, $_post, $_request)
 /**
  * Handle empty results for slug-based requests using a different approach.
  */
-function wp_theme_handle_empty_slug_results_v3($response, $post, $request)
-{
+function wp_theme_handle_empty_slug_results_v3($response, $post, $request) {
     // Only handle GET requests for pages/posts
     if ($request->get_method() !== 'GET') {
         return $response;
@@ -367,8 +303,7 @@ function wp_theme_handle_empty_slug_results_v3($response, $post, $request)
 /**
  * Handle empty results for slug-based requests using a different approach.
  */
-function wp_theme_handle_empty_slug_results_v2($response, $request)
-{
+function wp_theme_handle_empty_slug_results_v2($response, $request) {
     // Only handle GET requests for pages/posts
     if ($request->get_method() !== 'GET') {
         return $response;
@@ -450,8 +385,7 @@ function wp_theme_handle_empty_slug_results_v2($response, $request)
 /**
  * Handle empty results for slug-based requests.
  */
-function wp_theme_handle_empty_slug_results($response, $request)
-{
+function wp_theme_handle_empty_slug_results($response, $request) {
     // Only handle GET requests for pages/posts
     if ($request->get_method() !== 'GET') {
         return $response;
@@ -519,8 +453,7 @@ function wp_theme_handle_empty_slug_results($response, $request)
 /**
  * Handle slug-based requests for translated content.
  */
-function wp_theme_handle_translated_slug_request($result, $server, $request)
-{
+function wp_theme_handle_translated_slug_request($result, $server, $request) {
     // Only handle GET requests for pages/posts
     if ($request->get_method() !== 'GET') {
         return $result;
@@ -587,15 +520,9 @@ add_filter('rest_prepare_page', 'wp_theme_add_language_to_rest_response', 10, 3)
 /**
  * Switch language for REST API responses based on Accept-Language header.
  */
-function wp_theme_switch_language_for_rest_response($response, $post, $_request)
-{
+function wp_theme_switch_language_for_rest_response($response, $post, $_request) {
     // Only handle if Polylang is active
     if (!wp_theme_is_polylang_active()) {
-        return $response;
-    }
-
-    // Skip language switching for editor requests
-    if (wp_theme_is_editor_rest_request($_request)) {
         return $response;
     }
 
@@ -656,14 +583,8 @@ add_filter('rest_prepare_page', 'wp_theme_switch_language_for_rest_response', 5,
 /**
  * Add language parameter to standard WordPress REST API endpoints.
  */
-function wp_theme_add_language_to_rest_query(array $args, $_request): array
-{
+function wp_theme_add_language_to_rest_query(array $args, $_request): array {
     if (!wp_theme_is_polylang_active()) {
-        return $args;
-    }
-
-    // Skip language switching for editor requests
-    if (wp_theme_is_editor_rest_request($_request)) {
         return $args;
     }
 
@@ -719,14 +640,8 @@ add_filter('rest_page_query', 'wp_theme_add_language_to_rest_query', 10, 2);
 /**
  * Add language support to all custom post types REST API.
  */
-function wp_theme_add_language_to_cpt_rest_query(array $args, $_request): array
-{
+function wp_theme_add_language_to_cpt_rest_query(array $args, $_request): array {
     if (!wp_theme_is_polylang_active()) {
-        return $args;
-    }
-
-    // Skip language switching for editor requests
-    if (wp_theme_is_editor_rest_request($_request)) {
         return $args;
     }
 
@@ -775,13 +690,13 @@ function wp_theme_add_language_to_cpt_rest_query(array $args, $_request): array
 
 
 // Apply language filter to all custom post types
-add_filter('rest_query_vars', function ($vars) {
+add_filter('rest_query_vars', function($vars) {
     $vars[] = 'lang';
     return $vars;
 });
 
 // Hook into all post type queries
-add_action('rest_api_init', function (): void {
+add_action('rest_api_init', function(): void {
     $post_types = get_post_types(['public' => true, 'show_in_rest' => true], 'names');
 
     foreach ($post_types as $post_type) {
@@ -793,8 +708,7 @@ add_action('rest_api_init', function (): void {
 /**
  * Handle language switching for direct ID requests by modifying the route.
  */
-function wp_theme_handle_id_route_modification($result, $server, $request)
-{
+function wp_theme_handle_id_route_modification($result, $server, $request) {
     // Only handle GET requests
     if ($request->get_method() !== 'GET') {
         return $result;
@@ -811,11 +725,6 @@ function wp_theme_handle_id_route_modification($result, $server, $request)
 
     // Only handle if Polylang is active
     if (!wp_theme_is_polylang_active()) {
-        return $result;
-    }
-
-    // Skip language switching for editor requests
-    if (wp_theme_is_editor_rest_request($request)) {
         return $result;
     }
 

@@ -290,10 +290,7 @@ function wp_theme_update_acf_show_in_rest_on_setting_change( array $old_value, a
  * Updates show_in_rest for all ACF field groups.
  *
  * @param bool $enable Whether to enable show_in_rest.
- * @psalm-suppress UnusedForeachValue
  */
-
-
 function wp_theme_update_all_acf_show_in_rest( bool $enable ): void {
     if (!function_exists('acf_get_field_groups')) {
         return;
@@ -301,8 +298,8 @@ function wp_theme_update_all_acf_show_in_rest( bool $enable ): void {
 
     $field_groups = acf_get_field_groups();
 
-    foreach ($field_groups as $group_item) {
-        $group_data = acf_get_field_group($group_item['key']);
+    foreach ($field_groups as $_group) {
+        $group_data = acf_get_field_group($_group['key']);
 
         if ($group_data) {
             // Update show_in_rest setting
