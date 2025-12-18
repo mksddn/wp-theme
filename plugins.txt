@@ -1,5 +1,0 @@
-all-in-one-wp-migration
-query-monitor
-acf
-mksddn-forms-handler
-mksddn-collection-for-postman
