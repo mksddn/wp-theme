@@ -1,0 +1,624 @@
+# WP Theme Russian Translation
+# Copyright (C) 2026 Max Dudin
+# This file is distributed under the same license as the WP Theme package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Theme 1.0.29\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-24 12:00+0000\n"
+"PO-Revision-Date: 2026-01-24 12:00+0000\n"
+"Last-Translator: Max Dudin\n"
+"Language-Team: Russian\n"
+"Language: ru_RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: inc/image-optimization.php:166
+msgid "Image size too large. Maximum size is %dMB."
+msgstr "Размер изображения превышает лимит. Максимум: %dМБ."
+
+#: inc/category-thumbnails.php:19
+#: inc/category-thumbnails.php:34
+msgid "Category Thumbnail"
+msgstr "Миниатюра категории"
+
+#: inc/category-thumbnails.php:22
+#: inc/category-thumbnails.php:43
+msgid "Upload category thumbnail image"
+msgstr "Загрузить изображение категории"
+
+#: inc/category-thumbnails.php:22
+#: inc/category-thumbnails.php:43
+msgid "Upload Image"
+msgstr "Загрузить изображение"
+
+#: inc/category-thumbnails.php:23
+#: inc/category-thumbnails.php:46
+msgid "Remove category thumbnail image"
+msgstr "Удалить изображение категории"
+
+#: inc/category-thumbnails.php:23
+#: inc/category-thumbnails.php:47
+msgid "Remove Image"
+msgstr "Удалить изображение"
+
+#: inc/github-updater.php:479
+msgid "Security check failed"
+msgstr "Ошибка проверки безопасности"
+
+#: inc/file-size-column.php:18
+msgid "File Size"
+msgstr "Размер файла"
+
+#: inc/file-size-column.php:33
+msgid "N/A"
+msgstr "Н/Д"
+
+#: inc/thumbnail-column.php:26
+msgid "Thumbnail"
+msgstr "Миниатюра"
+
+#: inc/thumbnail-column.php:65
+msgid "None"
+msgstr "Нет"
+
+#: inc/duplicate-post.php:23
+msgid "Duplicate this post"
+msgstr "Дублировать этот пост"
+
+#: inc/duplicate-post.php:24
+msgid "Duplicate"
+msgstr "Дублировать"
+
+#: inc/duplicate-post.php:53
+msgid "Invalid parameters"
+msgstr "Неверные параметры"
+
+#: inc/duplicate-post.php:57
+msgid "Security error"
+msgstr "Ошибка безопасности"
+
+#: inc/duplicate-post.php:61
+msgid "Insufficient permissions"
+msgstr "Недостаточно прав доступа"
+
+#: inc/duplicate-post.php:66
+msgid "Post not found"
+msgstr "Запись не найдена"
+
+#: inc/duplicate-post.php:75
+msgid "Error creating duplicate"
+msgstr "Не удалось создать копию"
+
+#: inc/duplicate-post.php:192
+msgid "Post successfully duplicated!"
+msgstr "Запись успешно скопирована!"
+
+#: inc/theme-features.php:256
+#: inc/theme-features.php:257
+msgid "Theme Features"
+msgstr "Функции темы"
+
+#: inc/theme-features.php:282
+#: inc/theme-features.php:288
+msgid "Admin Features"
+msgstr "Функции панели управления"
+
+#: inc/theme-features.php:297
+#: inc/theme-features.php:303
+msgid "Content Features"
+msgstr "Функции контента"
+
+#: inc/theme-features.php:312
+#: inc/theme-features.php:318
+msgid "Security Features"
+msgstr "Функции безопасности"
+
+#: inc/theme-features.php:327
+#: inc/theme-features.php:333
+msgid "Search Features"
+msgstr "Функции поиска"
+
+#: inc/theme-features.php:342
+#: inc/theme-features.php:348
+msgid "Image Optimization"
+msgstr "Оптимизация изображений"
+
+#: inc/theme-features.php:357
+#: inc/theme-features.php:363
+msgid "Performance Features"
+msgstr "Оптимизация производительности"
+
+#: inc/theme-features.php:532
+msgid "Configure theme features and functionality. Enable or disable specific features based on your needs."
+msgstr "Настройте функции и возможности темы. Включайте или отключайте конкретные функции в зависимости от ваших потребностей."
+
+#: inc/theme-features.php:536
+msgid "Warning:"
+msgstr "Предупреждение:"
+
+#: inc/theme-features.php:536
+msgid "Settings are using default values. Database option 'wp_theme_settings' not found. Save settings to create the option."
+msgstr "Используются значения по умолчанию. Опция базы данных 'wp_theme_settings' не найдена. Сохраните настройки, чтобы создать опцию."
+
+#: inc/theme-features.php:544
+msgid "Save Theme Features"
+msgstr "Сохранить функции темы"
+
+#: inc/theme-features.php:549
+msgid "About Theme Features"
+msgstr "О функциях темы"
+
+#: inc/theme-features.php:550
+msgid "This page allows you to enable or disable various theme features. Changes take effect immediately after saving."
+msgstr "На этой странице вы можете включать или отключать различные функции темы. Изменения вступают в силу сразу после сохранения."
+
+#: inc/theme-features.php:551
+msgid "Note:"
+msgstr "Примечание:"
+
+#: inc/theme-features.php:551
+msgid "Some features require specific plugins to be installed and activated."
+msgstr "Некоторые функции требуют установки и активации определенных плагинов."
+
+#: inc/theme-features.php:552
+msgid "Settings source:"
+msgstr "Источник настроек:"
+
+#: inc/theme-features.php:556
+msgid "Backup &amp; Restore Settings"
+msgstr "Резервное копирование и восстановление настроек"
+
+#: inc/theme-features.php:557
+msgid "Use these tools to backup or restore theme settings. Useful for migrations."
+msgstr "Используйте эти инструменты для резервного копирования или восстановления настроек темы. Полезно при миграциях."
+
+#: inc/theme-features.php:560
+msgid "Export Settings"
+msgstr "Экспорт настроек"
+
+#: inc/theme-features.php:564
+msgid "Export Settings as JSON"
+msgstr "Экспортировать настройки в JSON"
+
+#: inc/theme-features.php:569
+msgid "Import Settings"
+msgstr "Импорт настроек"
+
+#: inc/theme-features.php:573
+msgid "Import Settings from JSON"
+msgstr "Импортировать настройки из JSON"
+
+#: inc/theme-features.php:585
+msgid "Admin interface enhancements, WordPress core modifications, and administrative tools."
+msgstr "Улучшения административного интерфейса, модификации ядра WordPress и административные инструменты."
+
+#: inc/theme-features.php:590
+msgid "Content editing, display, and formatting features including editor settings."
+msgstr "Функции редактирования, отображения и форматирования контента, включая настройки редактора."
+
+#: inc/theme-features.php:595
+msgid "WordPress security enhancements and hardening measures."
+msgstr "Улучшения безопасности WordPress и меры по усилению защиты."
+
+#: inc/theme-features.php:600
+msgid "Search functionality enhancements and optimizations."
+msgstr "Улучшения и оптимизации функциональности поиска."
+
+#: inc/theme-features.php:605
+msgid "Image optimization features, media library enhancements, and file format support for better performance and user experience."
+msgstr "Функции оптимизации изображений, улучшения медиатеки и поддержка форматов файлов для лучшей производительности и удобства использования."
+
+#: inc/theme-features.php:610
+msgid "Basic performance optimizations to improve site speed and reduce server load. These settings are safe to enable and won't conflict with most plugins."
+msgstr "Базовые оптимизации производительности для повышения скорости сайта и снижения нагрузки на сервер. Эти настройки безопасны для включения и не конфликтуют с большинством плагинов."
+
+#: inc/theme-features.php:619
+msgid "Enable headless CMS mode (API only, no theme assets)"
+msgstr "Включить режим headless CMS (только API, без ресурсов темы)"
+
+#: inc/theme-features.php:619
+msgid "Disables frontend theme, enables API-only usage"
+msgstr "Отключает фронтенд темы, включает использование только через API"
+
+#: inc/theme-features.php:620
+msgid "Cyr to Lat (transliteration)"
+msgstr "Кириллица в латиницу (транслитерация)"
+
+#: inc/theme-features.php:620
+msgid "Converts Cyrillic characters to Latin in URLs and filenames"
+msgstr "Преобразует кириллические символы в латинские в URL и именах файлов"
+
+#: inc/theme-features.php:621
+msgid "Enable ACF Local JSON with automatic path management"
+msgstr "Включить ACF JSON с автоматическим управлением"
+
+#: inc/theme-features.php:621
+msgid "Saves ACF field groups as JSON files in theme"
+msgstr "Сохраняет группы полей ACF как JSON файлы в теме"
+
+#: inc/theme-features.php:622
+msgid "Disable comments"
+msgstr "Отключить комментарии"
+
+#: inc/theme-features.php:622
+msgid "Completely removes comment functionality from posts and pages"
+msgstr "Отключает комментарии для всех записей и страниц"
+
+#: inc/theme-features.php:623
+msgid "Duplicate Post feature"
+msgstr "Функция дублирования записей"
+
+#: inc/theme-features.php:623
+msgid "Adds duplicate button to post edit screens"
+msgstr "Добавляет кнопку копирования при редактировании"
+
+#: inc/theme-features.php:624
+msgid "Plugins logger"
+msgstr "Логгер плагинов"
+
+#: inc/theme-features.php:624
+msgid "Logs plugin activation/deactivation events"
+msgstr "Ведёт логи активации и деактивации плагинов"
+
+#: inc/theme-features.php:625
+msgid "WooCommerce support"
+msgstr "Поддержка WooCommerce"
+
+#: inc/theme-features.php:625
+msgid "Adds theme support for WooCommerce plugin"
+msgstr "Включает совместимость темы с WooCommerce"
+
+#: inc/theme-features.php:626
+msgid "Polylang REST API language detection"
+msgstr "Определение языка в Polylang REST API"
+
+#: inc/theme-features.php:626
+msgid "Automatically detects language from Accept-Language header in REST API requests"
+msgstr "Автоматически выбирает язык по заголовку Accept-Language в REST API"
+
+#: inc/theme-features.php:635
+msgid "Disable Gutenberg"
+msgstr "Отключить Gutenberg"
+
+#: inc/theme-features.php:635
+msgid "Reverts to classic editor for all post types"
+msgstr "Использует классический редактор для всех типов записей"
+
+#: inc/theme-features.php:636
+msgid "Add excerpt support to pages"
+msgstr "Добавить поле описания для страниц"
+
+#: inc/theme-features.php:636
+msgid "Enables excerpt field for pages in admin"
+msgstr "Включает поле описания для страниц"
+
+#: inc/theme-features.php:637
+msgid "Remove \"Category: \", \"Tag: \" etc. from archive title"
+msgstr "Убрать \"Категория: \", \"Метка: \" из заголовка архива"
+
+#: inc/theme-features.php:637
+msgid "Shows only the term name"
+msgstr "Показывает только имя термина"
+
+#: inc/theme-features.php:638
+msgid "Remove H2 from pagination template"
+msgstr "Убрать H2 из пагинации"
+
+#: inc/theme-features.php:638
+msgid "Removes default heading wrapper from pagination"
+msgstr "Убирает стандартный заголовок из пагинации"
+
+#: inc/theme-features.php:639
+msgid "Posts list: thumbnail column"
+msgstr "Список записей: колонка миниатюр"
+
+#: inc/theme-features.php:639
+msgid "Shows featured image thumbnails in posts list"
+msgstr "Показывает миниатюры в списке записей"
+
+#: inc/theme-features.php:640
+msgid "Category thumbnails"
+msgstr "Миниатюры категорий"
+
+#: inc/theme-features.php:640
+msgid "Adds thumbnail support for categories with admin interface and REST API"
+msgstr "Добавляет изображения для категорий с поддержкой API"
+
+#: inc/theme-features.php:641
+msgid "Schema.org structured data markup"
+msgstr "Разметка структурированных данных Schema.org"
+
+#: inc/theme-features.php:641
+msgid "Adds structured data for better SEO"
+msgstr "Добавляет структурированные данные для SEO"
+
+#: inc/theme-features.php:667
+msgid "Disable XML-RPC"
+msgstr "Отключить XML-RPC"
+
+#: inc/theme-features.php:667
+msgid "Blocks XML-RPC requests to prevent brute force attacks"
+msgstr "Блокирует XML-RPC для защиты от перебора пароля"
+
+#: inc/theme-features.php:668
+msgid "Disable X-Pingback header"
+msgstr "Отключить заголовок X-Pingback"
+
+#: inc/theme-features.php:668
+msgid "Removes pingback header to hide WordPress"
+msgstr "Отключает pingback для скрытия версии"
+
+#: inc/theme-features.php:669
+msgid "Hide WordPress version"
+msgstr "Скрыть версию WP"
+
+#: inc/theme-features.php:669
+msgid "Removes version info from head and RSS feeds"
+msgstr "Убирает версию из head и RSS"
+
+#: inc/theme-features.php:670
+msgid "Disable file editing in admin"
+msgstr "Отключить редактор кода в панели"
+
+#: inc/theme-features.php:670
+msgid "Prevents theme/plugin editing via admin"
+msgstr "Запрещает изменение кода темы и плагинов"
+
+#: inc/theme-features.php:671
+msgid "Disable user enumeration"
+msgstr "Отключить перечисление пользователей"
+
+#: inc/theme-features.php:671
+msgid "Blocks user discovery via author archives"
+msgstr "Блокирует обнаружение пользователей через архивы авторов"
+
+#: inc/theme-features.php:672
+msgid "Add security headers (except CSP)"
+msgstr "Добавить заголовки безопасности (кроме CSP)"
+
+#: inc/theme-features.php:672
+msgid "Adds X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS"
+msgstr "Добавляет X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS"
+
+#: inc/theme-features.php:673
+msgid "Add Content-Security-Policy (CSP) header"
+msgstr "Добавить заголовок Content-Security-Policy (CSP)"
+
+#: inc/theme-features.php:673
+msgid "Sends CSP header to restrict resource loading"
+msgstr "Отправляет заголовок CSP для ограничения загрузки ресурсов"
+
+#: inc/theme-features.php:674
+msgid "Disable directory browsing"
+msgstr "Отключить просмотр директорий"
+
+#: inc/theme-features.php:674
+msgid "Prevents directory listing on server"
+msgstr "Предотвращает листинг директорий на сервере"
+
+#: inc/theme-features.php:675
+msgid "Limit login attempts"
+msgstr "Ограничить попытки входа"
+
+#: inc/theme-features.php:675
+msgid "Adds basic login attempt limiting"
+msgstr "Ограничивает количество попыток входа"
+
+#: inc/theme-features.php:686
+msgid "Stop query execution for empty search terms"
+msgstr "Остановить выполнение запроса для пустых поисковых запросов"
+
+#: inc/theme-features.php:686
+msgid "Prevents database queries when search is empty"
+msgstr "Не выполняет поиск при пустом запросе"
+
+#: inc/theme-features.php:692
+msgid "Select post types to include in search (leave empty to search all):"
+msgstr "Выберите типы для поиска (пусто = все):"
+
+#: inc/theme-features.php:709
+msgid "Post/Page IDs to exclude:"
+msgstr "ID для исключения из поиска:"
+
+#: inc/theme-features.php:712
+msgid "1, 5, 10"
+msgstr "1, 5, 10"
+
+#: inc/theme-features.php:712
+msgid "Enter IDs separated by commas"
+msgstr "Введите ID через запятую"
+
+#: inc/theme-features.php:722
+msgid "Slugs to exclude:"
+msgstr "Слаги для исключения:"
+
+#: inc/theme-features.php:725
+msgid "about-us, contact"
+msgstr "about-us, contact"
+
+#: inc/theme-features.php:725
+msgid "Enter slugs separated by commas"
+msgstr "Введите слаги через запятую"
+
+#: inc/theme-features.php:740
+msgid "Enable upload size and dimension limits"
+msgstr "Включить ограничения размера и размеров загрузки"
+
+#: inc/theme-features.php:740
+msgid "Restricts image upload size and dimensions"
+msgstr "Ограничивает размер и размеры загружаемых изображений"
+
+#: inc/theme-features.php:741
+msgid "Optimize image quality"
+msgstr "Улучшить качество сжатия"
+
+#: inc/theme-features.php:741
+msgid "Sets JPEG compression quality for better file sizes"
+msgstr "Настраивает качество JPEG для меньшего размера файла"
+
+#: inc/theme-features.php:742
+msgid "Enable priority loading for above-the-fold images"
+msgstr "Загружать изображения в первую очередь"
+
+#: inc/theme-features.php:742
+msgid "Loads featured images immediately"
+msgstr "Загружает основные изображения в первую очередь"
+
+#: inc/theme-features.php:743
+msgid "Media Library: file size column"
+msgstr "Медиатека: колонка размера файла"
+
+#: inc/theme-features.php:743
+msgid "Shows file size in Media Library list view"
+msgstr "Показывает размер файла в виде списка медиатеки"
+
+#: inc/theme-features.php:744
+msgid "SVG support"
+msgstr "Поддержка SVG"
+
+#: inc/theme-features.php:744
+msgid "Allows safe SVG file uploads with sanitization"
+msgstr "Разрешает загрузку SVG с защитой от вредоноса"
+
+#: inc/theme-features.php:752
+msgid "Upload Limits"
+msgstr "Ограничения загрузки"
+
+#: inc/theme-features.php:753
+msgid "Maximum image size (MB):"
+msgstr "Максимальный размер изображения (МБ):"
+
+#: inc/theme-features.php:754
+msgid "Maximum dimension (px):"
+msgstr "Максимальное разрешение (px):"
+
+#: inc/theme-features.php:757
+msgid "Image Quality"
+msgstr "Качество изображения"
+
+#: inc/theme-features.php:758
+msgid "JPEG Quality (%):"
+msgstr "Качество JPEG (%):"
+
+#: inc/theme-features.php:759
+msgid "General Quality (%):"
+msgstr "Общее качество (%):"
+
+#: inc/theme-features.php:763
+msgid "Thumbnail (150x150px)"
+msgstr "Миниатюра (150x150px)"
+
+#: inc/theme-features.php:764
+msgid "Medium (300x300px)"
+msgstr "Среднее (300x300px)"
+
+#: inc/theme-features.php:765
+msgid "Medium Large (768x768px)"
+msgstr "Среднее большое (768x768px)"
+
+#: inc/theme-features.php:766
+msgid "Large (1024x1024px)"
+msgstr "Большое (1024x1024px)"
+
+#: inc/theme-features.php:767
+msgid "1536x1536 (WordPress 5.3+ large size)"
+msgstr "1536x1536 (большой размер WordPress 5.3+)"
+
+#: inc/theme-features.php:768
+msgid "2048x2048 (WordPress 5.3+ large size)"
+msgstr "2048x2048 (большой размер WordPress 5.3+)"
+
+#: inc/theme-features.php:770
+msgid "Remove Intermediate Sizes"
+msgstr "Убрать дополнительные размеры"
+
+#: inc/theme-features.php:771
+msgid "Select sizes to remove (leave empty to keep all sizes):"
+msgstr "Выберите размеры (пусто = все):"
+
+#: inc/theme-features.php:788
+msgid "Remove WordPress emoji scripts"
+msgstr "Удалить скрипты эмодзи WordPress"
+
+#: inc/theme-features.php:788
+msgid "Removes emoji detection and styles for faster loading"
+msgstr "Убирает эмодзи для ускорения загрузки"
+
+#: inc/theme-features.php:789
+msgid "Disable WordPress embeds"
+msgstr "Отключить встраивание контента"
+
+#: inc/theme-features.php:789
+msgid "Removes oEmbed functionality to reduce HTTP requests"
+msgstr "Удаляет функциональность oEmbed для уменьшения HTTP запросов"
+
+#: inc/theme-features.php:790
+msgid "Optimize database queries"
+msgstr "Оптимизировать запросы к базе данных"
+
+#: inc/theme-features.php:790
+msgid "Removes unnecessary meta links and queries"
+msgstr "Убирает ненужные мета-ссылки"
+
+#: inc/theme-features.php:791
+msgid "Clean up unnecessary head elements"
+msgstr "Очистить ненужное из head"
+
+#: inc/theme-features.php:791
+msgid "Removes feed links and adjacent post links"
+msgstr "Убирает ссылки на RSS и соседние записи"
+
+#: inc/theme-features.php:792
+msgid "Disable WordPress cron (use server cron)"
+msgstr "Отключить cron WordPress (использовать cron сервера)"
+
+#: inc/theme-features.php:792
+msgid "Disables WP cron for better performance"
+msgstr "Отключает cron WP для ускорения"
+
+#: inc/theme-features.php:793
+msgid "Limit post revisions"
+msgstr "Ограничить черновики записей"
+
+#: inc/theme-features.php:793
+msgid "Limits number of post revisions to reduce database size"
+msgstr "Сохраняет только последние черновики"
+
+#: inc/theme-features.php:801
+msgid "Max revisions per post:"
+msgstr "Максимум ревизий на запись:"
+
+#: inc/theme-features.php:158
+#: inc/theme-features.php:162
+msgid "Unauthorized"
+msgstr "Доступ запрещен"
+
+#: inc/theme-features.php:162
+#: inc/theme-features.php:201
+msgid "Invalid nonce"
+msgstr "Ошибка проверки безопасности"
+
+#: inc/theme-features.php:169
+msgid "Failed to encode settings"
+msgstr "Не удалось закодировать настройки"
+
+#: inc/theme-features.php:206
+#: inc/theme-features.php:213
+msgid "File upload error. Please try again."
+msgstr "Не удалось загрузить файл"
+
+#: inc/theme-features.php:223
+msgid "Failed to read file."
+msgstr "Не удалось прочитать файл."
+
+#: inc/theme-features.php:233
+msgid "Invalid JSON format. Error:"
+msgstr "Неверный JSON:"
+
+#: inc/theme-features.php:246
+msgid "Settings imported successfully!"
+msgstr "Настройки успешно импортированы!"

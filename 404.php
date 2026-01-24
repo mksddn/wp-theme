@@ -21,8 +21,8 @@ get_header();
                 404
             </h1>
             <br>
-            <p>Oops! That page can't be found.</p>
-            <p>It looks like nothing was found at this location.</p>
+            <p><?php esc_html_e('Oops! That page can\'t be found.', 'wp-theme'); ?></p>
+            <p><?php esc_html_e('It looks like nothing was found at this location.', 'wp-theme'); ?></p>
         </article>
     </section>
 

@@ -23,7 +23,7 @@ if (! function_exists( 'add_thumb_column' )) {
      * @return array Updated columns with the new "Thumbnail" column.
      */
     function add_thumb_column( array $columns ): array {
-        $columns['thumbnail'] = __( 'Thumbnail', 'textdomain' );
+        $columns['thumbnail'] = __( 'Thumbnail', 'wp-theme' );
         return $columns;
     }
 
@@ -62,7 +62,7 @@ if (! function_exists( 'add_thumb_column' )) {
                     echo wp_get_attachment_image( $attachment->ID, [ $width, $height ], true );
                 } else {
                     // Display "None" if no image is found
-                    echo esc_html__( 'None', 'textdomain' );
+                    echo esc_html__( 'None', 'wp-theme' );
                 }
             }
         }

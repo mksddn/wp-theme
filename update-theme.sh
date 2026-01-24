@@ -1,21 +1,61 @@
 #!/bin/bash
 
-# Получаем текущую версию из style.css
+# Get current version from style.css
 CURRENT_VERSION=$(grep "Version:" style.css | sed 's/.*Version: *//' | tr -d ' ')
-echo "Current version: $CURRENT_VERSION"
+echo "📦 Current version: $CURRENT_VERSION"
+echo ""
 
-# Увеличиваем версию (patch)
-NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-echo "New version: $NEW_VERSION"
+# Parse version components
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
-# Обновляем версию в style.css
+# Show menu
+echo "Select version increment:"
+echo "  1) Patch  ($MAJOR.$MINOR.$((PATCH + 1)))"
+echo "  2) Minor  ($MAJOR.$((MINOR + 1)).0)"
+echo "  3) Major  ($((MAJOR + 1)).0.0)"
+echo ""
+read -p "Choose option (1-3): " choice
+
+# Calculate new version based on choice
+case $choice in
+    1)
+        PATCH=$((PATCH + 1))
+        ;;
+    2)
+        MINOR=$((MINOR + 1))
+        PATCH=0
+        ;;
+    3)
+        MAJOR=$((MAJOR + 1))
+        MINOR=0
+        PATCH=0
+        ;;
+    *)
+        echo "❌ Invalid choice. Exiting."
+        exit 1
+        ;;
+esac
+
+NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+echo ""
+echo "✨ New version: $NEW_VERSION"
+echo ""
+
+# Confirm before proceeding
+read -p "Proceed with update? (y/n): " confirm
+if [[ ! $confirm =~ ^[Yy]$ ]]; then
+    echo "Cancelled."
+    exit 0
+fi
+
+# Update version in style.css
 sed -i '' "s/Version: $CURRENT_VERSION/Version: $NEW_VERSION/" style.css
 
-# Коммитим изменения
+# Commit changes
 git add .
 git commit -m "Bump version to $NEW_VERSION"
 
-# Создаем и пушим тег
+# Create and push tag
 git tag -a "v$NEW_VERSION" -m "Release version $NEW_VERSION"
 git push origin main
 git push origin "v$NEW_VERSION"

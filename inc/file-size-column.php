@@ -8,10 +8,14 @@ Author: mksddn
 
 // Add file size column to media library
 define( 'FILESIZE_META_KEY', '_filesize' );
+define( 'FILESIZE_BATCH_SIZE', 50 );
+define( 'FILESIZE_UPDATE_PAGE_OPTION', 'filesize_metadata_update_page' );
+define( 'FILESIZE_UPDATE_DONE_OPTION', 'filesize_metadata_update_done' );
+define( 'FILESIZE_UPDATE_SCHEDULED_OPTION', 'filesize_metadata_update_scheduled' );
 
 
 function add_filesize_column( array $columns ): array {
-    $columns['filesize'] = __( 'File Size', 'textdomain' );
+    $columns['filesize'] = __( 'File Size', 'wp-theme' );
     return $columns;
 }
 
@@ -26,7 +30,7 @@ function display_filesize_column( $column_name, $post_id ): void {
             $file_size = filesize( $file_path );
             echo esc_html( size_format( $file_size ) );
         } else {
-            echo esc_html__( 'N/A', 'textdomain' );
+            echo esc_html__( 'N/A', 'wp-theme' );
         }
     }
 }
@@ -98,30 +102,76 @@ function update_filesize_on_upload( $post_id ): void {
 
 add_action( 'add_attachment', 'update_filesize_on_upload' );
 
-// Update file size metadata for existing attachments
-function update_filesize_for_existing_attachments(): void {
-    $attachments = get_posts(
+// Update file size metadata for existing attachments in batches
+function update_filesize_for_existing_attachments( int $page = 1, int $per_page = FILESIZE_BATCH_SIZE ): bool {
+    $attachment_ids = get_posts(
         [
-            'post_type'      => 'attachment',
-            'post_status'    => 'inherit',
-            'posts_per_page' => -1,
+            'post_type'              => 'attachment',
+            'post_status'            => 'inherit',
+            'posts_per_page'         => $per_page,
+            'paged'                  => $page,
+            'fields'                 => 'ids',
+            'orderby'                => 'ID',
+            'order'                  => 'ASC',
+            'no_found_rows'          => true,
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
         ]
     );
 
-    foreach ($attachments as $attachment) {
-        $file_path = get_attached_file( $attachment->ID );
+    if (empty( $attachment_ids )) {
+        return false;
+    }
+
+    foreach ($attachment_ids as $attachment_id) {
+        $file_path = get_attached_file( $attachment_id );
         if (file_exists( $file_path )) {
             $file_size = filesize( $file_path );
-            update_post_meta( $attachment->ID, FILESIZE_META_KEY, $file_size );
+            update_post_meta( $attachment_id, FILESIZE_META_KEY, $file_size );
         }
     }
+
+    return true;
 }
 
 
-// Trigger metadata update on plugin load (for MU-Plugin)
-function initialize_filesize_metadata_update(): void {
-    update_filesize_for_existing_attachments();
+function run_filesize_metadata_batch(): void {
+    $page = (int) get_option( FILESIZE_UPDATE_PAGE_OPTION, 1 );
+    $has_results = update_filesize_for_existing_attachments( $page );
+
+    if ($has_results) {
+        update_option( FILESIZE_UPDATE_PAGE_OPTION, $page + 1, false );
+        return;
+    }
+
+    delete_option( FILESIZE_UPDATE_PAGE_OPTION );
+    update_option( FILESIZE_UPDATE_DONE_OPTION, 1, false );
+    delete_option( FILESIZE_UPDATE_SCHEDULED_OPTION );
 }
 
 
-initialize_filesize_metadata_update();
+// Schedule metadata update once in admin
+function maybe_schedule_filesize_metadata_update(): void {
+    if (! is_admin()) {
+        return;
+    }
+
+    if (get_option( FILESIZE_UPDATE_DONE_OPTION )) {
+        return;
+    }
+
+    if (get_option( FILESIZE_UPDATE_SCHEDULED_OPTION )) {
+        return;
+    }
+
+    if (! current_user_can( 'manage_options' )) {
+        return;
+    }
+
+    update_option( FILESIZE_UPDATE_SCHEDULED_OPTION, 1, false );
+    wp_schedule_single_event( time() + 60, 'filesize_metadata_batch' );
+}
+
+
+add_action( 'filesize_metadata_batch', 'run_filesize_metadata_batch' );
+add_action( 'admin_init', 'maybe_schedule_filesize_metadata_update' );

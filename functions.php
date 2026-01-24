@@ -7,6 +7,24 @@
 
 
 /**
+ * Load theme translations before includes.
+ */
+function wp_theme_load_textdomain(): void {
+    $locale = is_admin() ? get_user_locale() : get_locale();
+    $mofile = get_template_directory() . '/languages/wp-theme-' . $locale . '.mo';
+
+    if (file_exists( $mofile )) {
+        load_textdomain( 'wp-theme', $mofile );
+    }
+
+    load_theme_textdomain( 'wp-theme', get_template_directory() . '/languages' );
+}
+
+
+wp_theme_load_textdomain();
+
+
+/**
  * Theme settings.
  */
 function theme_setup(): void {
@@ -24,6 +42,7 @@ function theme_setup(): void {
     // )).
     add_theme_support( 'title-tag' );
     add_theme_support( 'custom-logo', [ 'unlink-homepage-logo' => true ] );
+
 }
 
 

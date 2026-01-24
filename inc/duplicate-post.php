@@ -20,8 +20,8 @@ function theme_dp_add_link(array $actions, $post): array {
     $actions['duplicate'] = sprintf(
         '<a href="%s" title="%s" rel="permalink">%s</a>',
         esc_url($url),
-        esc_attr__('Duplicate this post', 'textdomain'),
-        esc_html__('Duplicate', 'textdomain')
+        esc_attr__('Duplicate this post', 'wp-theme'),
+        esc_html__('Duplicate', 'wp-theme')
     );
 
     return $actions;
@@ -50,20 +50,20 @@ function theme_dp_handle_action(): void {
     $nonce = is_string($nonce_raw) ? sanitize_text_field($nonce_raw) : '';
 
     if ($post_id <= 0 || empty($nonce)) {
-        wp_die(esc_html__('Invalid parameters', 'textdomain'));
+        wp_die(esc_html__('Invalid parameters', 'wp-theme'));
     }
 
     if (! wp_verify_nonce($nonce, 'duplicate_post_' . $post_id)) {
-        wp_die(esc_html__('Security error', 'textdomain'));
+        wp_die(esc_html__('Security error', 'wp-theme'));
     }
 
     if (! current_user_can('edit_posts')) {
-        wp_die(esc_html__('Insufficient permissions', 'textdomain'));
+        wp_die(esc_html__('Insufficient permissions', 'wp-theme'));
     }
 
     $original_post = get_post($post_id);
     if (! $original_post) {
-        wp_die(esc_html__('Post not found', 'textdomain'));
+        wp_die(esc_html__('Post not found', 'wp-theme'));
     }
 
     $duplicate_id = theme_dp_duplicate_post($original_post);
@@ -72,7 +72,7 @@ function theme_dp_handle_action(): void {
         exit;
     }
 
-    wp_die(esc_html__('Error creating duplicate', 'textdomain'));
+    wp_die(esc_html__('Error creating duplicate', 'wp-theme'));
 }
 
 
@@ -84,7 +84,7 @@ add_action('admin_init', 'theme_dp_handle_action');
  */
 function theme_dp_duplicate_post($original_post) {
     $post_data = [
-        'post_title'            => $original_post->post_title . ' (copy)',
+        'post_title'            => $original_post->post_title . ' ' . __('(copy)', 'wp-theme'),
         'post_content'          => $original_post->post_content,
         'post_excerpt'          => $original_post->post_excerpt,
         'post_status'           => 'draft',
@@ -189,7 +189,7 @@ function theme_dp_admin_notice(): void {
     $duplicated_raw = filter_input(INPUT_GET, 'duplicated', FILTER_UNSAFE_RAW);
     $duplicated = is_string($duplicated_raw) ? sanitize_text_field($duplicated_raw) : '';
     if ($duplicated === '1') {
-        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Post successfully duplicated!', 'textdomain') . '</p></div>';
+        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Post successfully duplicated!', 'wp-theme') . '</p></div>';
     }
 }
 

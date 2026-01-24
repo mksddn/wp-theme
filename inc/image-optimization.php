@@ -48,7 +48,11 @@ function wp_theme_image_optimization_init(): void {
     if (!empty($settings['image_opt_remove_sizes_list'])) {
         wp_theme_remove_intermediate_sizes();
         add_filter('intermediate_image_sizes_advanced', 'wp_theme_filter_intermediate_sizes');
-        add_filter('big_image_size_threshold', '__return_false');
+    }
+
+    // Auto-resize large images to max dimension
+    if ($settings['image_opt_upload_limits']) {
+        add_filter('big_image_size_threshold', 'wp_theme_set_big_image_size_threshold');
     }
 }
 
@@ -125,30 +129,42 @@ function wp_theme_fix_image_metadata($metadata, $attachment_id) {
 
 
 /**
- * Optimize image uploads with size and dimension limits.
+ * Set big image size threshold to auto-resize large images.
+ * WordPress will automatically resize images larger than this threshold.
+ *
+ * @since 1.0.0
+ * @param int|false $threshold Current threshold (2560 by default in WP 5.3+).
+ * @return int|false Threshold value or false to disable.
+ */
+function wp_theme_set_big_image_size_threshold($threshold) {
+    $settings = wp_theme_get_settings();
+    return $settings['image_opt_max_dimension'];
+}
+
+
+/**
+ * Optimize image uploads with file size limits.
+ * Note: Dimension limits are handled by big_image_size_threshold filter.
  *
  * @since 1.0.0
  */
 function wp_theme_optimize_image_upload(array $file): array {
+    // Check if file is an image
+    $file_type = wp_check_filetype($file['name']);
+    $is_image = str_starts_with((string) $file['type'], 'image/') || in_array($file_type['ext'], ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'ico', 'svg'], true);
+
+    if (!$is_image) {
+        return $file;
+    }
+
     $settings = wp_theme_get_settings();
     $max_size = $settings['image_opt_max_file_size'] * 1024 * 1024;
-    $max_dimension = $settings['image_opt_max_dimension'];
 
     // Check file size
     if ($file['size'] > $max_size) {
         $file['error'] = sprintf(
             esc_html__('Image size too large. Maximum size is %dMB.', 'wp-theme'),
             $settings['image_opt_max_file_size']
-        );
-        return $file;
-    }
-
-    // Check dimensions
-    $image_info = getimagesize($file['tmp_name']);
-    if ($image_info && ($image_info[0] > $max_dimension || $image_info[1] > $max_dimension)) {
-        $file['error'] = sprintf(
-            esc_html__('Image dimensions too large. Maximum dimension is %dpx.', 'wp-theme'),
-            $max_dimension
         );
         return $file;
     }

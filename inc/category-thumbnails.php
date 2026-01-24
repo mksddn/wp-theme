@@ -19,8 +19,8 @@ function add_category_thumbnail_field(): void {
         <label for="category_thumbnail"><?php esc_html_e('Category Thumbnail', 'wp-theme'); ?></label>
         <input type="hidden" id="category_thumbnail" name="category_thumbnail" value="" />
         <div id="category_thumbnail_preview" style="margin-top: 10px;"></div>
-        <button type="button" class="button" id="upload_category_thumbnail" aria-label="<?php esc_attr_e('Upload category thumbnail image', 'wp-theme'); ?>"><?php esc_html_e('Upload Image', 'wp-theme'); ?>Upload Image</button>
-        <button type="button" class="button" id="remove_category_thumbnail" style="display: none;" aria-label="<?php esc_attr_e('Remove category thumbnail image', 'wp-theme'); ?>"><?php esc_html_e('Remove Image', 'wp-theme'); ?>Remove Image</button>
+        <button type="button" class="button" id="upload_category_thumbnail" aria-label="<?php esc_attr_e('Upload category thumbnail image', 'wp-theme'); ?>"><?php esc_html_e('Upload Image', 'wp-theme'); ?></button>
+        <button type="button" class="button" id="remove_category_thumbnail" style="display: none;" aria-label="<?php esc_attr_e('Remove category thumbnail image', 'wp-theme'); ?>"><?php esc_html_e('Remove Image', 'wp-theme'); ?></button>
     </div>
     <?php
 }
@@ -40,11 +40,11 @@ function edit_category_thumbnail_field($term): void {
                     <?php echo wp_get_attachment_image($thumbnail_id, 'thumbnail'); ?>
                 <?php endif; ?>
             </div>
-            <button type="button" class="button" id="upload_category_thumbnail" aria-label="<?php esc_attr_e('Upload category thumbnail image', 'wp-theme'); ?>"><?php esc_html_e('Upload Image', 'wp-theme'); ?>Upload Image</button>
+            <button type="button" class="button" id="upload_category_thumbnail" aria-label="<?php esc_attr_e('Upload category thumbnail image', 'wp-theme'); ?>"><?php esc_html_e('Upload Image', 'wp-theme'); ?></button>
             <button type="button" class="button" id="remove_category_thumbnail" 
                 <?php echo $thumbnail_id ? '' : 'style="display: none;"'; ?> 
                 aria-label="<?php esc_attr_e('Remove category thumbnail image', 'wp-theme'); ?>">
-                <?php esc_html_e('Remove Image', 'wp-theme'); ?>Remove Image
+                <?php esc_html_e('Remove Image', 'wp-theme'); ?>
             </button>
         </td>
     </tr>
@@ -113,6 +113,10 @@ function category_thumbnail_admin_scripts(): void {
         wp_enqueue_media();
         $admin_js_uri = get_theme_file_uri( 'js/category-thumbnail-admin.js' );
         wp_enqueue_script('category-thumbnail-admin', $admin_js_uri, ['jquery'], wp_get_theme( get_stylesheet() )->get('Version'), true);
+        wp_localize_script('category-thumbnail-admin', 'categoryThumbnailL10n', [
+            'chooseThumbnail' => __('Choose Category Thumbnail', 'wp-theme'),
+            'chooseImage' => __('Choose Image', 'wp-theme'),
+        ]);
     }
 }
 

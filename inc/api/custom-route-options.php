@@ -94,7 +94,7 @@ add_action(
                     if (! $target_page) {
                         return new WP_Error(
                             'options_page_not_found',
-                            'Options Page with specified slug not found',
+                            __('Options Page with specified slug not found', 'wp-theme'),
                             [ 'status' => 404 ]
                         );
                     }

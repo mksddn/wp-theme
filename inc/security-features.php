@@ -191,7 +191,7 @@ function wp_theme_check_login_attempts($user, string $_username, string $_passwo
     $ip = wp_theme_get_client_ip();
 
     if (get_transient("login_blocked_{$ip}")) {
-        return new WP_Error('login_blocked', 'Too many failed login attempts. Please try again later.');
+        return new WP_Error('login_blocked', __('Too many failed login attempts. Please try again later.', 'wp-theme'));
     }
 
     return $user;

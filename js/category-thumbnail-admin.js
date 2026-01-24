@@ -5,8 +5,8 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         
         mediaUploader = wp.media({
-            title: 'Choose Category Thumbnail',
-            button: { text: 'Choose Image' },
+            title: categoryThumbnailL10n.chooseThumbnail,
+            button: { text: categoryThumbnailL10n.chooseImage },
             multiple: false
         });
         

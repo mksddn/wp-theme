@@ -16,7 +16,7 @@ get_header();
     <?php if (have_posts()) : ?>
     <h1 class="page-title">
         <?php
-        printf( 'Search Results for: %s', '<span>' . get_search_query() . '</span>' );
+        printf( esc_html__('Search Results for: %s', 'wp-theme'), '<span>' . get_search_query() . '</span>' );
         ?>
     </h1>
     <br>

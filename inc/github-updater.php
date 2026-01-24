@@ -38,11 +38,6 @@ final class GitHub_Theme_Updater {
     private $theme_slug;
 
     /**
-     * Current theme version
-     */
-    private $current_version;
-
-    /**
      * GitHub API URL
      */
     private readonly string $api_url;
@@ -65,8 +60,6 @@ final class GitHub_Theme_Updater {
         if (preg_match('/^(.+)-[\d\.]+$/', $this->theme_slug, $matches)) {
             $this->theme_slug = $matches[1];
         }
-
-        $this->current_version = $this->get_theme_version();
 
         // Extract GitHub info from style.css
         $github_uri = $this->get_github_theme_uri();
@@ -155,9 +148,26 @@ final class GitHub_Theme_Updater {
             return $transient;
         }
 
+        // Get current version dynamically to ensure it's up to date
+        $current_version = $this->get_theme_version();
         $remote_version = $this->get_remote_version();
 
-        if ($remote_version && version_compare($this->current_version, $remote_version, '<')) {
+        // Get all possible theme slugs (base name and versioned)
+        $possible_slugs = [$this->theme_slug];
+        $actual_theme_slug = get_template();
+        if ($actual_theme_slug !== $this->theme_slug) {
+            $possible_slugs[] = $actual_theme_slug;
+        }
+
+        // Remove any existing entries for this theme to prevent stale data
+        foreach ($possible_slugs as $slug) {
+            if (isset($transient->response[$slug])) {
+                unset($transient->response[$slug]);
+            }
+        }
+
+        // Only add update entry if remote version is newer
+        if ($remote_version && version_compare($current_version, $remote_version, '<')) {
             $transient->response[$this->theme_slug] = [
                 'theme' => $this->theme_slug,
                 'new_version' => $remote_version,
@@ -285,6 +295,10 @@ final class GitHub_Theme_Updater {
             if (function_exists('wp_cache_flush')) {
                 wp_cache_flush();
             }
+
+            // Clear update transients to force recheck
+            delete_site_transient('update_themes');
+            delete_transient('update_themes');
 
             // Rename theme directory to remove version suffix
             $this->rename_theme_directory();
@@ -451,18 +465,20 @@ final class GitHub_Theme_Updater {
 
         $screen = get_current_screen();
         if ($screen && $screen->id === 'themes') {
+            // Get current version dynamically to ensure it's up to date
+            $current_version = $this->get_theme_version();
             $remote_version = $this->get_remote_version();
 
-            if ($remote_version && version_compare($this->current_version, $remote_version, '<')) {
+            if ($remote_version && version_compare($current_version, $remote_version, '<')) {
                 echo '<div class="notice notice-warning is-dismissible">';
-                echo '<p><strong>Theme Update Available:</strong> ';
-                echo esc_html("Version {$remote_version} is available. ");
-                echo '<a href="' . esc_url(admin_url('update-core.php')) . '">Check for updates</a>';
+                echo '<p><strong>' . esc_html__('Theme Update Available:', 'wp-theme') . '</strong> ';
+                echo esc_html(sprintf(__('Version %s is available.', 'wp-theme'), $remote_version)) . ' ';
+                echo '<a href="' . esc_url(admin_url('update-core.php')) . '">' . esc_html__('Check for updates', 'wp-theme') . '</a>';
                 echo '</p></div>';
             } else {
                 $force_url = wp_nonce_url(admin_url('themes.php?force_check_updates=1'), 'force_check_updates');
                 echo '<div class="notice notice-info is-dismissible">';
-                echo '<p><a href="' . esc_url($force_url) . '">Check for theme updates</a></p>';
+                echo '<p><a href="' . esc_url($force_url) . '">' . esc_html__('Check for theme updates', 'wp-theme') . '</a></p>';
                 echo '</div>';
             }
         }
