@@ -890,8 +890,6 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
      */
     if ($settings['headless']) {
         require_once get_template_directory() . '/inc/api/api.php';
-    } else {
-        require_once get_template_directory() . '/inc/styles-n-scripts.php';
     }
 
     /**
