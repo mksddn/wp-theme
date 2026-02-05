@@ -50,6 +50,31 @@ add_action( 'after_setup_theme', 'theme_setup' );
 
 
 /**
+ * Programmatically set permalink structure to Post name.
+ */
+add_action(
+    'after_switch_theme',
+    function (): void {
+        global $wp_rewrite;
+        $desired_structure = '/%postname%/';
+        if (get_option( 'permalink_structure' ) !== $desired_structure) {
+            update_option( 'permalink_structure', $desired_structure );
+            $wp_rewrite->set_permalink_structure( $desired_structure );
+            flush_rewrite_rules();
+        }
+
+        // Update ACF show_in_rest settings if Headless CMS is enabled
+        if (function_exists('wp_theme_get_settings')) {
+            $settings = wp_theme_get_settings();
+            if (isset($settings['headless']) && $settings['headless'] && function_exists('wp_theme_update_all_acf_show_in_rest')) {
+                wp_theme_update_all_acf_show_in_rest(true);
+            }
+        }
+    }
+);
+
+
+/**
  * Theme Settings page and helpers.
  */
 require_once get_template_directory() . '/inc/theme-features.php';
