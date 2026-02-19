@@ -115,13 +115,6 @@ function wp_theme_add_security_headers(): void {
             // Referrer Policy for privacy
             header('Referrer-Policy: strict-origin-when-cross-origin');
 
-            // Content Security Policy header is controlled by Theme Settings
-            $settings = function_exists('wp_theme_get_settings') ? wp_theme_get_settings() : [];
-            if ($settings !== [] && ! empty($settings['security_csp_header'])) {
-                $csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self';";
-                header("Content-Security-Policy: {$csp}");
-            }
-
             // Strict Transport Security (HTTPS only)
             if (is_ssl()) {
                 header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');

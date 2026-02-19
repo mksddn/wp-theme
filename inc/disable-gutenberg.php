@@ -19,7 +19,7 @@ did_action( 'plugins_loaded' )
 final class Disable_Gutenberg {
 
     // Priority for high-priority filters
-    private const FILTER_PRIORITY_HIGH = 100;
+    private const int FILTER_PRIORITY_HIGH = 100;
 
 
     /**

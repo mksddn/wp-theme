@@ -80,15 +80,7 @@ add_action(
 
                     // Get all Options Pages.
                     $options_pages = get_all_options_pages();
-
-                    // Find Options Page by slug.
-                    $target_page = null;
-                    foreach ($options_pages as $page) {
-                        if ($page['menu_slug'] === $slug) {
-                            $target_page = $page;
-                            break;
-                        }
-                    }
+                    $target_page = array_find($options_pages, fn($page): bool => $page['menu_slug'] === $slug);
 
                     // If page not found.
                     if (! $target_page) {

@@ -63,8 +63,8 @@ final class GitHub_Theme_Updater {
 
         // Extract GitHub info from style.css
         $github_uri = $this->get_github_theme_uri();
-        if ($github_uri) {
-            $parts = explode('/', (string) $github_uri);
+        if (is_string($github_uri) && $github_uri) {
+            $parts = explode('/', $github_uri);
             $this->owner = $parts[0] ?? '';
             $this->repo = $parts[1] ?? '';
         }
@@ -113,6 +113,7 @@ final class GitHub_Theme_Updater {
         // Try different ways to get GitHub URI
         $github_uri = $theme_data->get('GitHub Theme URI');
 
+        // If still not found, try reading style.css directly
         if (!$github_uri) {
             // Try Theme URI
             $theme_uri = $theme_data->get('Theme URI');
@@ -120,10 +121,7 @@ final class GitHub_Theme_Updater {
                 $path = parse_url((string) $theme_uri, PHP_URL_PATH);
                 return ltrim($path, '/');
             }
-        }
 
-        // If still not found, try reading style.css directly
-        if (!$github_uri) {
             $style_css_path = get_template_directory() . '/style.css';
             if (file_exists($style_css_path)) {
                 $style_content = file_get_contents($style_css_path);

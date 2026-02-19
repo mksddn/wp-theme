@@ -34,7 +34,6 @@ function wp_theme_get_default_settings(): array {
         'security_hide_version'     => true,
         'security_disable_editing'  => true,
         'security_disable_enumeration' => true,
-        'security_csp_header'       => true,
         'security_headers'          => true,
         'security_directory_browsing' => true,
         'security_login_limits'     => true,
@@ -443,7 +442,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         'schema_markup',
         // Security Features
         'security_xmlrpc', 'security_x_pingback', 'security_hide_version', 'security_disable_editing',
-        'security_disable_enumeration', 'security_headers', 'security_csp_header', 'security_directory_browsing', 'security_login_limits',
+        'security_disable_enumeration', 'security_headers', 'security_directory_browsing', 'security_login_limits',
         // Search Features
         'search_empty_handling', 'search_post_types',
         // ACF Features
@@ -669,8 +668,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         'security_hide_version'     => '<b>' . __('Hide WordPress version', 'wp-theme') . '</b> - ' . __('Removes version info from head and RSS feeds', 'wp-theme'),
         'security_disable_editing'  => '<b>' . __('Disable file editing in admin', 'wp-theme') . '</b> - ' . __('Prevents theme/plugin editing via admin', 'wp-theme'),
         'security_disable_enumeration' => '<b>' . __('Disable user enumeration', 'wp-theme') . '</b> - ' . __('Blocks user discovery via author archives', 'wp-theme'),
-        'security_headers'          => '<b>' . __('Add security headers (except CSP)', 'wp-theme') . '</b> - ' . __('Adds X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS', 'wp-theme'),
-        'security_csp_header'       => '<b>' . __('Add Content-Security-Policy (CSP) header', 'wp-theme') . '</b> - ' . __('Sends CSP header to restrict resource loading', 'wp-theme'),
+        'security_headers'          => '<b>' . __('Add security headers', 'wp-theme') . '</b> - ' . __('Adds X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS', 'wp-theme'),
         'security_directory_browsing' => '<b>' . __('Disable directory browsing', 'wp-theme') . '</b> - ' . __('Prevents directory listing on server', 'wp-theme'),
         'security_login_limits'     => '<b>' . __('Limit login attempts', 'wp-theme') . '</b> - ' . __('Adds basic login attempt limiting', 'wp-theme'),
         ];
