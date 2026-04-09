@@ -618,7 +618,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         'headless'          => '<b>' . __('Enable headless CMS mode (API only, no theme assets)', 'wp-theme') . '</b> - ' . __('Disables frontend theme, enables API-only usage', 'wp-theme'),
         'cyr2lat'           => '<b>' . __('Cyr to Lat (transliteration)', 'wp-theme') . '</b> - ' . __('Converts Cyrillic characters to Latin in URLs and filenames', 'wp-theme'),
         'acf_local_json'    => '<b>' . __('Enable ACF Local JSON with automatic path management', 'wp-theme') . '</b> - ' . __('Saves ACF field groups as JSON files in theme', 'wp-theme'),
-        'disable_comments'  => '<b>' . __('Disable comments', 'wp-theme') . '</b> - ' . __('Completely removes comment functionality from posts and pages', 'wp-theme'),
+        'disable_comments'  => '<b>' . __('Disable comments', 'wp-theme') . '</b> - ' . __('Removes comments and trackbacks site-wide; hides Comments menu, Discussion settings, and related admin bar items.', 'wp-theme'),
         'duplicate_post'    => '<b>' . __('Duplicate Post feature', 'wp-theme') . '</b> - ' . __('Adds duplicate button to post edit screens', 'wp-theme'),
         'plugins_logger'    => '<b>' . __('Plugins logger', 'wp-theme') . '</b> - ' . __('Logs plugin activation/deactivation events', 'wp-theme'),
         'woocommerce_support'=> '<b>' . __('WooCommerce support', 'wp-theme') . '</b> - ' . __('Adds theme support for WooCommerce plugin', 'wp-theme'),

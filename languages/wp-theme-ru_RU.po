@@ -245,8 +245,8 @@ msgid "Disable comments"
 msgstr "Отключить комментарии"
 
 #: inc/theme-features.php:622
-msgid "Completely removes comment functionality from posts and pages"
-msgstr "Отключает комментарии для всех записей и страниц"
+msgid "Removes comments and trackbacks site-wide; hides Comments menu, Discussion settings, and related admin bar items."
+msgstr "Отключает комментарии и трекбеки на сайте; скрывает пункт «Комментарии», раздел «Обсуждение» в настройках и связанные элементы админ-бара."
 
 #: inc/theme-features.php:623
 msgid "Duplicate Post feature"

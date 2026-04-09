@@ -79,6 +79,11 @@ add_action(
  */
 require_once get_template_directory() . '/inc/theme-features.php';
 
+/**
+ * Admin: Tools menu visible only to administrators.
+ */
+require_once get_template_directory() . '/inc/admin-tools-menu-access.php';
+
 
 /**
  * GitHub Theme Updater.
