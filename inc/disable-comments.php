@@ -53,15 +53,16 @@ function wp_theme_disable_comments_zero_site_count($count, $post_id) {
         return $count;
     }
 
-    return (object) [
-        'approved'         => 0,
-        'moderated'        => 0,
-        'spam'             => 0,
-        'trash'            => 0,
-        'post-trashed'     => 0,
-        'total_comments'   => 0,
-        'all'              => 0,
-    ];
+    $zero = new stdClass();
+    $zero->approved       = 0;
+    $zero->moderated      = 0;
+    $zero->spam           = 0;
+    $zero->trash          = 0;
+    $zero->{'post-trashed'} = 0;
+    $zero->total_comments = 0;
+    $zero->all            = 0;
+
+    return $zero;
 }
 
 

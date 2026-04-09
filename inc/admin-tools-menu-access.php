@@ -27,6 +27,7 @@ function wp_theme_remove_tools_menu_for_non_administrators(): void {
     remove_menu_page('tools.php');
 }
 
+
 add_action('admin_menu', 'wp_theme_remove_tools_menu_for_non_administrators', 999);
 
 
@@ -53,5 +54,6 @@ function wp_theme_block_tools_pages_for_non_administrators(): void {
     wp_safe_redirect(admin_url());
     exit;
 }
+
 
 add_action('admin_init', 'wp_theme_block_tools_pages_for_non_administrators');
