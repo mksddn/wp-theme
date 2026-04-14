@@ -20,6 +20,7 @@ function wp_theme_get_default_settings(): array {
         'polylang_rest_api'  => false,
         // Content Features
         'disable_gutenberg'  => false,
+        'disable_gutenberg_post_types' => ['page'],
         'page_excerpt'       => true,
         'clean_archive_title'=> false,
         'clean_pagination'   => false,
@@ -461,9 +462,32 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
             $output[$key] = wp_theme_sanitize_boolean($output[$key] ?? false);
         }
 
-        // Search post types sanitization
         $allowed_post_types = get_post_types(['public' => true], 'names');
-        $selected_post_types = isset($output['search_post_types_list']) && is_array($output['search_post_types_list']) ? array_values(array_intersect($allowed_post_types, array_map(sanitize_text_field(...), $output['search_post_types_list']))) : [];
+
+        // Gutenberg post types sanitization
+        $selected_gutenberg_post_types = [];
+        if (isset($output['disable_gutenberg_post_types']) && is_array($output['disable_gutenberg_post_types'])) {
+            $selected_gutenberg_post_types = array_values(
+                array_intersect(
+                    $allowed_post_types,
+                    array_map(sanitize_text_field(...), $output['disable_gutenberg_post_types'])
+                )
+            );
+        }
+
+        $output['disable_gutenberg_post_types'] = $selected_gutenberg_post_types;
+
+        // Search post types sanitization
+        $selected_post_types = [];
+        if (isset($output['search_post_types_list']) && is_array($output['search_post_types_list'])) {
+            $selected_post_types = array_values(
+                array_intersect(
+                    $allowed_post_types,
+                    array_map(sanitize_text_field(...), $output['search_post_types_list'])
+                )
+            );
+        }
+
         $output['search_post_types_list'] = $selected_post_types;
 
         // Search exclude IDs sanitization
@@ -631,7 +655,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
     function wp_theme_render_content_features(): void {
         $opts = wp_theme_get_settings();
         $features = [
-        'disable_gutenberg' => '<b>' . __('Disable Gutenberg', 'wp-theme') . '</b> - ' . __('Reverts to classic editor for all post types', 'wp-theme'),
+        'disable_gutenberg' => '<b>' . __('Disable Gutenberg', 'wp-theme') . '</b> - ' . __('Reverts selected post types to classic editor', 'wp-theme'),
         'page_excerpt'      => '<b>' . __('Add excerpt support to pages', 'wp-theme') . '</b> - ' . __('Enables excerpt field for pages in admin', 'wp-theme'),
         'clean_archive_title'=> '<b>' . __('Remove "Category: ", "Tag: " etc. from archive title', 'wp-theme') . '</b> - ' . __('Shows only the term name', 'wp-theme'),
         'clean_pagination'  => '<b>' . __('Remove H2 from pagination template', 'wp-theme') . '</b> - ' . __('Removes default heading wrapper from pagination', 'wp-theme'),
@@ -640,6 +664,27 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         'schema_markup'     => '<b>' . __('Schema.org structured data markup', 'wp-theme') . '</b> - ' . __('Adds structured data for better SEO', 'wp-theme'),
         ];
         wp_theme_render_checkboxes($features, $opts);
+
+        $available_post_types = get_post_types(['public' => true], 'objects');
+        $selected_post_types = isset($opts['disable_gutenberg_post_types']) && is_array($opts['disable_gutenberg_post_types']) ? $opts['disable_gutenberg_post_types'] : [];
+
+        echo '<p><strong>' . esc_html__('Disable Gutenberg for selected post types:', 'wp-theme') . '</strong></p>';
+
+        foreach ($available_post_types as $post_type) {
+            $checked = in_array($post_type->name, $selected_post_types, true) ? 'checked' : '';
+            $checkbox_html  = '<p><label><input type="checkbox" name="wp_theme_settings[disable_gutenberg_post_types][]" value="' . esc_attr($post_type->name) . '" ' . esc_attr($checked) . '> ';
+            $checkbox_html .= esc_html($post_type->label) . ' <code>(' . esc_html($post_type->name) . ')</code></label></p>';
+
+            echo wp_kses(
+                $checkbox_html,
+                [
+                    'p' => [],
+                    'label' => [],
+                    'input' => ['type' => true, 'name' => true, 'value' => true, 'checked' => true],
+                    'code' => []
+                ]
+            );
+        }
     }
 
 
@@ -852,10 +897,8 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         require_once get_template_directory() . '/inc/cyr2lat.php';
     }
 
-    if ($settings['disable_gutenberg']) {
-        // Turn off Gutenberg editor
-        require_once get_template_directory() . '/inc/disable-gutenberg.php';
-    }
+    // Gutenberg controls (legacy global switch + post type list)
+    require_once get_template_directory() . '/inc/disable-gutenberg.php';
 
     if ($settings['file_size_column']) {
         // Add file size column in Media Library
