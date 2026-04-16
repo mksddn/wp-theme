@@ -10,16 +10,17 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Add enhanced featured_media support to posts REST API.
+ * Add enhanced featured media details to posts REST API.
  */
 add_action('rest_api_init', 'wp_theme_register_enhanced_featured_media_rest_field');
+add_filter('rest_prepare_post', 'wp_theme_prepare_legacy_featured_media_response', 20, 3);
 
 
 /**
- * Register enhanced featured_media field for posts REST API.
+ * Register enhanced featured media details field for posts REST API.
  */
 function wp_theme_register_enhanced_featured_media_rest_field(): void {
-    register_rest_field('post', 'featured_media', [
+    register_rest_field('post', 'featured_media_data', [
         'get_callback' => 'wp_theme_get_enhanced_featured_media',
         'schema' => [
             'description' => 'Enhanced featured media object with full image data',
@@ -90,4 +91,55 @@ function wp_theme_get_enhanced_featured_media(array $object): ?array {
             'full' => wp_get_attachment_image_src($thumbnail_id, 'full'),
         ],
     ];
+}
+
+
+/**
+ * Keep legacy featured_media object for public post responses.
+ *
+ * @param WP_REST_Response $response REST response.
+ * @param WP_Post          $_post    Post object.
+ * @param WP_REST_Request  $request  REST request.
+ */
+function wp_theme_prepare_legacy_featured_media_response(
+    WP_REST_Response $response,
+    WP_Post $_post,
+    WP_REST_Request $request
+): WP_REST_Response {
+    if ($request->get_method() !== 'GET') {
+        return $response;
+    }
+
+    if ($request->get_param('context') === 'edit') {
+        return $response;
+    }
+
+    $data = $response->get_data();
+
+    if (!is_array($data) || !array_key_exists('featured_media', $data)) {
+        return $response;
+    }
+
+    $featured_media_id = (int) $data['featured_media'];
+
+    if ($featured_media_id <= 0) {
+        $data['featured_media_id'] = 0;
+        $data['featured_media'] = null;
+        $response->set_data($data);
+        return $response;
+    }
+
+    $enhanced_featured_media = wp_theme_get_enhanced_featured_media([
+        'id' => (int) $data['id'],
+    ]);
+
+    if ($enhanced_featured_media === null) {
+        return $response;
+    }
+
+    $data['featured_media_id'] = $featured_media_id;
+    $data['featured_media'] = $enhanced_featured_media;
+    $response->set_data($data);
+
+    return $response;
 }
