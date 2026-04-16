@@ -16,78 +16,44 @@ add_action('rest_api_init', 'wp_theme_register_enhanced_categories_tags_rest_fie
 
 
 /**
- * Register enhanced categories and tags fields for posts REST API.
+ * Register enhanced categories and tags for posts REST API.
+ *
+ * Core `categories` / `tags` must stay as term ID arrays when context=edit
+ * (block editor). For other contexts, replace response values with full objects
+ * so existing API consumers keep the same shape without overriding REST schema.
  */
 function wp_theme_register_enhanced_categories_tags_rest_fields(): void {
-    // Enhanced categories field
-    register_rest_field('post', 'categories', [
-        'get_callback' => 'wp_theme_get_enhanced_categories',
-        'schema' => [
-            'description' => 'Enhanced categories with full data',
-            'type' => 'array',
-            'context' => ['view', 'edit'],
-            'items' => [
-                'type' => 'object',
-                'properties' => [
-                    'id' => [
-                        'description' => 'Category ID',
-                        'type' => 'integer',
-                    ],
-                    'name' => [
-                        'description' => 'Category name',
-                        'type' => 'string',
-                    ],
-                    'slug' => [
-                        'description' => 'Category slug',
-                        'type' => 'string',
-                    ],
-                    'description' => [
-                        'description' => 'Category description',
-                        'type' => 'string',
-                    ],
-                    'count' => [
-                        'description' => 'Number of posts in category',
-                        'type' => 'integer',
-                    ],
-                ],
-            ],
-        ],
-    ]);
+    add_filter('rest_prepare_post', 'wp_theme_rest_prepare_post_taxonomy_objects', 10, 3);
+}
 
-    // Enhanced tags field
-    register_rest_field('post', 'tags', [
-        'get_callback' => 'wp_theme_get_enhanced_tags',
-        'schema' => [
-            'description' => 'Enhanced tags with full data',
-            'type' => 'array',
-            'context' => ['view', 'edit'],
-            'items' => [
-                'type' => 'object',
-                'properties' => [
-                    'id' => [
-                        'description' => 'Tag ID',
-                        'type' => 'integer',
-                    ],
-                    'name' => [
-                        'description' => 'Tag name',
-                        'type' => 'string',
-                    ],
-                    'slug' => [
-                        'description' => 'Tag slug',
-                        'type' => 'string',
-                    ],
-                    'description' => [
-                        'description' => 'Tag description',
-                        'type' => 'string',
-                    ],
-                    'count' => [
-                        'description' => 'Number of posts with this tag',
-                        'type' => 'integer',
-                    ],
-                ],
-            ],
-        ],
-    ]);
+
+/**
+ * Replace categories/tags with enhanced objects for non-edit REST contexts.
+ *
+ * @param WP_REST_Response $response Response object.
+ * @param WP_Post          $post    Post object.
+ * @param WP_REST_Request  $request Request object.
+ */
+function wp_theme_rest_prepare_post_taxonomy_objects(
+    WP_REST_Response $response,
+    WP_Post $post,
+    WP_REST_Request $request
+): WP_REST_Response {
+    if ($request->get_param('context') === 'edit') {
+        return $response;
+    }
+
+    $data = $response->get_data();
+    if (!is_array($data)) {
+        return $response;
+    }
+
+    $data['categories'] = wp_theme_get_enhanced_categories(['id' => (int) $post->ID]);
+    $data['tags'] = wp_theme_get_enhanced_tags(['id' => (int) $post->ID]);
+
+    $response->set_data($data);
+
+    return $response;
 }
 
 
@@ -104,7 +70,7 @@ function wp_theme_get_enhanced_categories(array $object): array {
 
     foreach ($category_ids as $category_id) {
         $category = get_category($category_id);
-        if ($category && !is_wp_error($category)) {
+        if ($category instanceof WP_Term) {
             $categories[] = [
                 'id' => (int) $category->term_id,
                 'name' => $category->name,
@@ -132,7 +98,7 @@ function wp_theme_get_enhanced_tags(array $object): array {
 
     foreach ($tag_ids as $tag_id) {
         $tag = get_tag($tag_id);
-        if ($tag && !is_wp_error($tag)) {
+        if ($tag instanceof WP_Term) {
             $tags[] = [
                 'id' => (int) $tag->term_id,
                 'name' => $tag->name,
