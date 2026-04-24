@@ -28,29 +28,6 @@ add_action('template_redirect', function (): void {
 
 
 /**
- * Disable /wp/v2/users endpoint.
- */
-add_filter(
-    'rest_endpoints',
-    function ( array $endpoints ): array {
-        // Remove endpoint for getting users.
-        if (isset( $endpoints['/wp/v2/users'] )) {
-            unset( $endpoints['/wp/v2/users'] );
-        }
-
-        // Remove endpoint for getting single user by ID.
-        if (isset( $endpoints['/wp/v2/users/(?P<id>[\d]+)'] )) {
-            unset( $endpoints['/wp/v2/users/(?P<id>[\d]+)'] );
-        }
-
-        return $endpoints;
-    }
-);
-
-
-
-
-/**
  * Custom endpoint to get Options Page data by slug.
  */
 require get_template_directory() . '/inc/api/custom-route-options.php';
@@ -140,10 +117,14 @@ add_filter('rest_prepare_page', 'wp_theme_decode_acf_html_entities', 25, 3);
  *
  * @param WP_REST_Response $response
  * @param WP_Post $_post
- * @param WP_REST_Request $_request
+ * @param WP_REST_Request $request
  */
-function wp_theme_decode_html_entities_in_rest_response($response, $_post, $_request): WP_REST_Response {
+function wp_theme_decode_html_entities_in_rest_response($response, $_post, $request): WP_REST_Response {
     if (!$response instanceof WP_REST_Response) {
+        return $response;
+    }
+
+    if ($request instanceof WP_REST_Request && $request->get_param('context') === 'edit') {
         return $response;
     }
 
@@ -174,10 +155,14 @@ function wp_theme_decode_html_entities_in_rest_response($response, $_post, $_req
  *
  * @param WP_REST_Response $response
  * @param WP_Post $post
- * @param WP_REST_Request $_request
+ * @param WP_REST_Request $request
  */
-function wp_theme_decode_acf_html_entities($response, $post, $_request): WP_REST_Response {
+function wp_theme_decode_acf_html_entities($response, $post, $request): WP_REST_Response {
     if (!$response instanceof WP_REST_Response) {
+        return $response;
+    }
+
+    if ($request instanceof WP_REST_Request && $request->get_param('context') === 'edit') {
         return $response;
     }
 

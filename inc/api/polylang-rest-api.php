@@ -520,7 +520,16 @@ add_filter('rest_prepare_page', 'wp_theme_add_language_to_rest_response', 10, 3)
 /**
  * Switch language for REST API responses based on Accept-Language header.
  */
-function wp_theme_switch_language_for_rest_response($response, $post, $_request) {
+function wp_theme_switch_language_for_rest_response($response, $post, $request) {
+    if (!($response instanceof WP_REST_Response)) {
+        return $response;
+    }
+
+    // Never alter editor payloads: Gutenberg relies on native links/capabilities.
+    if ($request instanceof WP_REST_Request && $request->get_param('context') === 'edit') {
+        return $response;
+    }
+
     // Only handle if Polylang is active
     if (!wp_theme_is_polylang_active()) {
         return $response;
@@ -543,25 +552,15 @@ function wp_theme_switch_language_for_rest_response($response, $post, $_request)
         $translated_post = get_post($translated_post_id);
 
         if ($translated_post) {
-            // Create new response with translated post data
-            $new_response = new WP_REST_Response();
-
-            // Get the original response data
+            // Keep original response object to preserve REST links and permissions metadata.
             $data = $response->get_data();
 
             // Update with translated post data
             $data['title']['rendered'] = $translated_post->post_title;
             $data['content']['rendered'] = apply_filters('the_content', $translated_post->post_content);
 
-            $new_response->set_data($data);
-            $new_response->set_status($response->get_status());
-
-            // Copy headers
-            foreach ($response->get_headers() as $key => $value) {
-                $new_response->header($key, $value);
-            }
-
-            return $new_response;
+            $response->set_data($data);
+            return $response;
         }
     }
 
@@ -585,6 +584,10 @@ add_filter('rest_prepare_page', 'wp_theme_switch_language_for_rest_response', 5,
  */
 function wp_theme_add_language_to_rest_query(array $args, $_request): array {
     if (!wp_theme_is_polylang_active()) {
+        return $args;
+    }
+
+    if ($_request instanceof WP_REST_Request && $_request->get_param('context') === 'edit') {
         return $args;
     }
 
@@ -642,6 +645,10 @@ add_filter('rest_page_query', 'wp_theme_add_language_to_rest_query', 10, 2);
  */
 function wp_theme_add_language_to_cpt_rest_query(array $args, $_request): array {
     if (!wp_theme_is_polylang_active()) {
+        return $args;
+    }
+
+    if ($_request instanceof WP_REST_Request && $_request->get_param('context') === 'edit') {
         return $args;
     }
 

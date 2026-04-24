@@ -82,18 +82,30 @@ function wp_theme_disable_user_enumeration(): void {
         exit;
     }
 
-    // Block user enumeration via REST API
-    add_filter('rest_endpoints', function (array $endpoints): array {
-        if (isset($endpoints['/wp/v2/users'])) {
-            unset($endpoints['/wp/v2/users']);
-        }
+    // Block public user enumeration via REST API.
+    add_filter('rest_endpoints', 'wp_theme_filter_public_user_endpoints_security');
+}
 
-        if (isset($endpoints['/wp/v2/users/(?P<id>[\d]+)'])) {
-            unset($endpoints['/wp/v2/users/(?P<id>[\d]+)']);
-        }
 
+/**
+ * Remove users endpoints only for non-authenticated requests.
+ *
+ * @param array $endpoints Registered REST endpoints.
+ */
+function wp_theme_filter_public_user_endpoints_security(array $endpoints): array {
+    if (is_user_logged_in() || is_admin()) {
         return $endpoints;
-    });
+    }
+
+    if (isset($endpoints['/wp/v2/users'])) {
+        unset($endpoints['/wp/v2/users']);
+    }
+
+    if (isset($endpoints['/wp/v2/users/(?P<id>[\d]+)'])) {
+        unset($endpoints['/wp/v2/users/(?P<id>[\d]+)']);
+    }
+
+    return $endpoints;
 }
 
 
