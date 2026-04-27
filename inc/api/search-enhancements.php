@@ -114,7 +114,7 @@ function wp_theme_enhanced_search_callback($request) {
             // Add excerpt if requested or if not specified
             if (!$fields || str_contains((string) $fields, 'excerpt')) {
                 $excerpt = get_the_excerpt($post_id);
-                if (empty($excerpt)) {
+                if (empty($excerpt) && !wp_theme_is_auto_excerpt_disabled()) {
                     $excerpt = wp_trim_words(get_the_content($post_id), 20, '...');
                 }
 
