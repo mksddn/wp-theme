@@ -1081,15 +1081,5 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         require_once get_template_directory() . '/inc/api/polylang-rest-api.php';
     }
 
-    /**
-     * ACF features:
-     * - Hide content editor: disable Gutenberg when ACF field group hides content editor.
-     * - Repeater styling: visually separate ACF repeater fields.
-     */
-    if (class_exists('ACF')) {
-        require_once get_template_directory() . '/inc/acf-hide-content-editor.php';
-        require_once get_template_directory() . '/inc/acf-repeater-styling.php';
-    }
-
     // Allow other modules to apply their settings
     do_action('wp_theme_apply_settings');
