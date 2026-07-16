@@ -72,7 +72,7 @@ function wp_theme_get_enhanced_featured_media(array $object): ?array {
     }
 
     $thumbnail_id = get_post_thumbnail_id($post_id);
-    $thumbnail = wp_get_attachment_image_src($thumbnail_id, 'medium');
+    $thumbnail = wp_get_attachment_image_src($thumbnail_id, 'full');
 
     if (!$thumbnail) {
         return null;
