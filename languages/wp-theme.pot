@@ -1,14 +1,10 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
+# Copyright (C) 2026 WP Theme
+# This file is distributed under the same license as the WP Theme package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Theme 1.0.29\n"
+"Project-Id-Version: WP Theme 1.2.11\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-24 12:00+0000\n"
+"POT-Creation-Date: 2026-07-30 12:02+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,10 +12,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: inc/image-optimization.php:166
-msgid "Image size too large. Maximum size is %dMB."
+#: inc/api/custom-route-options.php:89
+msgid "Options Page with specified slug not found"
 msgstr ""
 
 #: inc/category-thumbnails.php:19
@@ -47,24 +42,12 @@ msgstr ""
 msgid "Remove Image"
 msgstr ""
 
-#: inc/github-updater.php:479
-msgid "Security check failed"
+#: inc/category-thumbnails.php:117
+msgid "Choose Category Thumbnail"
 msgstr ""
 
-#: inc/file-size-column.php:18
-msgid "File Size"
-msgstr ""
-
-#: inc/file-size-column.php:33
-msgid "N/A"
-msgstr ""
-
-#: inc/thumbnail-column.php:26
-msgid "Thumbnail"
-msgstr ""
-
-#: inc/thumbnail-column.php:65
-msgid "None"
+#: inc/category-thumbnails.php:118
+msgid "Choose Image"
 msgstr ""
 
 #: inc/duplicate-post.php:23
@@ -95,6 +78,617 @@ msgstr ""
 msgid "Error creating duplicate"
 msgstr ""
 
+#: inc/duplicate-post.php:87
+msgid "(copy)"
+msgstr ""
+
 #: inc/duplicate-post.php:192
 msgid "Post successfully duplicated!"
 msgstr ""
+
+#: inc/file-size-column.php:18
+msgid "File Size"
+msgstr ""
+
+#: inc/file-size-column.php:33
+msgid "N/A"
+msgstr ""
+
+#: inc/github-updater.php:472
+msgid "Theme Update Available:"
+msgstr ""
+
+#: inc/github-updater.php:473
+msgid "Version %s is available."
+msgstr ""
+
+#: inc/github-updater.php:474
+msgid "Check for updates"
+msgstr ""
+
+#: inc/github-updater.php:479
+msgid "Check for theme updates"
+msgstr ""
+
+#: inc/github-updater.php:493
+msgid "Security check failed"
+msgstr ""
+
+#: inc/image-optimization.php:301
+msgid "Image is too large. Maximum size is %d MB."
+msgstr ""
+
+#: inc/image-optimization.php:747
+msgid "Sorry, you are not allowed to do this."
+msgstr ""
+
+#: inc/image-optimization.php:792
+msgid "Image optimization finished: %1$d done, %2$d failed (%3$d total)."
+msgstr ""
+
+#: inc/security-features.php:199
+msgid "Too many failed login attempts. Please try again later."
+msgstr ""
+
+#: inc/theme-features.php:167
+#: inc/theme-features.php:206
+msgid "Unauthorized"
+msgstr ""
+
+#: inc/theme-features.php:171
+#: inc/theme-features.php:210
+msgid "Invalid nonce"
+msgstr ""
+
+#: inc/theme-features.php:178
+msgid "Failed to encode settings"
+msgstr ""
+
+#: inc/theme-features.php:215
+#: inc/theme-features.php:222
+msgid "File upload error. Please try again."
+msgstr ""
+
+#: inc/theme-features.php:232
+msgid "Failed to read file."
+msgstr ""
+
+#: inc/theme-features.php:242
+msgid "Invalid JSON format. Error:"
+msgstr ""
+
+#: inc/theme-features.php:255
+msgid "Settings imported successfully!"
+msgstr ""
+
+#: inc/theme-features.php:265
+#: inc/theme-features.php:266
+msgid "Theme Features"
+msgstr ""
+
+#: inc/theme-features.php:291
+#: inc/theme-features.php:297
+msgid "Admin Features"
+msgstr ""
+
+#: inc/theme-features.php:306
+#: inc/theme-features.php:312
+msgid "Content Features"
+msgstr ""
+
+#: inc/theme-features.php:321
+#: inc/theme-features.php:327
+msgid "Security Features"
+msgstr ""
+
+#: inc/theme-features.php:336
+#: inc/theme-features.php:342
+msgid "Search Features"
+msgstr ""
+
+#: inc/theme-features.php:351
+#: inc/theme-features.php:357
+msgid "Image Optimization"
+msgstr ""
+
+#: inc/theme-features.php:366
+#: inc/theme-features.php:372
+msgid "Performance Features"
+msgstr ""
+
+#: inc/theme-features.php:567
+msgid "Configure theme features and functionality. Enable or disable specific features based on your needs."
+msgstr ""
+
+#: inc/theme-features.php:571
+msgid "Warning:"
+msgstr ""
+
+#: inc/theme-features.php:571
+msgid "Settings are using default values. Database option 'wp_theme_settings' not found. Save settings to create the option."
+msgstr ""
+
+#: inc/theme-features.php:579
+msgid "Save Theme Features"
+msgstr ""
+
+#: inc/theme-features.php:584
+msgid "About Theme Features"
+msgstr ""
+
+#: inc/theme-features.php:585
+msgid "This page allows you to enable or disable various theme features. Changes take effect immediately after saving."
+msgstr ""
+
+#: inc/theme-features.php:586
+msgid "Note:"
+msgstr ""
+
+#: inc/theme-features.php:586
+msgid "Some features require specific plugins to be installed and activated."
+msgstr ""
+
+#: inc/theme-features.php:587
+msgid "Settings source:"
+msgstr ""
+
+#: inc/theme-features.php:591
+msgid "Backup &amp; Restore Settings"
+msgstr ""
+
+#: inc/theme-features.php:592
+msgid "Use these tools to backup or restore theme settings. Useful for migrations."
+msgstr ""
+
+#: inc/theme-features.php:595
+msgid "Export Settings"
+msgstr ""
+
+#: inc/theme-features.php:599
+msgid "Export Settings as JSON"
+msgstr ""
+
+#: inc/theme-features.php:604
+msgid "Import Settings"
+msgstr ""
+
+#: inc/theme-features.php:608
+msgid "Import Settings from JSON"
+msgstr ""
+
+#: inc/theme-features.php:620
+msgid "Admin interface enhancements, WordPress core modifications, and administrative tools."
+msgstr ""
+
+#: inc/theme-features.php:625
+msgid "Content editing, display, and formatting features including editor settings."
+msgstr ""
+
+#: inc/theme-features.php:630
+msgid "WordPress security enhancements and hardening measures."
+msgstr ""
+
+#: inc/theme-features.php:635
+msgid "Search functionality enhancements and optimizations."
+msgstr ""
+
+#: inc/theme-features.php:640
+msgid "Control how images are handled when uploaded to the Media Library."
+msgstr ""
+
+#: inc/theme-features.php:645
+msgid "Basic performance optimizations to improve site speed and reduce server load. These settings are safe to enable and won't conflict with most plugins."
+msgstr ""
+
+#: inc/theme-features.php:654
+msgid "Enable headless CMS mode (API only, no theme assets)"
+msgstr ""
+
+#: inc/theme-features.php:654
+msgid "Disables frontend theme, enables API-only usage"
+msgstr ""
+
+#: inc/theme-features.php:655
+msgid "Cyr to Lat (transliteration)"
+msgstr ""
+
+#: inc/theme-features.php:655
+msgid "Converts Cyrillic characters to Latin in URLs and filenames"
+msgstr ""
+
+#: inc/theme-features.php:656
+msgid "Enable ACF Local JSON with automatic path management"
+msgstr ""
+
+#: inc/theme-features.php:656
+msgid "Saves ACF field groups as JSON files in theme"
+msgstr ""
+
+#: inc/theme-features.php:657
+msgid "Disable comments"
+msgstr ""
+
+#: inc/theme-features.php:657
+msgid "Removes comments and trackbacks site-wide; hides Comments menu, Discussion settings, and related admin bar items."
+msgstr ""
+
+#: inc/theme-features.php:658
+msgid "Duplicate Post feature"
+msgstr ""
+
+#: inc/theme-features.php:658
+msgid "Adds duplicate button to post edit screens"
+msgstr ""
+
+#: inc/theme-features.php:659
+msgid "Plugins logger"
+msgstr ""
+
+#: inc/theme-features.php:659
+msgid "Logs plugin activation/deactivation events"
+msgstr ""
+
+#: inc/theme-features.php:660
+msgid "WooCommerce support"
+msgstr ""
+
+#: inc/theme-features.php:660
+msgid "Adds theme support for WooCommerce plugin"
+msgstr ""
+
+#: inc/theme-features.php:661
+msgid "Polylang REST API language detection"
+msgstr ""
+
+#: inc/theme-features.php:661
+msgid "Automatically detects language from Accept-Language header in REST API requests"
+msgstr ""
+
+#: inc/theme-features.php:670
+msgid "Disable Gutenberg"
+msgstr ""
+
+#: inc/theme-features.php:670
+msgid "Reverts selected post types to classic editor"
+msgstr ""
+
+#: inc/theme-features.php:671
+msgid "Add excerpt support to pages"
+msgstr ""
+
+#: inc/theme-features.php:671
+msgid "Enables excerpt field for pages in admin"
+msgstr ""
+
+#: inc/theme-features.php:672
+msgid "Do not create excerpts automatically from content"
+msgstr ""
+
+#: inc/theme-features.php:672
+msgid "Returns empty excerpt when manual excerpt is not set"
+msgstr ""
+
+#: inc/theme-features.php:673
+msgid "Remove \"Category: \", \"Tag: \" etc. from archive title"
+msgstr ""
+
+#: inc/theme-features.php:673
+msgid "Shows only the term name"
+msgstr ""
+
+#: inc/theme-features.php:674
+msgid "Remove H2 from pagination template"
+msgstr ""
+
+#: inc/theme-features.php:674
+msgid "Removes default heading wrapper from pagination"
+msgstr ""
+
+#: inc/theme-features.php:675
+msgid "Posts list: thumbnail column"
+msgstr ""
+
+#: inc/theme-features.php:675
+msgid "Shows featured image thumbnails in posts list"
+msgstr ""
+
+#: inc/theme-features.php:676
+msgid "Category thumbnails"
+msgstr ""
+
+#: inc/theme-features.php:676
+msgid "Adds thumbnail support for categories with admin interface and REST API"
+msgstr ""
+
+#: inc/theme-features.php:677
+msgid "Schema.org structured data markup"
+msgstr ""
+
+#: inc/theme-features.php:677
+msgid "Adds structured data for better SEO"
+msgstr ""
+
+#: inc/theme-features.php:684
+msgid "Disable Gutenberg for selected post types:"
+msgstr ""
+
+#: inc/theme-features.php:724
+msgid "Disable XML-RPC"
+msgstr ""
+
+#: inc/theme-features.php:724
+msgid "Blocks XML-RPC requests to prevent brute force attacks"
+msgstr ""
+
+#: inc/theme-features.php:725
+msgid "Disable X-Pingback header"
+msgstr ""
+
+#: inc/theme-features.php:725
+msgid "Removes pingback header to hide WordPress"
+msgstr ""
+
+#: inc/theme-features.php:726
+msgid "Hide WordPress version"
+msgstr ""
+
+#: inc/theme-features.php:726
+msgid "Removes version info from head and RSS feeds"
+msgstr ""
+
+#: inc/theme-features.php:727
+msgid "Disable file editing in admin"
+msgstr ""
+
+#: inc/theme-features.php:727
+msgid "Prevents theme/plugin editing via admin"
+msgstr ""
+
+#: inc/theme-features.php:728
+msgid "Disable user enumeration"
+msgstr ""
+
+#: inc/theme-features.php:728
+msgid "Blocks user discovery via author archives"
+msgstr ""
+
+#: inc/theme-features.php:729
+msgid "Add security headers"
+msgstr ""
+
+#: inc/theme-features.php:729
+msgid "Adds X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS"
+msgstr ""
+
+#: inc/theme-features.php:730
+msgid "Disable directory browsing"
+msgstr ""
+
+#: inc/theme-features.php:730
+msgid "Prevents directory listing on server"
+msgstr ""
+
+#: inc/theme-features.php:731
+msgid "Limit login attempts"
+msgstr ""
+
+#: inc/theme-features.php:731
+msgid "Adds basic login attempt limiting"
+msgstr ""
+
+#: inc/theme-features.php:742
+msgid "Stop query execution for empty search terms"
+msgstr ""
+
+#: inc/theme-features.php:742
+msgid "Prevents database queries when search is empty"
+msgstr ""
+
+#: inc/theme-features.php:748
+msgid "Select post types to include in search (leave empty to search all):"
+msgstr ""
+
+#: inc/theme-features.php:765
+msgid "Post/Page IDs to exclude:"
+msgstr ""
+
+#: inc/theme-features.php:767
+msgid "1, 5, 10"
+msgstr ""
+
+#: inc/theme-features.php:768
+msgid "Enter IDs separated by commas"
+msgstr ""
+
+#: inc/theme-features.php:786
+msgid "Slugs to exclude:"
+msgstr ""
+
+#: inc/theme-features.php:788
+msgid "about-us, contact"
+msgstr ""
+
+#: inc/theme-features.php:789
+msgid "Enter slugs separated by commas"
+msgstr ""
+
+#: inc/theme-features.php:812
+msgid "Optimize images on upload"
+msgstr ""
+
+#: inc/theme-features.php:812
+msgid "Blocks files over the max MB, shrinks oversized images, and compresses them using the settings below."
+msgstr ""
+
+#: inc/theme-features.php:813
+msgid "Load featured images first"
+msgstr ""
+
+#: inc/theme-features.php:813
+msgid "Helps the main image appear sooner on the page."
+msgstr ""
+
+#: inc/theme-features.php:814
+msgid "Show file size in Media Library"
+msgstr ""
+
+#: inc/theme-features.php:814
+msgid "Adds a file size column in the list view."
+msgstr ""
+
+#: inc/theme-features.php:815
+msgid "Allow SVG uploads"
+msgstr ""
+
+#: inc/theme-features.php:815
+msgid "Lets you upload SVG files safely."
+msgstr ""
+
+#: inc/theme-features.php:823
+msgid "Limits"
+msgstr ""
+
+#: inc/theme-features.php:824
+msgid "Used when Optimize images on upload is enabled."
+msgstr ""
+
+#: inc/theme-features.php:825
+msgid "Max file size (MB):"
+msgstr ""
+
+#: inc/theme-features.php:831
+msgid "Max width or height (px):"
+msgstr ""
+
+#: inc/theme-features.php:839
+msgid "Compression quality"
+msgstr ""
+
+#: inc/theme-features.php:840
+msgid "Higher = better quality, larger files. Lower = smaller files."
+msgstr ""
+
+#: inc/theme-features.php:841
+msgid "JPEG quality (%):"
+msgstr ""
+
+#: inc/theme-features.php:847
+msgid "WebP / PNG quality (%):"
+msgstr ""
+
+#: inc/theme-features.php:855
+msgid "Already uploaded images"
+msgstr ""
+
+#: inc/theme-features.php:856
+msgid "Shrink large images that were uploaded before these settings. Up to 50 images per click."
+msgstr ""
+
+#: inc/theme-features.php:861
+msgid "Optimize large images now"
+msgstr ""
+
+#: inc/theme-features.php:865
+msgid "Thumbnail (150x150px)"
+msgstr ""
+
+#: inc/theme-features.php:866
+msgid "Medium (300x300px)"
+msgstr ""
+
+#: inc/theme-features.php:867
+msgid "Medium Large (768x768px)"
+msgstr ""
+
+#: inc/theme-features.php:868
+msgid "Large (1024x1024px)"
+msgstr ""
+
+#: inc/theme-features.php:869
+msgid "1536x1536 (WordPress 5.3+ large size)"
+msgstr ""
+
+#: inc/theme-features.php:870
+msgid "2048x2048 (WordPress 5.3+ large size)"
+msgstr ""
+
+#: inc/theme-features.php:872
+msgid "Remove unused image sizes"
+msgstr ""
+
+#: inc/theme-features.php:873
+msgid "Checked sizes will not be created on upload. Leave empty to keep all sizes."
+msgstr ""
+
+#: inc/theme-features.php:890
+msgid "Remove WordPress emoji scripts"
+msgstr ""
+
+#: inc/theme-features.php:890
+msgid "Removes emoji detection and styles for faster loading"
+msgstr ""
+
+#: inc/theme-features.php:891
+msgid "Disable WordPress embeds"
+msgstr ""
+
+#: inc/theme-features.php:891
+msgid "Removes oEmbed functionality to reduce HTTP requests"
+msgstr ""
+
+#: inc/theme-features.php:892
+msgid "Optimize database queries"
+msgstr ""
+
+#: inc/theme-features.php:892
+msgid "Removes unnecessary meta links and queries"
+msgstr ""
+
+#: inc/theme-features.php:893
+msgid "Clean up unnecessary head elements"
+msgstr ""
+
+#: inc/theme-features.php:893
+msgid "Removes feed links and adjacent post links"
+msgstr ""
+
+#: inc/theme-features.php:894
+msgid "Disable WordPress cron (use server cron)"
+msgstr ""
+
+#: inc/theme-features.php:894
+msgid "Disables WP cron for better performance"
+msgstr ""
+
+#: inc/theme-features.php:895
+msgid "Limit post revisions"
+msgstr ""
+
+#: inc/theme-features.php:895
+msgid "Limits number of post revisions to reduce database size"
+msgstr ""
+
+#: inc/theme-features.php:903
+msgid "Max revisions per post:"
+msgstr ""
+
+#: inc/thumbnail-column.php:26
+msgid "Thumbnail"
+msgstr ""
+
+#: inc/thumbnail-column.php:65
+msgid "None"
+msgstr ""
+
+#: 404.php:24
+msgid "Oops! That page can't be found."
+msgstr ""
+
+#: 404.php:25
+msgid "It looks like nothing was found at this location."
+msgstr ""
+
+#: search.php:19
+msgid "Search Results for: %s"
+msgstr ""
+

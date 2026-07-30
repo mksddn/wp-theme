@@ -65,7 +65,6 @@ function wp_theme_acf_location_ignore_pll_lang(): void {
  *
  * @param array $values Location rule choices.
  * @param array $rule   Location rule.
- * @return array
  */
 function wp_theme_acf_location_preserve_selected_value(array $values, array $rule): array {
     $params = ['page', 'post', 'page_parent'];

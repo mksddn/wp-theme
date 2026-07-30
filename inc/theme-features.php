@@ -56,6 +56,7 @@ function wp_theme_get_default_settings(): array {
         'performance_limit_revisions'=> true,
         'performance_revisions_limit'=> 3,
         // Image optimization features (modernized for WordPress 5.5+)
+        // image_opt_quality is kept for backward compatibility; synced with upload_limits.
         'image_opt_upload_limits'     => true,
         'image_opt_quality'           => true,
         'image_opt_priority_loading'  => true,
@@ -93,6 +94,13 @@ function wp_theme_get_settings(bool $clear_cache = false): array {
     }
 
     $cached = array_merge($defaults, $opts);
+
+    // Legacy split toggles → one effective "optimize on upload" switch for UI/logic.
+    if (! empty($cached['image_opt_upload_limits']) || ! empty($cached['image_opt_quality'])) {
+        $cached['image_opt_upload_limits'] = true;
+        $cached['image_opt_quality']       = true;
+    }
+
     return $cached;
 }
 
@@ -463,6 +471,9 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
             $output[$key] = wp_theme_sanitize_boolean($output[$key] ?? false);
         }
 
+        // One UI toggle controls reject + resize + compress (legacy quality key stays in sync).
+        $output['image_opt_quality'] = $output['image_opt_upload_limits'];
+
         $allowed_post_types = get_post_types(['public' => true], 'names');
 
         // Gutenberg post types sanitization
@@ -626,7 +637,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
 
 
     function wp_theme_image_opt_section_callback(): void {
-        echo '<p>' . esc_html__('Image optimization features, media library enhancements, and file format support for better performance and user experience.', 'wp-theme') . '</p>';
+        echo '<p>' . esc_html__('Control how images are handled when uploaded to the Media Library.', 'wp-theme') . '</p>';
     }
 
 
@@ -798,11 +809,10 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
 
         // Basic optimization features (modernized for WordPress 5.5+)
         $features = [
-        'image_opt_upload_limits'    => '<b>' . __('Enable upload size and dimension limits', 'wp-theme') . '</b> - ' . __('Restricts image upload size and dimensions', 'wp-theme'),
-        'image_opt_quality'          => '<b>' . __('Optimize image quality', 'wp-theme') . '</b> - ' . __('Sets JPEG compression quality for better file sizes', 'wp-theme'),
-        'image_opt_priority_loading' => '<b>' . __('Enable priority loading for above-the-fold images', 'wp-theme') . '</b> - ' . __('Loads featured images immediately', 'wp-theme'),
-        'file_size_column'           => '<b>' . __('Media Library: file size column', 'wp-theme') . '</b> - ' . __('Shows file size in Media Library list view', 'wp-theme'),
-        'svg_support'                => '<b>' . __('SVG support', 'wp-theme') . '</b> - ' . __('Allows safe SVG file uploads with sanitization', 'wp-theme'),
+        'image_opt_upload_limits'    => '<b>' . __('Optimize images on upload', 'wp-theme') . '</b> - ' . __('Blocks files over the max MB, shrinks oversized images, and compresses them using the settings below.', 'wp-theme'),
+        'image_opt_priority_loading' => '<b>' . __('Load featured images first', 'wp-theme') . '</b> - ' . __('Helps the main image appear sooner on the page.', 'wp-theme'),
+        'file_size_column'           => '<b>' . __('Show file size in Media Library', 'wp-theme') . '</b> - ' . __('Adds a file size column in the list view.', 'wp-theme'),
+        'svg_support'                => '<b>' . __('Allow SVG uploads', 'wp-theme') . '</b> - ' . __('Lets you upload SVG files safely.', 'wp-theme'),
         ];
 
         // Note: WordPress 5.5+ has built-in lazy loading and responsive images
@@ -810,14 +820,15 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         wp_theme_render_checkboxes($features, $opts);
 
         // Upload limits
-        echo '<h4>' . esc_html__('Upload Limits', 'wp-theme') . '</h4>';
-        $max_file_label = esc_html__('Maximum image size (MB):', 'wp-theme');
+        echo '<h4>' . esc_html__('Limits', 'wp-theme') . '</h4>';
+        echo '<p class="description">' . esc_html__('Used when Optimize images on upload is enabled.', 'wp-theme') . '</p>';
+        $max_file_label = esc_html__('Max file size (MB):', 'wp-theme');
         $max_file_value = esc_attr($opts['image_opt_max_file_size']);
         $max_file_html = '<p><label>' . $max_file_label . ' ';
         $max_file_html .= '<input type="number" name="wp_theme_settings[image_opt_max_file_size]" ';
         $max_file_html .= 'value="' . $max_file_value . '" min="1" max="50" style="width: 80px;"></label></p>';
         echo wp_kses($max_file_html, ['p' => [], 'label' => [], 'input' => ['type' => true, 'name' => true, 'value' => true, 'min' => true, 'max' => true, 'style' => true]]);
-        $max_dim_label = esc_html__('Maximum dimension (px):', 'wp-theme');
+        $max_dim_label = esc_html__('Max width or height (px):', 'wp-theme');
         $max_dim_value = esc_attr($opts['image_opt_max_dimension']);
         $max_dim_html = '<p><label>' . $max_dim_label . ' ';
         $max_dim_html .= '<input type="number" name="wp_theme_settings[image_opt_max_dimension]" ';
@@ -825,19 +836,29 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         echo wp_kses($max_dim_html, ['p' => [], 'label' => [], 'input' => ['type' => true, 'name' => true, 'value' => true, 'min' => true, 'max' => true, 'style' => true]]);
 
         // Quality settings
-        echo '<h4>' . esc_html__('Image Quality', 'wp-theme') . '</h4>';
-        $jpeg_quality_label = esc_html__('JPEG Quality (%):', 'wp-theme');
+        echo '<h4>' . esc_html__('Compression quality', 'wp-theme') . '</h4>';
+        echo '<p class="description">' . esc_html__('Higher = better quality, larger files. Lower = smaller files.', 'wp-theme') . '</p>';
+        $jpeg_quality_label = esc_html__('JPEG quality (%):', 'wp-theme');
         $jpeg_quality_value = esc_attr($opts['image_opt_jpeg_quality']);
         $jpeg_html = '<p><label>' . $jpeg_quality_label . ' ';
         $jpeg_html .= '<input type="number" name="wp_theme_settings[image_opt_jpeg_quality]" ';
         $jpeg_html .= 'value="' . $jpeg_quality_value . '" min="60" max="100" style="width: 80px;"></label></p>';
         echo wp_kses($jpeg_html, ['p' => [], 'label' => [], 'input' => ['type' => true, 'name' => true, 'value' => true, 'min' => true, 'max' => true, 'style' => true]]);
-        $general_quality_label = esc_html__('General Quality (%):', 'wp-theme');
+        $general_quality_label = esc_html__('WebP / PNG quality (%):', 'wp-theme');
         $general_quality_value = esc_attr($opts['image_opt_quality_value']);
         $general_html = '<p><label>' . $general_quality_label . ' ';
         $general_html .= '<input type="number" name="wp_theme_settings[image_opt_quality_value]" ';
         $general_html .= 'value="' . $general_quality_value . '" min="60" max="100" style="width: 80px;"></label></p>';
         echo wp_kses($general_html, ['p' => [], 'label' => [], 'input' => ['type' => true, 'name' => true, 'value' => true, 'min' => true, 'max' => true, 'style' => true]]);
+
+        // Re-optimize existing library images.
+        echo '<h4>' . esc_html__('Already uploaded images', 'wp-theme') . '</h4>';
+        echo '<p class="description">' . esc_html__('Shrink large images that were uploaded before these settings. Up to 50 images per click.', 'wp-theme') . '</p>';
+        $reoptimize_url = wp_nonce_url(
+            admin_url('admin-post.php?action=wp_theme_reoptimize_images&limit=50'),
+            'wp_theme_reoptimize_images'
+        );
+        echo '<p><a class="button button-secondary" href="' . esc_url($reoptimize_url) . '">' . esc_html__('Optimize large images now', 'wp-theme') . '</a></p>';
 
         // Remove intermediate sizes
         $allowed_sizes = [
@@ -848,8 +869,8 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         '1536x1536' => __('1536x1536 (WordPress 5.3+ large size)', 'wp-theme'),
         '2048x2048' => __('2048x2048 (WordPress 5.3+ large size)', 'wp-theme')
         ];
-        echo '<h4>' . esc_html__('Remove Intermediate Sizes', 'wp-theme') . '</h4>';
-        echo '<p><strong>' . esc_html__('Select sizes to remove (leave empty to keep all sizes):', 'wp-theme') . '</strong></p>';
+        echo '<h4>' . esc_html__('Remove unused image sizes', 'wp-theme') . '</h4>';
+        echo '<p class="description">' . esc_html__('Checked sizes will not be created on upload. Leave empty to keep all sizes.', 'wp-theme') . '</p>';
 
         foreach ($allowed_sizes as $size => $description) {
             $checked = in_array($size, $opts['image_opt_remove_sizes_list'], true) ? 'checked' : '';
