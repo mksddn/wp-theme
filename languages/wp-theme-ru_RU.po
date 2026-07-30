@@ -694,3 +694,27 @@ msgstr "По этому адресу ничего не найдено."
 msgid "Search Results for: %s"
 msgstr "Результаты поиска: %s"
 
+
+#: inc/image-optimization.php
+msgid "Attachment is not an image."
+msgstr "Вложение не является изображением."
+
+#: inc/image-optimization.php
+msgid "Image type is not supported for optimization: %s"
+msgstr "Тип изображения не поддерживается для оптимизации: %s"
+
+#: inc/image-optimization.php
+msgid "unknown"
+msgstr "неизвестно"
+
+#: inc/image-optimization.php
+msgid "Attached file is missing on disk."
+msgstr "Файл вложения отсутствует на диске."
+
+#: inc/image-optimization.php
+msgid "Unable to copy original image onto attached file."
+msgstr "Не удалось скопировать оригинал поверх файла вложения."
+
+#: inc/image-optimization.php
+msgid "Details are also written to the PHP error log with the prefix [wp-theme image-opt]."
+msgstr "Подробности также пишутся в PHP error log с префиксом [wp-theme image-opt]."

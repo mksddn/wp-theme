@@ -141,6 +141,181 @@ function wp_theme_get_image_opt_quality_for_mime(string $mime_type): ?int {
 
 
 /**
+ * Raise Imagick resource limits so large camera JPEGs can be decoded.
+ *
+ * Shared-host defaults often hit "cache resources exhausted" on 4K–8K images.
+ *
+ * @since 1.3.0
+ */
+function wp_theme_configure_imagick_resources(): void {
+    if (! class_exists('Imagick') || ! is_callable(array('Imagick', 'setResourceLimit'))) {
+        return;
+    }
+
+    $limits = array(
+        'RESOURCETYPE_AREA'   => 256 * 1024 * 1024,
+        'RESOURCETYPE_DISK'   => 2 * 1024 * 1024 * 1024,
+        'RESOURCETYPE_FILE'   => 192,
+        'RESOURCETYPE_MAP'    => 512 * 1024 * 1024,
+        'RESOURCETYPE_MEMORY' => 256 * 1024 * 1024,
+    );
+
+    foreach ($limits as $constant_name => $value) {
+        if (! defined('Imagick::' . $constant_name)) {
+            continue;
+        }
+
+        try {
+            Imagick::setResourceLimit(constant('Imagick::' . $constant_name), $value);
+        } catch (Exception) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+            // Host may forbid changing Magick limits; GD fallback still available.
+        }
+    }
+}
+
+
+/**
+ * Whether an Image Editor error looks like Imagick cache/memory exhaustion.
+ *
+ * @since 1.3.0
+ * @param WP_Error|mixed $error Error from editor load/resize/save.
+ */
+function wp_theme_is_imagick_resource_error($error): bool {
+    if (! is_wp_error($error)) {
+        return false;
+    }
+
+    $message = strtolower((string) $error->get_error_message());
+
+    return (str_contains($message, 'cache resources exhausted'))
+        || (str_contains($message, 'openpixelcache'))
+        || (str_contains($message, 'memory allocation failed'))
+        || (str_contains($message, 'insufficient memory'));
+}
+
+
+/**
+ * Force GD-only editor list after Imagick cache failure.
+ *
+ * @since 1.3.0
+ * @param string[] $editors Editor class names.
+ * @return string[]
+ */
+function wp_theme_image_editors_gd_only(array $editors): array {
+    unset($editors);
+    return array('WP_Image_Editor_GD');
+}
+
+
+/**
+ * Run resize/re-encode with the current image editor stack.
+ *
+ * @since 1.3.0
+ * @param string $file_path Absolute path.
+ * @param string $mime_type Mime type.
+ * @param bool   $needs_resize Whether to downscale.
+ * @param bool   $needs_reencode Whether to re-encode.
+ * @param int    $max_dimension Max long side.
+ * @param bool   $force_gd Force GD editor.
+ * @return true|WP_Error
+ */
+function wp_theme_optimize_image_file_with_editor(
+    string $file_path,
+    string $mime_type,
+    bool $needs_resize,
+    bool $needs_reencode,
+    int $max_dimension,
+    bool $force_gd = false
+) {
+    if ($force_gd) {
+        add_filter('wp_image_editors', 'wp_theme_image_editors_gd_only', 100);
+    } else {
+        wp_theme_configure_imagick_resources();
+    }
+
+    $editor = wp_get_image_editor($file_path);
+
+    if ($force_gd) {
+        remove_filter('wp_image_editors', 'wp_theme_image_editors_gd_only', 100);
+    }
+
+    if (is_wp_error($editor)) {
+        wp_theme_log_image_editor_error($force_gd ? 'load_gd' : 'load', $editor, $file_path);
+        return $editor;
+    }
+
+    if ($needs_resize) {
+        $resized = $editor->resize($max_dimension, $max_dimension, false);
+        if (is_wp_error($resized)) {
+            wp_theme_log_image_editor_error($force_gd ? 'resize_gd' : 'resize', $resized, $file_path);
+            unset($editor);
+            return $resized;
+        }
+    }
+
+    $quality = wp_theme_get_image_opt_quality_for_mime($mime_type);
+    if (null !== $quality) {
+        $quality_set = $editor->set_quality($quality);
+        if (is_wp_error($quality_set)) {
+            wp_theme_log_image_editor_error('set_quality', $quality_set, $file_path);
+            unset($editor);
+            return $quality_set;
+        }
+    }
+
+    $directory = dirname($file_path);
+    $basename  = wp_basename($file_path);
+    $temp_path = trailingslashit($directory) . 'opt-' . wp_unique_filename($directory, $basename);
+    $saved     = $editor->save($temp_path, $mime_type);
+
+    unset($editor);
+    if (function_exists('gc_collect_cycles')) {
+        gc_collect_cycles();
+    }
+
+    if (is_wp_error($saved)) {
+        wp_theme_log_image_editor_error($force_gd ? 'save_gd' : 'save', $saved, $file_path);
+        if (file_exists($temp_path)) {
+            wp_delete_file($temp_path);
+        }
+
+        return $saved;
+    }
+
+    $saved_path = $saved['path'] ?? $temp_path;
+
+    if (! file_exists($saved_path)) {
+        $error = new WP_Error('image_opt_save_missing', 'Optimized file was not written.');
+        wp_theme_log_image_editor_error('save', $error, $file_path);
+        return $error;
+    }
+
+    $original_size = (int) filesize($file_path);
+    $new_size      = (int) filesize($saved_path);
+
+    if (! $needs_resize && $needs_reencode && $new_size >= $original_size) {
+        wp_delete_file($saved_path);
+        return true;
+    }
+
+    $replaced = rename($saved_path, $file_path);
+    if (! $replaced) {
+        $copied = copy($saved_path, $file_path);
+        wp_delete_file($saved_path);
+        if (! $copied) {
+            $error = new WP_Error('image_opt_replace', 'Unable to replace image with optimized file.');
+            wp_theme_log_image_editor_error('replace', $error, $file_path);
+            return $error;
+        }
+    }
+
+    clearstatcache(true, $file_path);
+
+    return true;
+}
+
+
+/**
  * Optimize a raster image file in place (resize and/or re-encode).
  *
  * @since 1.3.0
@@ -189,82 +364,52 @@ function wp_theme_optimize_image_file(string $file_path, string $mime_type = '',
         return $error;
     }
 
-    $width         = $image_size[0];
-    $height        = $image_size[1];
-    $max_dimension = max(1, (int) $args['max_dimension']);
-    $needs_resize  = ! empty($args['allow_resize']) && max($width, $height) > $max_dimension;
+    $width          = $image_size[0];
+    $height         = $image_size[1];
+    $max_dimension  = max(1, (int) $args['max_dimension']);
+    $needs_resize   = ! empty($args['allow_resize']) && max($width, $height) > $max_dimension;
     $needs_reencode = ! empty($args['allow_reencode']);
 
     if (! $needs_resize && ! $needs_reencode) {
         return true;
     }
 
-    $editor = wp_get_image_editor($file_path);
-    if (is_wp_error($editor)) {
-        wp_theme_log_image_editor_error('load', $editor, $file_path);
-        return $editor;
+    $previous_memory = ini_get('memory_limit');
+    if (function_exists('wp_raise_memory_limit')) {
+        wp_raise_memory_limit('image');
+    } else {
+        // phpcs:ignore WordPress.PHP.IniSet.memory_limit_Disallowed
+        @ini_set('memory_limit', '512M');
     }
 
-    if ($needs_resize) {
-        $resized = $editor->resize($max_dimension, $max_dimension, false);
-        if (is_wp_error($resized)) {
-            wp_theme_log_image_editor_error('resize', $resized, $file_path);
-            return $resized;
-        }
+    $result = wp_theme_optimize_image_file_with_editor(
+        $file_path,
+        $mime_type,
+        $needs_resize,
+        $needs_reencode,
+        $max_dimension,
+        false
+    );
+
+    // Shared hosting Imagick often fails on large JPEGs — retry once with GD.
+    if (is_wp_error($result) && wp_theme_is_imagick_resource_error($result)) {
+        wp_theme_log_image_editor_error('imagick_fallback_gd', $result, $file_path);
+        $result = wp_theme_optimize_image_file_with_editor(
+            $file_path,
+            $mime_type,
+            $needs_resize,
+            $needs_reencode,
+            $max_dimension,
+            true
+        );
     }
 
-    $quality = wp_theme_get_image_opt_quality_for_mime($mime_type);
-    if (null !== $quality) {
-        $quality_set = $editor->set_quality($quality);
-        if (is_wp_error($quality_set)) {
-            wp_theme_log_image_editor_error('set_quality', $quality_set, $file_path);
-            return $quality_set;
-        }
+    if (is_string($previous_memory) && '' !== $previous_memory) {
+        // phpcs:ignore WordPress.PHP.IniSet.memory_limit_Disallowed
+        @ini_set('memory_limit', $previous_memory);
     }
 
-    // Save to a sibling temp file, then replace the original atomically.
-    $directory  = dirname($file_path);
-    $basename   = wp_basename($file_path);
-    $temp_path  = trailingslashit($directory) . 'opt-' . wp_unique_filename($directory, $basename);
-    $saved      = $editor->save($temp_path, $mime_type);
-
-    if (is_wp_error($saved)) {
-        wp_theme_log_image_editor_error('save', $saved, $file_path);
-        return $saved;
-    }
-
-    $saved_path = $saved['path'] ?? $temp_path;
-
-    if (! file_exists($saved_path)) {
-        $error = new WP_Error('image_opt_save_missing', 'Optimized file was not written.');
-        wp_theme_log_image_editor_error('save', $error, $file_path);
-        return $error;
-    }
-
-    // Prefer the lighter result; keep original bytes if re-encode grew the file
-    // and no resize was required.
-    $original_size = (int) filesize($file_path);
-    $new_size      = (int) filesize($saved_path);
-
-    if (! $needs_resize && $needs_reencode && $new_size >= $original_size) {
-        wp_delete_file($saved_path);
-        return true;
-    }
-
-    $replaced = rename($saved_path, $file_path);
-    if (! $replaced) {
-        $copied = copy($saved_path, $file_path);
-        wp_delete_file($saved_path);
-        if (! $copied) {
-            $error = new WP_Error('image_opt_replace', 'Unable to replace image with optimized file.');
-            wp_theme_log_image_editor_error('replace', $error, $file_path);
-            return $error;
-        }
-    }
-
-    clearstatcache(true, $file_path);
-
-    return true;
+    return $result;
 }
 
 
@@ -593,17 +738,30 @@ function wp_theme_attachment_needs_reoptimize(int $attachment_id): bool {
  */
 function wp_theme_reoptimize_attachment(int $attachment_id) {
     if ('attachment' !== get_post_type($attachment_id) || ! wp_attachment_is_image($attachment_id)) {
-        return new WP_Error('image_opt_not_image', 'Attachment is not an image.');
+        $error = new WP_Error('image_opt_not_image', __('Attachment is not an image.', 'wp-theme'));
+        wp_theme_log_image_editor_error('reoptimize', $error, 'attachment #' . $attachment_id);
+        return $error;
     }
 
     $mime_type = get_post_mime_type($attachment_id);
     if (! in_array($mime_type, wp_theme_image_opt_supported_mimes(), true)) {
-        return new WP_Error('image_opt_unsupported', 'Image mime type is not supported for optimization.');
+        $error = new WP_Error(
+            'image_opt_unsupported',
+            sprintf(
+                /* translators: %s: mime type */
+                __('Image type is not supported for optimization: %s', 'wp-theme'),
+                $mime_type ?: __('unknown', 'wp-theme')
+            )
+        );
+        wp_theme_log_image_editor_error('reoptimize', $error, 'attachment #' . $attachment_id);
+        return $error;
     }
 
     $attached = get_attached_file($attachment_id);
     if (! $attached || ! file_exists($attached)) {
-        return new WP_Error('image_opt_missing', 'Attached file is missing.');
+        $error = new WP_Error('image_opt_missing', __('Attached file is missing on disk.', 'wp-theme'));
+        wp_theme_log_image_editor_error('reoptimize', $error, 'attachment #' . $attachment_id);
+        return $error;
     }
 
     $original_path = function_exists('wp_get_original_image_path')
@@ -615,7 +773,7 @@ function wp_theme_reoptimize_attachment(int $attachment_id) {
     // If working from a separate full original, optimize a copy onto the attached path.
     if ($source !== $attached) {
         if (! @copy($source, $attached)) {
-            $error = new WP_Error('image_opt_copy', 'Unable to copy original image onto attached file.');
+            $error = new WP_Error('image_opt_copy', __('Unable to copy original image onto attached file.', 'wp-theme'));
             wp_theme_log_image_editor_error('copy_original', $error, $source);
             return $error;
         }
@@ -785,11 +943,38 @@ function wp_theme_reoptimize_admin_notice(): void {
         (int) ($result['processed'] ?? 0)
     );
 
-    printf(
-        '<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
-        empty($result['failed']) ? 'success' : 'warning',
-        esc_html($message)
-    );
+    $notice_class = empty($result['failed']) ? 'success' : 'warning';
+
+    echo '<div class="notice notice-' . esc_attr($notice_class) . ' is-dismissible">';
+    echo '<p>' . esc_html($message) . '</p>';
+
+    $errors = isset($result['errors']) && is_array($result['errors']) ? $result['errors'] : array();
+    if ($errors !== []) {
+        echo '<ul style="list-style:disc;margin-left:1.5em;">';
+        foreach ($errors as $attachment_id => $error_message) {
+            $attachment_id = (int) $attachment_id;
+            $edit_link     = get_edit_post_link($attachment_id, 'raw');
+            $title         = get_the_title($attachment_id);
+            if (! is_string($title) || '' === $title) {
+                $title = '#' . $attachment_id;
+            }
+
+            echo '<li>';
+            if ($edit_link) {
+                echo '<a href="' . esc_url($edit_link) . '">' . esc_html($title) . '</a>';
+            } else {
+                echo esc_html($title);
+            }
+
+            echo ' — ' . esc_html((string) $error_message);
+            echo '</li>';
+        }
+
+        echo '</ul>';
+        echo '<p class="description">' . esc_html__('Details are also written to the PHP error log with the prefix [wp-theme image-opt].', 'wp-theme') . '</p>';
+    }
+
+    echo '</div>';
 }
 
 

@@ -4,3 +4,6 @@ vendor/
 node_modules/
 .DS_Store
 __MACOSX
+# msgfmt without -o drops this junk in the theme root
+messages.mo
+messages.po
