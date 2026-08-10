@@ -94,6 +94,8 @@ require_once get_template_directory() . '/inc/github-updater.php';
 /**
  * Always-on ACF modules (not Theme Features toggles).
  */
+require_once get_template_directory() . '/inc/content-seeder.php';
+
 if (class_exists('ACF')) {
     require_once get_template_directory() . '/inc/acf-hide-content-editor.php';
     require_once get_template_directory() . '/inc/acf-repeater-styling.php';
