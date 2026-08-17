@@ -55,7 +55,7 @@ require get_template_directory() . '/inc/api/categories-tags-enhancements.php';
 // if (!is_user_logged_in()) {
 // return new WP_Error(
 // 'rest_forbidden',
-// __('You must be authorized to access the API.', 'text-domain'),
+// __('You must be authorized to access the API.', 'wp-theme'),
 // ['status' => 401]
 // );
 // }

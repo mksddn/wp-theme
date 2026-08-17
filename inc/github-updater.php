@@ -470,7 +470,13 @@ final class GitHub_Theme_Updater {
             if ($remote_version && version_compare($current_version, $remote_version, '<')) {
                 echo '<div class="notice notice-warning is-dismissible">';
                 echo '<p><strong>' . esc_html__('Theme Update Available:', 'wp-theme') . '</strong> ';
-                echo esc_html(sprintf(__('Version %s is available.', 'wp-theme'), $remote_version)) . ' ';
+                echo esc_html(
+                    sprintf(
+                        /* translators: %s: new theme version */
+                        __('Version %s is available.', 'wp-theme'),
+                        $remote_version
+                    )
+                ) . ' ';
                 echo '<a href="' . esc_url(admin_url('update-core.php')) . '">' . esc_html__('Check for updates', 'wp-theme') . '</a>';
                 echo '</p></div>';
             } else {

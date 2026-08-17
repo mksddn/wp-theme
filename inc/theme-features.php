@@ -588,7 +588,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         </div>
         
         <div class="wp-theme-settings-backup" style="margin-top: 20px; padding: 15px; background: #fff; border: 1px solid #ccc;">
-            <h3><?php esc_html_e('Backup &amp; Restore Settings', 'wp-theme'); ?></h3>
+            <h3><?php esc_html_e('Backup & Restore Settings', 'wp-theme'); ?></h3>
             <p><?php esc_html_e('Use these tools to backup or restore theme settings. Useful for migrations.', 'wp-theme'); ?></p>
             
             <div style="margin-bottom: 15px;">
@@ -764,7 +764,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         echo '<div style="margin-top: 10px;">';
         echo '<p><strong>' . esc_html__('Post/Page IDs to exclude:', 'wp-theme') . '</strong></p>';
         $exclude_ids_text = implode(', ', $opts['search_exclude_ids_list']);
-        $exclude_ids_placeholder = esc_attr__('1, 5, 10', 'wp-theme');
+        $exclude_ids_placeholder = esc_attr('1, 5, 10');
         $exclude_ids_label = esc_html__('Enter IDs separated by commas', 'wp-theme');
         $html = '<p>';
         $html .= '<input type="text" name="wp_theme_settings[search_exclude_ids_list]" ';
@@ -785,7 +785,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         echo '<div style="margin-top: 10px;">';
         echo '<p><strong>' . esc_html__('Slugs to exclude:', 'wp-theme') . '</strong></p>';
         $exclude_slugs_text = implode(', ', $opts['search_exclude_slugs_list']);
-        $exclude_slugs_placeholder = esc_attr__('about-us, contact', 'wp-theme');
+        $exclude_slugs_placeholder = esc_attr('about-us, contact');
         $exclude_slugs_label = esc_html__('Enter slugs separated by commas', 'wp-theme');
         $html = '<p>';
         $html .= '<input type="text" name="wp_theme_settings[search_exclude_slugs_list]" ';

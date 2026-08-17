@@ -529,7 +529,12 @@ function wp_theme_content_seed_ensure_posts(array $args, array &$stats): void {
 
             if ($args['dry_run']) {
                 ++$stats['created'];
-                $stats['log'][] = sprintf('[dry-run] Would create %s: %s', $post_type, $title);
+                $stats['log'][] = sprintf(
+                    /* translators: 1: post type slug, 2: post title */
+                    __('[dry-run] Would create %1$s: %2$s', 'wp-theme'),
+                    $post_type,
+                    $title
+                );
                 continue;
             }
 
@@ -550,7 +555,8 @@ function wp_theme_content_seed_ensure_posts(array $args, array &$stats): void {
             if (is_wp_error($post_id)) {
                 ++$stats['failed'];
                 $stats['log'][] = sprintf(
-                    'Failed to create %s "%s": %s',
+                    /* translators: 1: post type slug, 2: post title, 3: error message */
+                    __('Failed to create %1$s "%2$s": %3$s', 'wp-theme'),
                     $post_type,
                     $title,
                     $post_id->get_error_message()
@@ -559,7 +565,13 @@ function wp_theme_content_seed_ensure_posts(array $args, array &$stats): void {
             }
 
             ++$stats['created'];
-            $stats['log'][] = sprintf('Created %s #%d: %s', $post_type, (int) $post_id, $title);
+            $stats['log'][] = sprintf(
+                /* translators: 1: post type slug, 2: post ID, 3: post title */
+                __('Created %1$s #%2$d: %3$s', 'wp-theme'),
+                $post_type,
+                (int) $post_id,
+                $title
+            );
         }
     }
 }
@@ -601,7 +613,12 @@ function wp_theme_content_seed_ensure_terms(array $args, array &$stats): void {
 
             if ($args['dry_run']) {
                 ++$stats['created'];
-                $stats['log'][] = sprintf('[dry-run] Would create term %s: %s', $taxonomy, $name);
+                $stats['log'][] = sprintf(
+                    /* translators: 1: taxonomy slug, 2: term name */
+                    __('[dry-run] Would create term %1$s: %2$s', 'wp-theme'),
+                    $taxonomy,
+                    $name
+                );
                 continue;
             }
 
@@ -616,7 +633,8 @@ function wp_theme_content_seed_ensure_terms(array $args, array &$stats): void {
             if (is_wp_error($result)) {
                 ++$stats['failed'];
                 $stats['log'][] = sprintf(
-                    'Failed to create term %s "%s": %s',
+                    /* translators: 1: taxonomy slug, 2: term name, 3: error message */
+                    __('Failed to create term %1$s "%2$s": %3$s', 'wp-theme'),
                     $taxonomy,
                     $name,
                     $result->get_error_message()
@@ -625,7 +643,12 @@ function wp_theme_content_seed_ensure_terms(array $args, array &$stats): void {
             }
 
             ++$stats['created'];
-            $stats['log'][] = sprintf('Created term %s: %s', $taxonomy, $name);
+            $stats['log'][] = sprintf(
+                /* translators: 1: taxonomy slug, 2: term name */
+                __('Created term %1$s: %2$s', 'wp-theme'),
+                $taxonomy,
+                $name
+            );
         }
     }
 }
@@ -890,7 +913,12 @@ function wp_theme_content_seed_post(int $post_id, array $args, array &$stats): v
     if ([] !== $fields_to_update && $args['dry_run']) {
         foreach ($fields_to_update as $field_name) {
             ++$stats['seeded'];
-            $stats['log'][] = sprintf('[dry-run] Would seed %s (#%d).', $field_name, $post_id);
+            $stats['log'][] = sprintf(
+                /* translators: 1: field name, 2: post ID */
+                __('[dry-run] Would seed %1$s (#%2$d).', 'wp-theme'),
+                $field_name,
+                $post_id
+            );
         }
     } elseif ([] !== $fields_to_update) {
         $result = wp_update_post($updates, true);
@@ -899,7 +927,8 @@ function wp_theme_content_seed_post(int $post_id, array $args, array &$stats): v
             foreach ($fields_to_update as $field_name) {
                 ++$stats['failed'];
                 $stats['log'][] = sprintf(
-                    'Failed %s (#%d): %s',
+                    /* translators: 1: field name, 2: post ID, 3: error message */
+                    __('Failed %1$s (#%2$d): %3$s', 'wp-theme'),
                     $field_name,
                     $post_id,
                     $result->get_error_message()
@@ -908,7 +937,12 @@ function wp_theme_content_seed_post(int $post_id, array $args, array &$stats): v
         } else {
             foreach ($fields_to_update as $field_name) {
                 ++$stats['seeded'];
-                $stats['log'][] = sprintf('Seeded %s (#%d).', $field_name, $post_id);
+                $stats['log'][] = sprintf(
+                    /* translators: 1: field name, 2: post ID */
+                    __('Seeded %1$s (#%2$d).', 'wp-theme'),
+                    $field_name,
+                    $post_id
+                );
             }
         }
     }
@@ -919,13 +953,25 @@ function wp_theme_content_seed_post(int $post_id, array $args, array &$stats): v
         if ($attachment_id) {
             if ($args['dry_run']) {
                 ++$stats['seeded'];
-                $stats['log'][] = sprintf('[dry-run] Would seed featured_image (#%d).', $post_id);
+                $stats['log'][] = sprintf(
+                    /* translators: %d: post ID */
+                    __('[dry-run] Would seed featured_image (#%d).', 'wp-theme'),
+                    $post_id
+                );
             } elseif (set_post_thumbnail($post_id, $attachment_id)) {
                 ++$stats['seeded'];
-                $stats['log'][] = sprintf('Seeded featured_image (#%d).', $post_id);
+                $stats['log'][] = sprintf(
+                    /* translators: %d: post ID */
+                    __('Seeded featured_image (#%d).', 'wp-theme'),
+                    $post_id
+                );
             } else {
                 ++$stats['failed'];
-                $stats['log'][] = sprintf('Failed featured_image (#%d).', $post_id);
+                $stats['log'][] = sprintf(
+                    /* translators: %d: post ID */
+                    __('Failed featured_image (#%d).', 'wp-theme'),
+                    $post_id
+                );
             }
         }
     } else {
@@ -951,7 +997,12 @@ function wp_theme_content_seed_post(int $post_id, array $args, array &$stats): v
 
         if ($args['dry_run']) {
             ++$stats['seeded'];
-            $stats['log'][] = sprintf('[dry-run] Would seed taxonomy %s (#%d).', $taxonomy, $post_id);
+            $stats['log'][] = sprintf(
+                /* translators: 1: taxonomy slug, 2: post ID */
+                __('[dry-run] Would seed taxonomy %1$s (#%2$d).', 'wp-theme'),
+                $taxonomy,
+                $post_id
+            );
             continue;
         }
 
@@ -960,14 +1011,20 @@ function wp_theme_content_seed_post(int $post_id, array $args, array &$stats): v
         if (is_wp_error($result)) {
             ++$stats['failed'];
             $stats['log'][] = sprintf(
-                'Failed taxonomy %s (#%d): %s',
+                /* translators: 1: taxonomy slug, 2: post ID, 3: error message */
+                __('Failed taxonomy %1$s (#%2$d): %3$s', 'wp-theme'),
                 $taxonomy,
                 $post_id,
                 $result->get_error_message()
             );
         } else {
             ++$stats['seeded'];
-            $stats['log'][] = sprintf('Seeded taxonomy %s (#%d).', $taxonomy, $post_id);
+            $stats['log'][] = sprintf(
+                /* translators: 1: taxonomy slug, 2: post ID */
+                __('Seeded taxonomy %1$s (#%2$d).', 'wp-theme'),
+                $taxonomy,
+                $post_id
+            );
         }
     }
 }
@@ -987,7 +1044,11 @@ function wp_theme_content_seed_term(WP_Term $term, array $args, array &$stats): 
 
         if ($args['dry_run']) {
             ++$stats['seeded'];
-            $stats['log'][] = sprintf('[dry-run] Would seed term_description (term_%d).', $term->term_id);
+            $stats['log'][] = sprintf(
+                /* translators: %d: term ID */
+                __('[dry-run] Would seed term_description (term_%d).', 'wp-theme'),
+                $term->term_id
+            );
         } else {
             $result = wp_update_term(
                 $term->term_id,
@@ -1000,13 +1061,18 @@ function wp_theme_content_seed_term(WP_Term $term, array $args, array &$stats): 
             if (is_wp_error($result)) {
                 ++$stats['failed'];
                 $stats['log'][] = sprintf(
-                    'Failed term_description (term_%d): %s',
+                    /* translators: 1: term ID, 2: error message */
+                    __('Failed term_description (term_%1$d): %2$s', 'wp-theme'),
                     $term->term_id,
                     $result->get_error_message()
                 );
             } else {
                 ++$stats['seeded'];
-                $stats['log'][] = sprintf('Seeded term_description (term_%d).', $term->term_id);
+                $stats['log'][] = sprintf(
+                    /* translators: %d: term ID */
+                    __('Seeded term_description (term_%d).', 'wp-theme'),
+                    $term->term_id
+                );
             }
         }
     } else {
@@ -1086,7 +1152,8 @@ function wp_theme_content_seed_acf_field_list($entity_id, array $fields, array $
         if (wp_theme_content_seed_is_empty($value) && null !== $value) {
             ++$stats['skipped'];
             $stats['log'][] = sprintf(
-                'Skipped acf:%s (%s): no placeholder for type "%s".',
+                /* translators: 1: field name, 2: entity ID, 3: ACF field type */
+                __('Skipped acf:%1$s (%2$s): no placeholder for type "%3$s".', 'wp-theme'),
                 $field_name,
                 (string) $entity_id,
                 $field_type
@@ -1097,7 +1164,8 @@ function wp_theme_content_seed_acf_field_list($entity_id, array $fields, array $
         if (null === $value) {
             ++$stats['skipped'];
             $stats['log'][] = sprintf(
-                'Skipped acf:%s (%s): unsupported type "%s".',
+                /* translators: 1: field name, 2: entity ID, 3: ACF field type */
+                __('Skipped acf:%1$s (%2$s): unsupported type "%3$s".', 'wp-theme'),
                 $field_name,
                 (string) $entity_id,
                 $field_type
@@ -1110,7 +1178,8 @@ function wp_theme_content_seed_acf_field_list($entity_id, array $fields, array $
         if ($args['dry_run']) {
             ++$stats['seeded'];
             $stats['log'][] = sprintf(
-                '[dry-run] Would seed acf:%s (%s).',
+                /* translators: 1: field name, 2: entity ID */
+                __('[dry-run] Would seed acf:%1$s (%2$s).', 'wp-theme'),
                 $field_name,
                 (string) $entity_id
             );
@@ -1123,10 +1192,20 @@ function wp_theme_content_seed_acf_field_list($entity_id, array $fields, array $
 
         if ($updated) {
             ++$stats['seeded'];
-            $stats['log'][] = sprintf('Seeded acf:%s (%s).', $field_name, (string) $entity_id);
+            $stats['log'][] = sprintf(
+                /* translators: 1: field name, 2: entity ID */
+                __('Seeded acf:%1$s (%2$s).', 'wp-theme'),
+                $field_name,
+                (string) $entity_id
+            );
         } else {
             ++$stats['failed'];
-            $stats['log'][] = sprintf('Failed acf:%s (%s).', $field_name, (string) $entity_id);
+            $stats['log'][] = sprintf(
+                /* translators: 1: field name, 2: entity ID */
+                __('Failed acf:%1$s (%2$s).', 'wp-theme'),
+                $field_name,
+                (string) $entity_id
+            );
         }
     }
 }

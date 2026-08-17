@@ -7,7 +7,11 @@
 
 
 /**
- * Load theme translations before includes.
+ * Load theme translations.
+ *
+ * Theme .mo files use the plugin-style name wp-theme-{locale}.mo,
+ * so load_textdomain() is called first. load_theme_textdomain()
+ * also registers the languages path for just-in-time loading.
  */
 function wp_theme_load_textdomain(): void {
     $locale = is_admin() ? get_user_locale() : get_locale();
@@ -21,7 +25,7 @@ function wp_theme_load_textdomain(): void {
 }
 
 
-wp_theme_load_textdomain();
+add_action( 'after_setup_theme', 'wp_theme_load_textdomain', 1 );
 
 
 function theme_setup(): void {

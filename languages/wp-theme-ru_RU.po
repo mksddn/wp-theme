@@ -3,44 +3,48 @@
 # This file is distributed under the same license as the WP Theme package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Theme 1.2.11\n"
+"Project-Id-Version: WP Theme 1.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-30 12:02+0000\n"
-"PO-Revision-Date: 2026-07-30 12:02+0000\n"
+"POT-Creation-Date: 2026-08-14 09:43+0300\n"
+"PO-Revision-Date: 2026-08-14 09:43+0300\n"
 "Last-Translator: \n"
 "Language-Team: Russian\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: 404.php:24
+msgid "Oops! That page can't be found."
+msgstr "Упс! Страница не найдена."
+
+#: 404.php:25
+msgid "It looks like nothing was found at this location."
+msgstr "По этому адресу ничего не найдено."
 
 #: inc/api/custom-route-options.php:89
 msgid "Options Page with specified slug not found"
 msgstr "Страница опций с указанным slug не найдена"
 
-#: inc/category-thumbnails.php:19
-#: inc/category-thumbnails.php:34
+#: inc/category-thumbnails.php:19 inc/category-thumbnails.php:34
 msgid "Category Thumbnail"
 msgstr "Миниатюра категории"
 
-#: inc/category-thumbnails.php:22
-#: inc/category-thumbnails.php:43
+#: inc/category-thumbnails.php:22 inc/category-thumbnails.php:43
 msgid "Upload category thumbnail image"
 msgstr "Загрузить изображение категории"
 
-#: inc/category-thumbnails.php:22
-#: inc/category-thumbnails.php:43
+#: inc/category-thumbnails.php:22 inc/category-thumbnails.php:43
 msgid "Upload Image"
 msgstr "Загрузить изображение"
 
-#: inc/category-thumbnails.php:23
-#: inc/category-thumbnails.php:46
+#: inc/category-thumbnails.php:23 inc/category-thumbnails.php:46
 msgid "Remove category thumbnail image"
 msgstr "Удалить изображение категории"
 
-#: inc/category-thumbnails.php:23
-#: inc/category-thumbnails.php:47
+#: inc/category-thumbnails.php:23 inc/category-thumbnails.php:47
 msgid "Remove Image"
 msgstr "Удалить изображение"
 
@@ -51,6 +55,219 @@ msgstr "Выбрать миниатюру категории"
 #: inc/category-thumbnails.php:118
 msgid "Choose Image"
 msgstr "Выбрать изображение"
+
+#. translators: 1: post type slug, 2: post title
+#: inc/content-seeder.php:534
+#, php-format
+msgid "[dry-run] Would create %1$s: %2$s"
+msgstr "[dry-run] Будет создано %1$s: %2$s"
+
+#. translators: 1: post type slug, 2: post title, 3: error message
+#: inc/content-seeder.php:559
+#, php-format
+msgid "Failed to create %1$s \"%2$s\": %3$s"
+msgstr "Не удалось создать %1$s «%2$s»: %3$s"
+
+#. translators: 1: post type slug, 2: post ID, 3: post title
+#: inc/content-seeder.php:570
+#, php-format
+msgid "Created %1$s #%2$d: %3$s"
+msgstr "Создано %1$s #%2$d: %3$s"
+
+#. translators: 1: taxonomy slug, 2: term name
+#: inc/content-seeder.php:618
+#, php-format
+msgid "[dry-run] Would create term %1$s: %2$s"
+msgstr "[dry-run] Будет создан термин %1$s: %2$s"
+
+#. translators: 1: taxonomy slug, 2: term name, 3: error message
+#: inc/content-seeder.php:637
+#, php-format
+msgid "Failed to create term %1$s \"%2$s\": %3$s"
+msgstr "Не удалось создать термин %1$s «%2$s»: %3$s"
+
+#. translators: 1: taxonomy slug, 2: term name
+#: inc/content-seeder.php:648
+#, php-format
+msgid "Created term %1$s: %2$s"
+msgstr "Создан термин %1$s: %2$s"
+
+#. translators: 1: field name, 2: post ID
+#: inc/content-seeder.php:918
+#, php-format
+msgid "[dry-run] Would seed %1$s (#%2$d)."
+msgstr "[dry-run] Будет заполнено %1$s (#%2$d)."
+
+#. translators: 1: field name, 2: post ID, 3: error message
+#: inc/content-seeder.php:931
+#, php-format
+msgid "Failed %1$s (#%2$d): %3$s"
+msgstr "Ошибка %1$s (#%2$d): %3$s"
+
+#. translators: 1: field name, 2: post ID
+#: inc/content-seeder.php:942
+#, php-format
+msgid "Seeded %1$s (#%2$d)."
+msgstr "Заполнено %1$s (#%2$d)."
+
+#. translators: %d: post ID
+#: inc/content-seeder.php:958
+#, php-format
+msgid "[dry-run] Would seed featured_image (#%d)."
+msgstr "[dry-run] Будет заполнено featured_image (#%d)."
+
+#. translators: %d: post ID
+#: inc/content-seeder.php:965
+#, php-format
+msgid "Seeded featured_image (#%d)."
+msgstr "Заполнено featured_image (#%d)."
+
+#. translators: %d: post ID
+#: inc/content-seeder.php:972
+#, php-format
+msgid "Failed featured_image (#%d)."
+msgstr "Ошибка featured_image (#%d)."
+
+#. translators: 1: taxonomy slug, 2: post ID
+#: inc/content-seeder.php:1002
+#, php-format
+msgid "[dry-run] Would seed taxonomy %1$s (#%2$d)."
+msgstr "[dry-run] Будет заполнена таксономия %1$s (#%2$d)."
+
+#. translators: 1: taxonomy slug, 2: post ID, 3: error message
+#: inc/content-seeder.php:1015
+#, php-format
+msgid "Failed taxonomy %1$s (#%2$d): %3$s"
+msgstr "Ошибка таксономии %1$s (#%2$d): %3$s"
+
+#. translators: 1: taxonomy slug, 2: post ID
+#: inc/content-seeder.php:1024
+#, php-format
+msgid "Seeded taxonomy %1$s (#%2$d)."
+msgstr "Заполнена таксономия %1$s (#%2$d)."
+
+#. translators: %d: term ID
+#: inc/content-seeder.php:1049
+#, php-format
+msgid "[dry-run] Would seed term_description (term_%d)."
+msgstr "[dry-run] Будет заполнено term_description (term_%d)."
+
+#. translators: 1: term ID, 2: error message
+#: inc/content-seeder.php:1065
+#, php-format
+msgid "Failed term_description (term_%1$d): %2$s"
+msgstr "Ошибка term_description (term_%1$d): %2$s"
+
+#. translators: %d: term ID
+#: inc/content-seeder.php:1073
+#, php-format
+msgid "Seeded term_description (term_%d)."
+msgstr "Заполнено term_description (term_%d)."
+
+#. translators: 1: field name, 2: entity ID, 3: ACF field type
+#: inc/content-seeder.php:1156
+#, php-format
+msgid "Skipped acf:%1$s (%2$s): no placeholder for type \"%3$s\"."
+msgstr "Пропущено acf:%1$s (%2$s): нет заглушки для типа «%3$s»."
+
+#. translators: 1: field name, 2: entity ID, 3: ACF field type
+#: inc/content-seeder.php:1168
+#, php-format
+msgid "Skipped acf:%1$s (%2$s): unsupported type \"%3$s\"."
+msgstr "Пропущено acf:%1$s (%2$s): неподдерживаемый тип «%3$s»."
+
+#. translators: 1: field name, 2: entity ID
+#: inc/content-seeder.php:1182
+#, php-format
+msgid "[dry-run] Would seed acf:%1$s (%2$s)."
+msgstr "[dry-run] Будет заполнено acf:%1$s (%2$s)."
+
+#. translators: 1: field name, 2: entity ID
+#: inc/content-seeder.php:1197
+#, php-format
+msgid "Seeded acf:%1$s (%2$s)."
+msgstr "Заполнено acf:%1$s (%2$s)."
+
+#. translators: 1: field name, 2: entity ID
+#: inc/content-seeder.php:1205
+#, php-format
+msgid "Failed acf:%1$s (%2$s)."
+msgstr "Ошибка acf:%1$s (%2$s)."
+
+#: inc/content-seeder.php:1399 inc/content-seeder.php:1400
+#: inc/content-seeder.php:1435
+msgid "Content Seeder"
+msgstr "Наполнитель контента"
+
+#: inc/content-seeder.php:1432
+msgid "Create missing entities and fill content fields with placeholders?"
+msgstr "Создать недостающие сущности и заполнить поля контента заглушками?"
+
+#: inc/content-seeder.php:1436
+msgid ""
+"Creates sample posts and terms when needed, then fills WordPress and ACF "
+"fields with placeholder values. Post types: pages, posts, and CPTs with ACF "
+"field groups."
+msgstr ""
+"Создаёт тестовые записи и термины при необходимости, затем заполняет "
+"поля WordPress и ACF значениями-заглушками. Типы записей: страницы, "
+"посты и CPT с группами полей ACF."
+
+#: inc/content-seeder.php:1444
+msgid "Options"
+msgstr "Параметры"
+
+#: inc/content-seeder.php:1448
+msgid "Create missing sample posts and terms"
+msgstr "Создавать недостающие тестовые записи и термины"
+
+#: inc/content-seeder.php:1453
+msgid "Dry run (preview only, no database writes)"
+msgstr "Пробный запуск (только просмотр, без записи в базу)"
+
+#: inc/content-seeder.php:1458
+msgid "Overwrite existing field values"
+msgstr "Перезаписывать существующие значения полей"
+
+#: inc/content-seeder.php:1464
+msgid "Post type"
+msgstr "Тип записи"
+
+#: inc/content-seeder.php:1468
+msgid "All (posts, options, terms)"
+msgstr "Все (записи, опции, термины)"
+
+#: inc/content-seeder.php:1479
+msgid "Limit"
+msgstr "Лимит"
+
+#: inc/content-seeder.php:1483
+msgid "Optional. Max entities per post type / taxonomy, and max posts to seed."
+msgstr ""
+"Необязательно. Максимум сущностей на тип записи / таксономию и "
+"максимум записей для наполнения."
+
+#: inc/content-seeder.php:1488
+msgid "Run seeder"
+msgstr "Запустить наполнение"
+
+#: inc/content-seeder.php:1502 inc/image-optimization.php:895
+msgid "Sorry, you are not allowed to do this."
+msgstr "Недостаточно прав для этого действия."
+
+#. translators: 1: created count, 2: seeded count, 3: skipped count, 4: failed count
+#: inc/content-seeder.php:1561
+#, php-format
+msgid ""
+"Content seeder finished: %1$d created, %2$d seeded, %3$d skipped, %4$d "
+"failed."
+msgstr ""
+"Наполнение завершено: создано %1$d, заполнено %2$d, пропущено %3$d, "
+"ошибок %4$d."
+
+#: inc/content-seeder.php:1575
+msgid "Details"
+msgstr "Подробности"
 
 #: inc/duplicate-post.php:23
 msgid "Duplicate this post"
@@ -100,45 +317,91 @@ msgstr "Н/Д"
 msgid "Theme Update Available:"
 msgstr "Доступно обновление темы:"
 
-#: inc/github-updater.php:473
+#. translators: %s: new theme version
+#: inc/github-updater.php:476
+#, php-format
 msgid "Version %s is available."
 msgstr "Доступна версия %s."
 
-#: inc/github-updater.php:474
+#: inc/github-updater.php:480
 msgid "Check for updates"
 msgstr "Проверить обновления"
 
-#: inc/github-updater.php:479
+#: inc/github-updater.php:485
 msgid "Check for theme updates"
 msgstr "Проверить обновления темы"
 
-#: inc/github-updater.php:493
+#: inc/github-updater.php:499
 msgid "Security check failed"
 msgstr "Ошибка проверки безопасности"
 
-#: inc/image-optimization.php:301
+#: inc/image-optimization.php:288
+msgid "Optimized file was not written."
+msgstr "Оптимизированный файл не был записан."
+
+#: inc/image-optimization.php:306
+msgid "Unable to replace image with optimized file."
+msgstr "Не удалось заменить изображение оптимизированным файлом."
+
+#: inc/image-optimization.php:335
+msgid "Image file is missing or not writable."
+msgstr "Файл изображения отсутствует или недоступен для записи."
+
+#: inc/image-optimization.php:362
+msgid "Unable to read image dimensions."
+msgstr "Не удалось прочитать размеры изображения."
+
+#. translators: %d: maximum upload size in megabytes
+#: inc/image-optimization.php:444
+#, php-format
 msgid "Image is too large. Maximum size is %d MB."
 msgstr "Изображение слишком большое. Максимум: %d МБ."
 
-#: inc/image-optimization.php:747
-msgid "Sorry, you are not allowed to do this."
-msgstr "Недостаточно прав для этого действия."
+#: inc/image-optimization.php:741
+msgid "Attachment is not an image."
+msgstr "Вложение не является изображением."
 
-#: inc/image-optimization.php:792
+#. translators: %s: mime type
+#: inc/image-optimization.php:752
+#, php-format
+msgid "Image type is not supported for optimization: %s"
+msgstr "Тип изображения не поддерживается для оптимизации: %s"
+
+#: inc/image-optimization.php:753
+msgid "unknown"
+msgstr "неизвестно"
+
+#: inc/image-optimization.php:762
+msgid "Attached file is missing on disk."
+msgstr "Файл вложения отсутствует на диске."
+
+#: inc/image-optimization.php:776
+msgid "Unable to copy original image onto attached file."
+msgstr "Не удалось скопировать оригинал поверх файла вложения."
+
+#. translators: 1: success count, 2: failed count, 3: processed count
+#: inc/image-optimization.php:940
+#, php-format
 msgid "Image optimization finished: %1$d done, %2$d failed (%3$d total)."
-msgstr "Оптимизация изображений завершена: %1$d готово, %2$d с ошибкой (всего %3$d)."
+msgstr ""
+"Оптимизация изображений завершена: %1$d готово, %2$d с ошибкой (всего %3$d)."
+
+#: inc/image-optimization.php:974
+msgid ""
+"Details are also written to the PHP error log with the prefix [wp-theme "
+"image-opt]."
+msgstr ""
+"Подробности также пишутся в PHP error log с префиксом [wp-theme image-opt]."
 
 #: inc/security-features.php:199
 msgid "Too many failed login attempts. Please try again later."
 msgstr "Слишком много неудачных попыток входа. Попробуйте позже."
 
-#: inc/theme-features.php:167
-#: inc/theme-features.php:206
+#: inc/theme-features.php:167 inc/theme-features.php:206
 msgid "Unauthorized"
 msgstr "Доступ запрещен"
 
-#: inc/theme-features.php:171
-#: inc/theme-features.php:210
+#: inc/theme-features.php:171 inc/theme-features.php:210
 msgid "Invalid nonce"
 msgstr "Ошибка проверки безопасности"
 
@@ -146,8 +409,7 @@ msgstr "Ошибка проверки безопасности"
 msgid "Failed to encode settings"
 msgstr "Не удалось закодировать настройки"
 
-#: inc/theme-features.php:215
-#: inc/theme-features.php:222
+#: inc/theme-features.php:215 inc/theme-features.php:222
 msgid "File upload error. Please try again."
 msgstr "Не удалось загрузить файл"
 
@@ -163,52 +425,53 @@ msgstr "Неверный JSON:"
 msgid "Settings imported successfully!"
 msgstr "Настройки успешно импортированы!"
 
-#: inc/theme-features.php:265
-#: inc/theme-features.php:266
+#: inc/theme-features.php:265 inc/theme-features.php:266
 msgid "Theme Features"
 msgstr "Функции темы"
 
-#: inc/theme-features.php:291
-#: inc/theme-features.php:297
+#: inc/theme-features.php:291 inc/theme-features.php:297
 msgid "Admin Features"
 msgstr "Функции панели управления"
 
-#: inc/theme-features.php:306
-#: inc/theme-features.php:312
+#: inc/theme-features.php:306 inc/theme-features.php:312
 msgid "Content Features"
 msgstr "Функции контента"
 
-#: inc/theme-features.php:321
-#: inc/theme-features.php:327
+#: inc/theme-features.php:321 inc/theme-features.php:327
 msgid "Security Features"
 msgstr "Функции безопасности"
 
-#: inc/theme-features.php:336
-#: inc/theme-features.php:342
+#: inc/theme-features.php:336 inc/theme-features.php:342
 msgid "Search Features"
 msgstr "Функции поиска"
 
-#: inc/theme-features.php:351
-#: inc/theme-features.php:357
+#: inc/theme-features.php:351 inc/theme-features.php:357
 msgid "Image Optimization"
 msgstr "Оптимизация изображений"
 
-#: inc/theme-features.php:366
-#: inc/theme-features.php:372
+#: inc/theme-features.php:366 inc/theme-features.php:372
 msgid "Performance Features"
 msgstr "Оптимизация производительности"
 
 #: inc/theme-features.php:567
-msgid "Configure theme features and functionality. Enable or disable specific features based on your needs."
-msgstr "Настройте функции и возможности темы. Включайте или отключайте конкретные функции в зависимости от ваших потребностей."
+msgid ""
+"Configure theme features and functionality. Enable or disable specific "
+"features based on your needs."
+msgstr ""
+"Настройте функции и возможности темы. Включайте или отключайте конкретные "
+"функции в зависимости от ваших потребностей."
 
 #: inc/theme-features.php:571
 msgid "Warning:"
 msgstr "Предупреждение:"
 
 #: inc/theme-features.php:571
-msgid "Settings are using default values. Database option 'wp_theme_settings' not found. Save settings to create the option."
-msgstr "Используются значения по умолчанию. Опция базы данных 'wp_theme_settings' не найдена. Сохраните настройки, чтобы создать опцию."
+msgid ""
+"Settings are using default values. Database option 'wp_theme_settings' not "
+"found. Save settings to create the option."
+msgstr ""
+"Используются значения по умолчанию. Опция базы данных 'wp_theme_settings' не "
+"найдена. Сохраните настройки, чтобы создать опцию."
 
 #: inc/theme-features.php:579
 msgid "Save Theme Features"
@@ -219,8 +482,12 @@ msgid "About Theme Features"
 msgstr "О функциях темы"
 
 #: inc/theme-features.php:585
-msgid "This page allows you to enable or disable various theme features. Changes take effect immediately after saving."
-msgstr "На этой странице вы можете включать или отключать различные функции темы. Изменения вступают в силу сразу после сохранения."
+msgid ""
+"This page allows you to enable or disable various theme features. Changes "
+"take effect immediately after saving."
+msgstr ""
+"На этой странице вы можете включать или отключать различные функции темы. "
+"Изменения вступают в силу сразу после сохранения."
 
 #: inc/theme-features.php:586
 msgid "Note:"
@@ -235,12 +502,15 @@ msgid "Settings source:"
 msgstr "Источник настроек:"
 
 #: inc/theme-features.php:591
-msgid "Backup &amp; Restore Settings"
+msgid "Backup & Restore Settings"
 msgstr "Резервное копирование и восстановление настроек"
 
 #: inc/theme-features.php:592
-msgid "Use these tools to backup or restore theme settings. Useful for migrations."
-msgstr "Используйте эти инструменты для резервного копирования или восстановления настроек темы. Полезно при миграциях."
+msgid ""
+"Use these tools to backup or restore theme settings. Useful for migrations."
+msgstr ""
+"Используйте эти инструменты для резервного копирования или восстановления "
+"настроек темы. Полезно при миграциях."
 
 #: inc/theme-features.php:595
 msgid "Export Settings"
@@ -259,12 +529,19 @@ msgid "Import Settings from JSON"
 msgstr "Импортировать настройки из JSON"
 
 #: inc/theme-features.php:620
-msgid "Admin interface enhancements, WordPress core modifications, and administrative tools."
-msgstr "Улучшения административного интерфейса, модификации ядра WordPress и административные инструменты."
+msgid ""
+"Admin interface enhancements, WordPress core modifications, and "
+"administrative tools."
+msgstr ""
+"Улучшения административного интерфейса, модификации ядра WordPress и "
+"административные инструменты."
 
 #: inc/theme-features.php:625
-msgid "Content editing, display, and formatting features including editor settings."
-msgstr "Функции редактирования, отображения и форматирования контента, включая настройки редактора."
+msgid ""
+"Content editing, display, and formatting features including editor settings."
+msgstr ""
+"Функции редактирования, отображения и форматирования контента, включая "
+"настройки редактора."
 
 #: inc/theme-features.php:630
 msgid "WordPress security enhancements and hardening measures."
@@ -279,8 +556,13 @@ msgid "Control how images are handled when uploaded to the Media Library."
 msgstr "Настройки обработки изображений при загрузке в медиатеку."
 
 #: inc/theme-features.php:645
-msgid "Basic performance optimizations to improve site speed and reduce server load. These settings are safe to enable and won't conflict with most plugins."
-msgstr "Базовые оптимизации производительности для повышения скорости сайта и снижения нагрузки на сервер. Эти настройки безопасны для включения и не конфликтуют с большинством плагинов."
+msgid ""
+"Basic performance optimizations to improve site speed and reduce server "
+"load. These settings are safe to enable and won't conflict with most plugins."
+msgstr ""
+"Базовые оптимизации производительности для повышения скорости сайта и "
+"снижения нагрузки на сервер. Эти настройки безопасны для включения и не "
+"конфликтуют с большинством плагинов."
 
 #: inc/theme-features.php:654
 msgid "Enable headless CMS mode (API only, no theme assets)"
@@ -311,8 +593,12 @@ msgid "Disable comments"
 msgstr "Отключить комментарии"
 
 #: inc/theme-features.php:657
-msgid "Removes comments and trackbacks site-wide; hides Comments menu, Discussion settings, and related admin bar items."
-msgstr "Отключает комментарии и трекбеки на сайте; скрывает пункт «Комментарии», раздел «Обсуждение» в настройках и связанные элементы админ-бара."
+msgid ""
+"Removes comments and trackbacks site-wide; hides Comments menu, Discussion "
+"settings, and related admin bar items."
+msgstr ""
+"Отключает комментарии и трекбеки на сайте; скрывает пункт «Комментарии», "
+"раздел «Обсуждение» в настройках и связанные элементы админ-бара."
 
 #: inc/theme-features.php:658
 msgid "Duplicate Post feature"
@@ -343,7 +629,9 @@ msgid "Polylang REST API language detection"
 msgstr "Определение языка в Polylang REST API"
 
 #: inc/theme-features.php:661
-msgid "Automatically detects language from Accept-Language header in REST API requests"
+msgid ""
+"Automatically detects language from Accept-Language header in REST API "
+"requests"
 msgstr "Автоматически выбирает язык по заголовку Accept-Language в REST API"
 
 #: inc/theme-features.php:670
@@ -460,7 +748,8 @@ msgstr "Добавить заголовки безопасности"
 
 #: inc/theme-features.php:729
 msgid "Adds X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS"
-msgstr "Добавляет X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS"
+msgstr ""
+"Добавляет X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS"
 
 #: inc/theme-features.php:730
 msgid "Disable directory browsing"
@@ -494,10 +783,6 @@ msgstr "Выберите типы для поиска (пусто = все):"
 msgid "Post/Page IDs to exclude:"
 msgstr "ID для исключения из поиска:"
 
-#: inc/theme-features.php:767
-msgid "1, 5, 10"
-msgstr "1, 5, 10"
-
 #: inc/theme-features.php:768
 msgid "Enter IDs separated by commas"
 msgstr "Введите ID через запятую"
@@ -505,10 +790,6 @@ msgstr "Введите ID через запятую"
 #: inc/theme-features.php:786
 msgid "Slugs to exclude:"
 msgstr "Слаги для исключения:"
-
-#: inc/theme-features.php:788
-msgid "about-us, contact"
-msgstr "about-us, contact"
 
 #: inc/theme-features.php:789
 msgid "Enter slugs separated by commas"
@@ -519,8 +800,12 @@ msgid "Optimize images on upload"
 msgstr "Оптимизировать изображения при загрузке"
 
 #: inc/theme-features.php:812
-msgid "Blocks files over the max MB, shrinks oversized images, and compresses them using the settings below."
-msgstr "Блокирует файлы больше лимита МБ, уменьшает слишком большие изображения и сжимает их по настройкам ниже."
+msgid ""
+"Blocks files over the max MB, shrinks oversized images, and compresses them "
+"using the settings below."
+msgstr ""
+"Блокирует файлы больше лимита МБ, уменьшает слишком большие изображения и "
+"сжимает их по настройкам ниже."
 
 #: inc/theme-features.php:813
 msgid "Load featured images first"
@@ -583,8 +868,12 @@ msgid "Already uploaded images"
 msgstr "Уже загруженные изображения"
 
 #: inc/theme-features.php:856
-msgid "Shrink large images that were uploaded before these settings. Up to 50 images per click."
-msgstr "Уменьшает крупные изображения, загруженные до этих настроек. До 50 за один клик."
+msgid ""
+"Shrink large images that were uploaded before these settings. Up to 50 "
+"images per click."
+msgstr ""
+"Уменьшает крупные изображения, загруженные до этих настроек. До 50 за один "
+"клик."
 
 #: inc/theme-features.php:861
 msgid "Optimize large images now"
@@ -619,8 +908,11 @@ msgid "Remove unused image sizes"
 msgstr "Убрать лишние размеры изображений"
 
 #: inc/theme-features.php:873
-msgid "Checked sizes will not be created on upload. Leave empty to keep all sizes."
-msgstr "Отмеченные размеры не будут создаваться при загрузке. Оставьте пустым, чтобы сохранить все."
+msgid ""
+"Checked sizes will not be created on upload. Leave empty to keep all sizes."
+msgstr ""
+"Отмеченные размеры не будут создаваться при загрузке. Оставьте пустым, чтобы "
+"сохранить все."
 
 #: inc/theme-features.php:890
 msgid "Remove WordPress emoji scripts"
@@ -682,39 +974,25 @@ msgstr "Миниатюра"
 msgid "None"
 msgstr "Нет"
 
-#: 404.php:24
-msgid "Oops! That page can't be found."
-msgstr "Упс! Страница не найдена."
-
-#: 404.php:25
-msgid "It looks like nothing was found at this location."
-msgstr "По этому адресу ничего не найдено."
-
-#: search.php:19
+#. translators: %s: search query wrapped in a span
+#: search.php:21
+#, php-format
 msgid "Search Results for: %s"
 msgstr "Результаты поиска: %s"
 
+#: template-parts/content-none.php:10
+msgid "Nothing Found"
+msgstr "Ничего не найдено"
 
-#: inc/image-optimization.php
-msgid "Attachment is not an image."
-msgstr "Вложение не является изображением."
+#: template-parts/content-none.php:15
+msgid ""
+"Sorry, but nothing matched your search terms. Please try again with some "
+"different keywords."
+msgstr ""
+"К сожалению, по вашему запросу ничего не найдено. Попробуйте другие "
+"ключевые слова."
 
-#: inc/image-optimization.php
-msgid "Image type is not supported for optimization: %s"
-msgstr "Тип изображения не поддерживается для оптимизации: %s"
-
-#: inc/image-optimization.php
-msgid "unknown"
-msgstr "неизвестно"
-
-#: inc/image-optimization.php
-msgid "Attached file is missing on disk."
-msgstr "Файл вложения отсутствует на диске."
-
-#: inc/image-optimization.php
-msgid "Unable to copy original image onto attached file."
-msgstr "Не удалось скопировать оригинал поверх файла вложения."
-
-#: inc/image-optimization.php
-msgid "Details are also written to the PHP error log with the prefix [wp-theme image-opt]."
-msgstr "Подробности также пишутся в PHP error log с префиксом [wp-theme image-opt]."
+#: template-parts/content-none.php:20
+msgid ""
+"It seems we can't find what you're looking for. Perhaps searching can help."
+msgstr "Похоже, здесь ничего нет. Попробуйте воспользоваться поиском."

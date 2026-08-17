@@ -285,7 +285,7 @@ function wp_theme_optimize_image_file_with_editor(
     $saved_path = $saved['path'] ?? $temp_path;
 
     if (! file_exists($saved_path)) {
-        $error = new WP_Error('image_opt_save_missing', 'Optimized file was not written.');
+        $error = new WP_Error('image_opt_save_missing', __('Optimized file was not written.', 'wp-theme'));
         wp_theme_log_image_editor_error('save', $error, $file_path);
         return $error;
     }
@@ -303,7 +303,7 @@ function wp_theme_optimize_image_file_with_editor(
         $copied = copy($saved_path, $file_path);
         wp_delete_file($saved_path);
         if (! $copied) {
-            $error = new WP_Error('image_opt_replace', 'Unable to replace image with optimized file.');
+            $error = new WP_Error('image_opt_replace', __('Unable to replace image with optimized file.', 'wp-theme'));
             wp_theme_log_image_editor_error('replace', $error, $file_path);
             return $error;
         }
@@ -332,7 +332,7 @@ function wp_theme_optimize_image_file_with_editor(
  */
 function wp_theme_optimize_image_file(string $file_path, string $mime_type = '', array $args = []) {
     if (! file_exists($file_path) || ! is_readable($file_path) || ! is_writable($file_path)) {
-        $error = new WP_Error('image_opt_unreadable', 'Image file is missing or not writable.');
+        $error = new WP_Error('image_opt_unreadable', __('Image file is missing or not writable.', 'wp-theme'));
         wp_theme_log_image_editor_error('access', $error, $file_path);
         return $error;
     }
@@ -359,7 +359,7 @@ function wp_theme_optimize_image_file(string $file_path, string $mime_type = '',
 
     $image_size = @getimagesize($file_path);
     if (! $image_size) {
-        $error = new WP_Error('image_opt_getsize', 'Unable to read image dimensions.');
+        $error = new WP_Error('image_opt_getsize', __('Unable to read image dimensions.', 'wp-theme'));
         wp_theme_log_image_editor_error('getimagesize', $error, $file_path);
         return $error;
     }
