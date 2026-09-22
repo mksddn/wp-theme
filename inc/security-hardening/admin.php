@@ -1,0 +1,828 @@
+<?php
+/**
+ * Security Hardening admin screen markup.
+ *
+ * @package wp-theme
+ */
+
+if (! defined('ABSPATH')) {
+    exit;
+}
+
+
+/**
+ * Allowed admin tabs.
+ *
+ * @return array<string, string>
+ */
+function wp_theme_security_hardening_tabs(): array {
+    return array(
+        'overview'    => __('Overview', 'wp-theme'),
+        'web-server'  => __('Web server', 'wp-theme'),
+        'permissions' => __('File permissions', 'wp-theme'),
+        'wp-config'   => __('wp-config', 'wp-theme'),
+    );
+}
+
+
+/**
+ * Link label to a Tools tab (or the screen itself).
+ *
+ * @param string $tab Tab slug.
+ */
+function wp_theme_security_hardening_action_label_for_tab(string $tab): string {
+    $tabs = wp_theme_security_hardening_tabs();
+
+    if (isset($tabs[ $tab ]) && 'overview' !== $tab) {
+        /* translators: %s: admin tab title */
+        return sprintf(__('Open %s', 'wp-theme'), $tabs[ $tab ]);
+    }
+
+    return __('Open Security Hardening', 'wp-theme');
+}
+
+
+/**
+ * Current tab from the request.
+ */
+function wp_theme_security_hardening_current_tab(): string {
+    $tab = 'overview';
+
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only tab switch.
+    if (isset($_GET['tab'])) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only tab switch.
+        $tab = sanitize_key(wp_unslash((string) $_GET['tab']));
+    }
+
+    if ('nginx' === $tab || 'apache' === $tab) {
+        return 'web-server';
+    }
+
+    $tabs = wp_theme_security_hardening_tabs();
+    if (! isset($tabs[ $tab ])) {
+        return 'overview';
+    }
+
+    return $tab;
+}
+
+
+/**
+ * Admin URL for a tab.
+ *
+ * @param string $tab Tab slug.
+ */
+function wp_theme_security_hardening_tab_url(string $tab): string {
+    return add_query_arg(
+        array(
+            'page' => wp_theme_security_hardening_page_slug(),
+            'tab'  => $tab,
+        ),
+        admin_url('tools.php')
+    );
+}
+
+
+/**
+ * Detect the web server family using WordPress globals from vars.php.
+ *
+ * @global bool $is_apache
+ * @global bool $is_nginx
+ * @global bool $is_iis7
+ * @global bool $is_IIS
+ * @global bool $is_litespeed
+ * @return array{family:string, label:string, raw:string}
+ */
+function wp_theme_security_hardening_detect_server(): array {
+    global $is_apache, $is_nginx, $is_iis7, $is_IIS, $is_litespeed;
+
+    $raw = '';
+    if (isset($_SERVER['SERVER_SOFTWARE'])) {
+        $raw = sanitize_text_field(wp_unslash((string) $_SERVER['SERVER_SOFTWARE']));
+    }
+
+    if (! empty($is_nginx)) {
+        return array(
+            'family' => 'nginx',
+            'label'  => 'Nginx',
+            'raw'    => $raw,
+        );
+    }
+
+    if (! empty($is_litespeed)) {
+        return array(
+            'family' => 'apache',
+            'label'  => 'LiteSpeed',
+            'raw'    => $raw,
+        );
+    }
+
+    if (! empty($is_apache)) {
+        return array(
+            'family' => 'apache',
+            'label'  => 'Apache',
+            'raw'    => $raw,
+        );
+    }
+
+    if (! empty($is_iis7) || ! empty($is_IIS)) {
+        return array(
+            'family' => 'unknown',
+            'label'  => 'IIS',
+            'raw'    => $raw,
+        );
+    }
+
+    return array(
+        'family' => 'unknown',
+        'label'  => __('Unknown', 'wp-theme'),
+        'raw'    => $raw,
+    );
+}
+
+
+/**
+ * Nginx location snippet (uploads PHP block).
+ */
+function wp_theme_security_hardening_nginx_snippet(): string {
+    return <<<'NGINX'
+location ~* ^/wp-content/uploads/.*\.(php[0-9]*|phtml|phar)(\.|/|$) {
+    return 403;
+}
+NGINX;
+}
+
+
+/**
+ * Nginx verification commands with the real uploads URL.
+ */
+function wp_theme_security_hardening_nginx_verify_commands(): string {
+    $uploads = wp_upload_dir();
+    $baseurl = is_array($uploads) ? (string) ($uploads['baseurl'] ?? '') : '';
+
+    if ('' === $baseurl || ! empty($uploads['error'])) {
+        $url = home_url('/wp-content/uploads/security-test.php');
+    } else {
+        $url = trailingslashit($baseurl) . 'security-test.php';
+    }
+
+    return "sudo nginx -t && sudo systemctl reload nginx\ncurl -I " . $url . "\n";
+}
+
+
+/**
+ * Apache FilesMatch snippet for uploads/.htaccess only.
+ */
+function wp_theme_security_hardening_apache_htaccess_snippet(): string {
+    return <<<'APACHE'
+<FilesMatch "\.(php[0-9]*|phtml|phar)(\.|$)">
+    Require all denied
+</FilesMatch>
+APACHE;
+}
+
+
+/**
+ * Apache VirtualHost snippet scoped to the uploads directory.
+ */
+function wp_theme_security_hardening_apache_vhost_snippet(): string {
+    $uploads = wp_upload_dir();
+    $basedir = is_array($uploads) ? (string) ($uploads['basedir'] ?? '') : '';
+    $basedir = (string) wp_normalize_path($basedir);
+    $basedir = str_replace('"', '', $basedir);
+
+    if ('' === $basedir) {
+        $basedir = '/path/to/wp-content/uploads';
+    }
+
+    return '<Directory "' . $basedir . '">' . "\n"
+        . '    <FilesMatch "\.(php[0-9]*|phtml|phar)(\.|$)">' . "\n"
+        . '        Require all denied' . "\n"
+        . '    </FilesMatch>' . "\n"
+        . '</Directory>' . "\n";
+}
+
+
+/**
+ * Quote a filesystem path for a POSIX shell snippet.
+ *
+ * @param string $path Absolute path.
+ */
+function wp_theme_security_hardening_shell_quote_path(string $path): string {
+    $path = untrailingslashit(wp_normalize_path($path));
+
+    return escapeshellarg($path);
+}
+
+
+/**
+ * POSIX account name for a uid, or empty when unavailable.
+ *
+ * @param int $uid User id.
+ */
+function wp_theme_security_hardening_posix_user_name(int $uid): string {
+    if ($uid < 0 || ! function_exists('posix_getpwuid')) {
+        return '';
+    }
+
+    $info = posix_getpwuid($uid);
+    if (! is_array($info) || empty($info['name'])) {
+        return '';
+    }
+
+    $name = (string) $info['name'];
+    if (! preg_match('/^[A-Za-z_][A-Za-z0-9_-]*\$?$/', $name)) {
+        return '';
+    }
+
+    return $name;
+}
+
+
+/**
+ * User the PHP process runs as.
+ */
+function wp_theme_security_hardening_php_user_name(): string {
+    if (! function_exists('posix_geteuid')) {
+        return '';
+    }
+
+    return wp_theme_security_hardening_posix_user_name(posix_geteuid());
+}
+
+
+/**
+ * Owner of a path, or empty when unavailable.
+ *
+ * @param string $path Filesystem path.
+ */
+function wp_theme_security_hardening_path_owner_name(string $path): string {
+    if (! is_dir($path) && ! is_file($path)) {
+        return '';
+    }
+
+    $uid = fileowner($path);
+    if (! is_int($uid)) {
+        return '';
+    }
+
+    return wp_theme_security_hardening_posix_user_name($uid);
+}
+
+
+/**
+ * Normalize a directory path for comparisons and snippets.
+ *
+ * @param string $path Path.
+ */
+function wp_theme_security_hardening_normalize_dir(string $path): string {
+    return untrailingslashit(wp_normalize_path($path));
+}
+
+
+/**
+ * Directories to drop write bits on (code only — not uploads/cache/logs).
+ *
+ * @return string[]
+ */
+function wp_theme_security_hardening_lock_directories(): array {
+    $root = wp_theme_security_hardening_normalize_dir(ABSPATH);
+    $paths = array(
+        $root . '/wp-admin',
+        $root . '/wp-includes',
+        defined('WP_PLUGIN_DIR') ? (string) WP_PLUGIN_DIR : $root . '/wp-content/plugins',
+        (string) get_theme_root(),
+    );
+
+    $normalized = array();
+    foreach ($paths as $candidate) {
+        $candidate = wp_theme_security_hardening_normalize_dir($candidate);
+        if ('' === $candidate || ! is_dir($candidate)) {
+            continue;
+        }
+
+        $normalized[] = $candidate;
+    }
+
+    return array_values(array_unique($normalized));
+}
+
+
+/**
+ * Root PHP/bootstrap files to lock without touching the whole ABSPATH tree.
+ *
+ * @return string[]
+ */
+function wp_theme_security_hardening_lock_root_files(): array {
+    $root  = wp_theme_security_hardening_normalize_dir(ABSPATH);
+    $names = array(
+        'index.php',
+        'wp-activate.php',
+        'wp-blog-header.php',
+        'wp-comments-post.php',
+        'wp-config-sample.php',
+        'wp-cron.php',
+        'wp-links-opml.php',
+        'wp-load.php',
+        'wp-login.php',
+        'wp-mail.php',
+        'wp-settings.php',
+        'wp-signup.php',
+        'wp-trackback.php',
+        'xmlrpc.php',
+    );
+
+    $files = array();
+    foreach ($names as $name) {
+        $path = $root . '/' . $name;
+        if (is_file($path)) {
+            $files[] = $path;
+        }
+    }
+
+    return $files;
+}
+
+
+/**
+ * Uploads basedir for this site.
+ */
+function wp_theme_security_hardening_uploads_dir(): string {
+    $uploads = wp_upload_dir();
+    $basedir = is_array($uploads) ? (string) ($uploads['basedir'] ?? '') : '';
+
+    if ('' === $basedir) {
+        $basedir = ABSPATH . 'wp-content/uploads';
+    }
+
+    return wp_theme_security_hardening_normalize_dir($basedir);
+}
+
+
+/**
+ * chmod/chown commands for this site's real paths and users.
+ */
+function wp_theme_security_hardening_permissions_snippet(): string {
+    $lock_dirs  = wp_theme_security_hardening_lock_directories();
+    $lock_files = wp_theme_security_hardening_lock_root_files();
+    $lock_all   = array_merge($lock_dirs, $lock_files);
+    $lock_quoted = array_map(
+        wp_theme_security_hardening_shell_quote_path(...),
+        $lock_all
+    );
+    $dirs_quoted = array_map(
+        wp_theme_security_hardening_shell_quote_path(...),
+        $lock_dirs
+    );
+    $files_quoted = array_map(
+        wp_theme_security_hardening_shell_quote_path(...),
+        $lock_files
+    );
+    $uploads_q = wp_theme_security_hardening_shell_quote_path(
+        wp_theme_security_hardening_uploads_dir()
+    );
+    $php_user   = wp_theme_security_hardening_php_user_name();
+    $root_owner = wp_theme_security_hardening_path_owner_name(ABSPATH);
+    $lines      = array();
+
+    if (array() === $lock_quoted) {
+        return "# No lockable WordPress code paths were found.\n";
+    }
+
+    if ('' !== $php_user && '' !== $root_owner && $php_user !== $root_owner) {
+        $lines[] = 'sudo chown -R ' . $root_owner . ':' . $root_owner . ' ' . implode(' ', $lock_quoted);
+        if (array() !== $dirs_quoted) {
+            $lines[] = 'sudo chmod -R u=rwX,go=rX ' . implode(' ', $dirs_quoted);
+        }
+
+        if (array() !== $files_quoted) {
+            $lines[] = 'sudo chmod u=rw,go=r ' . implode(' ', $files_quoted);
+        }
+
+        $lines[] = '';
+        $lines[] = 'sudo chown -R ' . $php_user . ':' . $php_user . ' ' . $uploads_q;
+        $lines[] = 'sudo chmod -R u=rwX,go=rX ' . $uploads_q;
+    } else {
+        if (array() !== $dirs_quoted) {
+            $lines[] = 'sudo chmod -R u=rX,go=rX ' . implode(' ', $dirs_quoted);
+        }
+
+        if (array() !== $files_quoted) {
+            $lines[] = 'sudo chmod u=r,go=r ' . implode(' ', $files_quoted);
+        }
+
+        $lines[] = 'sudo chmod -R u=rwX,go=rX ' . $uploads_q;
+    }
+
+    return implode("\n", $lines) . "\n";
+}
+
+
+/**
+ * wp-config.php constants snippet.
+ *
+ * DISALLOW_FILE_MODS is optional: include it only when updates go through
+ * git/CI. Leaving it out keeps admin installs and the GitHub theme updater working.
+ */
+function wp_theme_security_hardening_wp_config_snippet(): string {
+    return <<<'PHP'
+// Optional: only when updates go through git/CI (blocks admin installs and GitHub theme updates).
+// define( 'DISALLOW_FILE_MODS', true );
+
+define( 'DISALLOW_FILE_EDIT', true );
+define( 'FORCE_SSL_ADMIN', true );
+define( 'WP_DEBUG_DISPLAY', false );
+define( 'WP_ENVIRONMENT_TYPE', 'production' );
+PHP;
+}
+
+
+/**
+ * Render a readonly snippet with a Copy button.
+ *
+ * @param string $id      Element id.
+ * @param string $code    Snippet body.
+ * @param bool   $is_pre  Use pre instead of textarea.
+ * @param int    $rows    Textarea rows.
+ * @param string $heading Optional heading above the snippet.
+ */
+function wp_theme_security_hardening_render_copyable(
+    string $id,
+    string $code,
+    bool $is_pre = false,
+    int $rows = 6,
+    string $heading = ''
+): void {
+    echo '<div class="wp-theme-security-hardening-copy">';
+    echo '<div class="wp-theme-security-hardening-copy-toolbar">';
+    if ('' !== $heading) {
+        echo '<h3>' . esc_html($heading) . '</h3>';
+    }
+
+    echo '<button type="button" class="button wp-theme-security-hardening-copy-button" data-copy-target="' . esc_attr($id) . '">';
+    echo esc_html__('Copy', 'wp-theme');
+    echo '</button>';
+    echo '</div>';
+
+    if ($is_pre) {
+        echo '<pre class="code" id="' . esc_attr($id) . '">' . esc_html($code) . '</pre>';
+    } else {
+        echo '<textarea readonly="readonly" class="large-text code" id="' . esc_attr($id) . '" rows="' . esc_attr((string) $rows) . '">';
+        echo esc_textarea($code);
+        echo '</textarea>';
+    }
+
+    echo '</div>';
+}
+
+
+/**
+ * Render the Tools page.
+ */
+function wp_theme_security_hardening_render_admin_page(): void {
+    if (! current_user_can('manage_options')) {
+        wp_die(esc_html__('Sorry, you are not allowed to do this.', 'wp-theme'));
+    }
+
+    $tabs    = wp_theme_security_hardening_tabs();
+    $current = wp_theme_security_hardening_current_tab();
+    ?>
+    <div class="wrap wp-theme-security-hardening">
+        <h1><?php esc_html_e('Security Hardening', 'wp-theme'); ?></h1>
+
+        <nav class="nav-tab-wrapper">
+            <?php foreach ($tabs as $slug => $label) : ?>
+                <?php $active = $current === $slug; ?>
+                <a
+                    href="<?php echo esc_url(wp_theme_security_hardening_tab_url($slug)); ?>"
+                    class="nav-tab<?php echo $active ? ' nav-tab-active' : ''; ?>"
+                    <?php echo $active ? ' aria-current="page"' : ''; ?>
+                >
+                    <?php echo esc_html($label); ?>
+                </a>
+            <?php endforeach; ?>
+        </nav>
+
+        <?php
+        match ($current) {
+            'web-server' => wp_theme_security_hardening_render_tab_web_server(),
+            'permissions' => wp_theme_security_hardening_render_tab_permissions(),
+            'wp-config' => wp_theme_security_hardening_render_tab_wp_config(),
+            default => wp_theme_security_hardening_render_tab_overview(),
+        };
+    ?>
+    </div>
+    <?php
+}
+
+
+/**
+ * Overview tab.
+ */
+function wp_theme_security_hardening_render_tab_overview(): void {
+    $env = wp_get_environment_type();
+    $groups = array(
+        'critical' => array(
+            'title' => __('Critical', 'wp-theme'),
+            'class' => 'notice-error',
+            'items' => array(),
+            'hide_when_empty' => false,
+        ),
+        'warning'  => array(
+            'title' => __('Warnings', 'wp-theme'),
+            'class' => 'notice-warning',
+            'items' => array(),
+            'hide_when_empty' => false,
+        ),
+        'skipped'  => array(
+            'title' => __('Not scored', 'wp-theme'),
+            'class' => 'notice-info',
+            'items' => array(),
+            'hide_when_empty' => true,
+        ),
+        'good'     => array(
+            'title' => __('Passed', 'wp-theme'),
+            'class' => 'notice-success',
+            'items' => array(),
+            'hide_when_empty' => false,
+        ),
+        'unknown'  => array(
+            'title' => __('Could not check automatically', 'wp-theme'),
+            'class' => 'notice-info',
+            'items' => array(),
+            'hide_when_empty' => true,
+        ),
+    );
+
+    foreach (wp_theme_security_hardening_get_results() as $item) {
+        $status = isset($groups[ $item['status'] ]) ? $item['status'] : 'unknown';
+        $groups[ $status ]['items'][] = $item;
+    }
+    ?>
+    <div class="wp-theme-security-hardening-meta">
+        <p>
+            <strong><?php esc_html_e('Environment type', 'wp-theme'); ?>:</strong>
+            <code><?php echo esc_html($env); ?></code>
+        </p>
+        <p class="description">
+            <?php esc_html_e('Critical and warning checks count as issues only when the environment type is production.', 'wp-theme'); ?>
+            <a href="<?php echo esc_url(wp_theme_security_hardening_tab_url('wp-config')); ?>">
+                <?php esc_html_e('How to set WP_ENVIRONMENT_TYPE', 'wp-theme'); ?>
+            </a>
+        </p>
+    </div>
+
+    <?php foreach ($groups as $group) : ?>
+        <?php if (array() !== $group['items'] || empty($group['hide_when_empty'])) : ?>
+            <div class="wp-theme-security-hardening-group">
+                <h2><?php echo esc_html($group['title']); ?></h2>
+                <?php if (array() === $group['items']) : ?>
+                    <p><?php esc_html_e('None.', 'wp-theme'); ?></p>
+                <?php else : ?>
+                    <?php foreach ($group['items'] as $item) : ?>
+                        <div class="notice <?php echo esc_attr($group['class']); ?> inline">
+                            <p>
+                                <strong><?php echo esc_html((string) $item['title']); ?></strong><br>
+                                <?php echo esc_html((string) $item['description']); ?>
+                            </p>
+                            <?php wp_theme_security_hardening_render_check_action($item); ?>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    <?php endforeach; ?>
+    <?php
+}
+
+
+/**
+ * Link from a failed check to the tab with the fix, if any.
+ *
+ * @param array<string, mixed> $item Check item.
+ */
+function wp_theme_security_hardening_render_check_action(array $item): void {
+    $id     = isset($item['id']) ? (string) $item['id'] : '';
+    $status = isset($item['status']) ? (string) $item['status'] : '';
+    $tab    = wp_theme_security_hardening_tab_for_check($id);
+
+    if ('' === $id || 'overview' === $tab || 'good' === $status) {
+        return;
+    }
+
+    echo '<p class="wp-theme-security-hardening-action">';
+    echo '<a href="' . esc_url(wp_theme_security_hardening_tab_url($tab)) . '">';
+    echo esc_html(wp_theme_security_hardening_action_label_for_tab($tab));
+    echo '</a>';
+    echo '</p>';
+}
+
+
+/**
+ * Web server tab: show instructions for the detected server.
+ */
+function wp_theme_security_hardening_render_tab_web_server(): void {
+    $server = wp_theme_security_hardening_detect_server();
+    ?>
+    <div class="wp-theme-security-hardening-meta">
+        <p>
+            <strong><?php esc_html_e('Detected web server:', 'wp-theme'); ?></strong>
+            <?php echo esc_html($server['label']); ?>
+            <?php if ('' !== $server['raw']) : ?>
+                <code><?php echo esc_html($server['raw']); ?></code>
+            <?php endif; ?>
+        </p>
+        <?php if ('unknown' !== $server['family']) : ?>
+            <p class="description">
+                <?php esc_html_e('Detected by WordPress from the server signature. A reverse proxy can hide the real server.', 'wp-theme'); ?>
+            </p>
+        <?php endif; ?>
+    </div>
+    <?php if ('nginx' === $server['family']) : ?>
+        <h2><?php echo esc_html($server['label']); ?></h2>
+        <?php wp_theme_security_hardening_render_section_nginx(); ?>
+        <details class="wp-theme-security-hardening-other-server">
+            <summary><?php esc_html_e('Apache / LiteSpeed instructions', 'wp-theme'); ?></summary>
+            <?php wp_theme_security_hardening_render_section_apache(); ?>
+        </details>
+    <?php elseif ('apache' === $server['family']) : ?>
+        <p class="description">
+            <?php esc_html_e('If production uses Nginx, open the Nginx instructions below.', 'wp-theme'); ?>
+        </p>
+        <h2><?php echo esc_html($server['label']); ?></h2>
+        <?php wp_theme_security_hardening_render_section_apache(); ?>
+        <details class="wp-theme-security-hardening-other-server">
+            <summary><?php esc_html_e('Nginx instructions', 'wp-theme'); ?></summary>
+            <?php wp_theme_security_hardening_render_section_nginx(); ?>
+        </details>
+    <?php else : ?>
+        <div class="notice notice-warning inline">
+            <p>
+                <?php esc_html_e('WordPress could not tell whether this site runs Nginx or Apache. A reverse proxy can hide the real server. Both instruction sets are shown.', 'wp-theme'); ?>
+            </p>
+        </div>
+        <h2><?php esc_html_e('Nginx', 'wp-theme'); ?></h2>
+        <?php wp_theme_security_hardening_render_section_nginx(); ?>
+        <h2><?php esc_html_e('Apache', 'wp-theme'); ?></h2>
+        <?php wp_theme_security_hardening_render_section_apache(); ?>
+    <?php endif; ?>
+    <?php
+}
+
+
+/**
+ * Nginx instructions.
+ */
+function wp_theme_security_hardening_render_section_nginx(): void {
+    ?>
+    <p>
+        <?php esc_html_e('Add this location to the site nginx config, above the general PHP handler. The theme does not change nginx and does not run these commands.', 'wp-theme'); ?>
+    </p>
+    <?php
+    wp_theme_security_hardening_render_copyable(
+        'wp-theme-hardening-nginx-snippet',
+        wp_theme_security_hardening_nginx_snippet(),
+        false,
+        6,
+        __('Nginx location', 'wp-theme')
+    );
+    ?>
+    <p>
+        <?php esc_html_e('After saving the config, test and reload nginx, then request a dummy PHP file. The expected response is HTTP 403.', 'wp-theme'); ?>
+    </p>
+    <?php
+    wp_theme_security_hardening_render_copyable(
+        'wp-theme-hardening-nginx-verify',
+        wp_theme_security_hardening_nginx_verify_commands(),
+        false,
+        4,
+        __('Reload and test', 'wp-theme')
+    );
+}
+
+
+/**
+ * Apache / LiteSpeed instructions.
+ */
+function wp_theme_security_hardening_render_section_apache(): void {
+    ?>
+    <p>
+        <?php esc_html_e('Paste the first snippet only into wp-content/uploads/.htaccess.', 'wp-theme'); ?>
+        <?php esc_html_e('Do not put it in the site-root .htaccess or in unscoped VirtualHost extra directives: that FilesMatch would deny PHP for the whole site.', 'wp-theme'); ?>
+    </p>
+    <?php
+    wp_theme_security_hardening_render_copyable(
+        'wp-theme-hardening-apache-htaccess',
+        wp_theme_security_hardening_apache_htaccess_snippet(),
+        false,
+        6,
+        __('uploads/.htaccess', 'wp-theme')
+    );
+    ?>
+    <p>
+        <?php esc_html_e('If you use a root-owned VirtualHost, paste the Directory block instead. It is already limited to the uploads path of this site. The theme does not create or overwrite .htaccess.', 'wp-theme'); ?>
+    </p>
+    <?php
+    wp_theme_security_hardening_render_copyable(
+        'wp-theme-hardening-apache-vhost',
+        wp_theme_security_hardening_apache_vhost_snippet(),
+        false,
+        8,
+        __('VirtualHost', 'wp-theme')
+    );
+}
+
+
+/**
+ * File permissions tab (writable core / plugins / themes).
+ */
+function wp_theme_security_hardening_render_tab_permissions(): void {
+    $php_user   = wp_theme_security_hardening_php_user_name();
+    $root_owner = wp_theme_security_hardening_path_owner_name(ABSPATH);
+    $snippet    = wp_theme_security_hardening_permissions_snippet();
+    $rows       = max(6, substr_count($snippet, "\n") + 1);
+    ?>
+    <p>
+        <?php esc_html_e('WordPress reports this warning when the PHP user can write core, plugins, or themes.', 'wp-theme'); ?>
+        <?php esc_html_e('That lets a compromised plugin change PHP on disk. It is also required if you install plugins and themes from wp-admin.', 'wp-theme'); ?>
+    </p>
+    <p>
+        <?php esc_html_e('If updates go through git/CI, make those directories owned by the deploy user and not writable by PHP.', 'wp-theme'); ?>
+        <?php esc_html_e('Keep uploads writable so media still works. Run the commands over SSH after deploy; the theme does not change ownership.', 'wp-theme'); ?>
+    </p>
+    <p>
+        <?php esc_html_e('If you update from the admin, skip this. The warning is expected. On Docker the mounted dirs stay writable on purpose.', 'wp-theme'); ?>
+    </p>
+    <p class="description">
+        <?php esc_html_e('DISALLOW_FILE_MODS only hides install buttons in wp-admin. It does not make directories read-only.', 'wp-theme'); ?>
+    </p>
+    <div class="wp-theme-security-hardening-meta">
+        <p>
+            <strong><?php esc_html_e('PHP user', 'wp-theme'); ?>:</strong>
+            <?php if ('' !== $php_user) : ?>
+                <code><?php echo esc_html($php_user); ?></code>
+            <?php else : ?>
+                <?php esc_html_e('Could not detect', 'wp-theme'); ?>
+            <?php endif; ?>
+        </p>
+        <p>
+            <strong><?php esc_html_e('Owner of WordPress root', 'wp-theme'); ?>:</strong>
+            <?php if ('' !== $root_owner) : ?>
+                <code><?php echo esc_html($root_owner); ?></code>
+            <?php else : ?>
+                <?php esc_html_e('Could not detect', 'wp-theme'); ?>
+            <?php endif; ?>
+        </p>
+    </div>
+    <?php if ('' !== $php_user && $php_user === $root_owner) : ?>
+        <p class="description">
+            <?php esc_html_e('PHP runs as the same user that owns the files. The commands below remove the owner write bit on core and restore it on uploads.', 'wp-theme'); ?>
+        </p>
+    <?php endif; ?>
+    <?php
+    wp_theme_security_hardening_render_copyable(
+        'wp-theme-hardening-permissions-snippet',
+        $snippet,
+        false,
+        $rows,
+        __('Commands for this site', 'wp-theme')
+    );
+}
+
+
+/**
+ * wp-config tab.
+ */
+function wp_theme_security_hardening_render_tab_wp_config(): void {
+    ?>
+    <p>
+        <?php esc_html_e('Copy these constants into wp-config.php, above the "That\'s all, stop editing!" line. The theme does not change that file.', 'wp-theme'); ?>
+    </p>
+    <p>
+        <?php esc_html_e('DISALLOW_FILE_MODS is optional. Enable it only when updates go through git/CI.', 'wp-theme'); ?>
+        <?php esc_html_e('It disables installing and updating plugins and themes from the admin, including this theme\'s GitHub updater.', 'wp-theme'); ?>
+        <?php esc_html_e('It does not block posts, pages, ACF, users, media, REST API, or already active plugins.', 'wp-theme'); ?>
+    </p>
+    <p>
+        <?php esc_html_e('FORCE_SSL_ADMIN redirects wp-admin and login to HTTPS.', 'wp-theme'); ?>
+    </p>
+    <p>
+        <?php esc_html_e('WP_DEBUG_DISPLAY hides PHP errors from visitors.', 'wp-theme'); ?>
+    </p>
+    <p>
+        <?php esc_html_e('WP_ENVIRONMENT_TYPE accepts only production, staging, development, and local. Without this constant WordPress treats the site as production.', 'wp-theme'); ?>
+    </p>
+    <?php if (wp_theme_security_hardening_file_edit_defined_by_theme()) : ?>
+        <p class="description">
+            <?php esc_html_e('DISALLOW_FILE_EDIT is currently set by the theme. Declaring it in wp-config.php before the theme loads is slightly more reliable if the theme fails to load.', 'wp-theme'); ?>
+        </p>
+    <?php endif; ?>
+    <?php
+    wp_theme_security_hardening_render_copyable(
+        'wp-theme-hardening-wp-config-snippet',
+        wp_theme_security_hardening_wp_config_snippet(),
+        false,
+        11,
+        'wp-config.php'
+    );
+}

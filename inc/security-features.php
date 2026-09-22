@@ -52,9 +52,17 @@ function wp_theme_hide_wp_version(): void {
 
 /**
  * Disable file editing in admin.
+ *
+ * Sets WP_THEME_DEFINED_DISALLOW_FILE_EDIT when the theme defines the
+ * constant so Security Hardening can tell theme vs wp-config origin.
+ * DISALLOW_FILE_MODS is never defined here.
  */
 function wp_theme_disable_file_editing(): void {
     if (! defined('DISALLOW_FILE_EDIT')) {
+        if (! defined('WP_THEME_DEFINED_DISALLOW_FILE_EDIT')) {
+            define('WP_THEME_DEFINED_DISALLOW_FILE_EDIT', true);
+        }
+
         define('DISALLOW_FILE_EDIT', true);
     }
 }

@@ -100,6 +100,11 @@ require_once get_template_directory() . '/inc/github-updater.php';
  */
 require_once get_template_directory() . '/inc/content-seeder.php';
 
+/**
+ * Security Hardening diagnostics (Tools). Always available to administrators.
+ */
+require_once get_template_directory() . '/inc/security-hardening/security-hardening.php';
+
 if (class_exists('ACF')) {
     require_once get_template_directory() . '/inc/acf-hide-content-editor.php';
     require_once get_template_directory() . '/inc/acf-repeater-styling.php';

@@ -1,18 +1,43 @@
 # Copyright (C) 2026 WP Theme
 # This file is distributed under the same license as the WP Theme package.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Theme 1.3.0\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-14 09:43+0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Project-Id-Version: WP Theme 1.3.1\n"
+"Report-Msgid-Bugs-To: https://github.com/mksddn/wp-theme\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-09-18T11:18:07+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: wp-theme\n"
+
+#. Theme Name of the theme
+#: style.css
+msgid "WP Theme"
+msgstr ""
+
+#. Theme URI of the theme
+#: style.css
+msgid "https://github.com/mksddn/wp-theme"
+msgstr ""
+
+#. Description of the theme
+#: style.css
+msgid "A modern WordPress theme with GitHub auto-updates"
+msgstr ""
+
+#. Author of the theme
+#: style.css
+msgid "Max Dudin"
+msgstr ""
+
+#. Author URI of the theme
+#: style.css
+msgid "https://github.com/mksddn"
+msgstr ""
 
 #: 404.php:24
 msgid "Oops! That page can't be found."
@@ -26,23 +51,28 @@ msgstr ""
 msgid "Options Page with specified slug not found"
 msgstr ""
 
-#: inc/category-thumbnails.php:19 inc/category-thumbnails.php:34
+#: inc/category-thumbnails.php:19
+#: inc/category-thumbnails.php:34
 msgid "Category Thumbnail"
 msgstr ""
 
-#: inc/category-thumbnails.php:22 inc/category-thumbnails.php:43
+#: inc/category-thumbnails.php:22
+#: inc/category-thumbnails.php:43
 msgid "Upload category thumbnail image"
 msgstr ""
 
-#: inc/category-thumbnails.php:22 inc/category-thumbnails.php:43
+#: inc/category-thumbnails.php:22
+#: inc/category-thumbnails.php:43
 msgid "Upload Image"
 msgstr ""
 
-#: inc/category-thumbnails.php:23 inc/category-thumbnails.php:46
+#: inc/category-thumbnails.php:23
+#: inc/category-thumbnails.php:46
 msgid "Remove category thumbnail image"
 msgstr ""
 
-#: inc/category-thumbnails.php:23 inc/category-thumbnails.php:47
+#: inc/category-thumbnails.php:23
+#: inc/category-thumbnails.php:47
 msgid "Remove Image"
 msgstr ""
 
@@ -192,7 +222,8 @@ msgstr ""
 msgid "Failed acf:%1$s (%2$s)."
 msgstr ""
 
-#: inc/content-seeder.php:1399 inc/content-seeder.php:1400
+#: inc/content-seeder.php:1399
+#: inc/content-seeder.php:1400
 #: inc/content-seeder.php:1435
 msgid "Content Seeder"
 msgstr ""
@@ -202,10 +233,7 @@ msgid "Create missing entities and fill content fields with placeholders?"
 msgstr ""
 
 #: inc/content-seeder.php:1436
-msgid ""
-"Creates sample posts and terms when needed, then fills WordPress and ACF "
-"fields with placeholder values. Post types: pages, posts, and CPTs with ACF "
-"field groups."
+msgid "Creates sample posts and terms when needed, then fills WordPress and ACF fields with placeholder values. Post types: pages, posts, and CPTs with ACF field groups."
 msgstr ""
 
 #: inc/content-seeder.php:1444
@@ -244,16 +272,16 @@ msgstr ""
 msgid "Run seeder"
 msgstr ""
 
-#: inc/content-seeder.php:1502 inc/image-optimization.php:895
+#: inc/content-seeder.php:1502
+#: inc/image-optimization.php:895
+#: inc/security-hardening/admin.php:409
 msgid "Sorry, you are not allowed to do this."
 msgstr ""
 
 #. translators: 1: created count, 2: seeded count, 3: skipped count, 4: failed count
 #: inc/content-seeder.php:1561
 #, php-format
-msgid ""
-"Content seeder finished: %1$d created, %2$d seeded, %3$d skipped, %4$d "
-"failed."
+msgid "Content seeder finished: %1$d created, %2$d seeded, %3$d skipped, %4$d failed."
 msgstr ""
 
 #: inc/content-seeder.php:1575
@@ -377,20 +405,442 @@ msgid "Image optimization finished: %1$d done, %2$d failed (%3$d total)."
 msgstr ""
 
 #: inc/image-optimization.php:974
-msgid ""
-"Details are also written to the PHP error log with the prefix [wp-theme "
-"image-opt]."
+msgid "Details are also written to the PHP error log with the prefix [wp-theme image-opt]."
 msgstr ""
 
-#: inc/security-features.php:199
+#: inc/security-features.php:207
 msgid "Too many failed login attempts. Please try again later."
 msgstr ""
 
-#: inc/theme-features.php:167 inc/theme-features.php:206
+#: inc/security-hardening/admin.php:20
+msgid "Overview"
+msgstr ""
+
+#: inc/security-hardening/admin.php:21
+#: inc/security-hardening/checks.php:1005
+msgid "Web server"
+msgstr ""
+
+#: inc/security-hardening/admin.php:22
+msgid "File permissions"
+msgstr ""
+
+#: inc/security-hardening/admin.php:23
+msgid "wp-config"
+msgstr ""
+
+#. translators: %s: admin tab title
+#: inc/security-hardening/admin.php:38
+#, php-format
+msgid "Open %s"
+msgstr ""
+
+#: inc/security-hardening/admin.php:41
+msgid "Open Security Hardening"
+msgstr ""
+
+#: inc/security-hardening/admin.php:138
+msgid "Unknown"
+msgstr ""
+
+#: inc/security-hardening/admin.php:388
+#: inc/security-hardening/security-hardening.php:81
+msgid "Copy"
+msgstr ""
+
+#: inc/security-hardening/admin.php:416
+#: inc/security-hardening/checks.php:188
+#: inc/security-hardening/checks.php:1025
+#: inc/security-hardening/security-hardening.php:30
+#: inc/security-hardening/security-hardening.php:31
+msgid "Security Hardening"
+msgstr ""
+
+#: inc/security-hardening/admin.php:459
+#: inc/security-hardening/checks.php:980
+msgid "Critical"
+msgstr ""
+
+#: inc/security-hardening/admin.php:465
+msgid "Warnings"
+msgstr ""
+
+#: inc/security-hardening/admin.php:471
+#: inc/security-hardening/checks.php:983
+msgid "Not scored"
+msgstr ""
+
+#: inc/security-hardening/admin.php:477
+#: inc/security-hardening/checks.php:982
+msgid "Passed"
+msgstr ""
+
+#: inc/security-hardening/admin.php:483
+#: inc/security-hardening/checks.php:984
+msgid "Could not check automatically"
+msgstr ""
+
+#: inc/security-hardening/admin.php:500
+#: inc/security-hardening/checks.php:1001
+msgid "Environment type"
+msgstr ""
+
+#: inc/security-hardening/admin.php:504
+msgid "Critical and warning checks count as issues only when the environment type is production."
+msgstr ""
+
+#: inc/security-hardening/admin.php:506
+msgid "How to set WP_ENVIRONMENT_TYPE"
+msgstr ""
+
+#: inc/security-hardening/admin.php:518
+msgid "None."
+msgstr ""
+
+#: inc/security-hardening/admin.php:566
+msgid "Detected web server:"
+msgstr ""
+
+#: inc/security-hardening/admin.php:574
+msgid "Detected by WordPress from the server signature. A reverse proxy can hide the real server."
+msgstr ""
+
+#: inc/security-hardening/admin.php:582
+msgid "Apache / LiteSpeed instructions"
+msgstr ""
+
+#: inc/security-hardening/admin.php:587
+msgid "If production uses Nginx, open the Nginx instructions below."
+msgstr ""
+
+#: inc/security-hardening/admin.php:592
+msgid "Nginx instructions"
+msgstr ""
+
+#: inc/security-hardening/admin.php:598
+msgid "WordPress could not tell whether this site runs Nginx or Apache. A reverse proxy can hide the real server. Both instruction sets are shown."
+msgstr ""
+
+#: inc/security-hardening/admin.php:601
+msgid "Nginx"
+msgstr ""
+
+#: inc/security-hardening/admin.php:603
+msgid "Apache"
+msgstr ""
+
+#: inc/security-hardening/admin.php:616
+msgid "Add this location to the site nginx config, above the general PHP handler. The theme does not change nginx and does not run these commands."
+msgstr ""
+
+#: inc/security-hardening/admin.php:624
+msgid "Nginx location"
+msgstr ""
+
+#: inc/security-hardening/admin.php:628
+msgid "After saving the config, test and reload nginx, then request a dummy PHP file. The expected response is HTTP 403."
+msgstr ""
+
+#: inc/security-hardening/admin.php:636
+msgid "Reload and test"
+msgstr ""
+
+#: inc/security-hardening/admin.php:647
+msgid "Paste the first snippet only into wp-content/uploads/.htaccess."
+msgstr ""
+
+#: inc/security-hardening/admin.php:648
+msgid "Do not put it in the site-root .htaccess or in unscoped VirtualHost extra directives: that FilesMatch would deny PHP for the whole site."
+msgstr ""
+
+#: inc/security-hardening/admin.php:656
+msgid "uploads/.htaccess"
+msgstr ""
+
+#: inc/security-hardening/admin.php:660
+msgid "If you use a root-owned VirtualHost, paste the Directory block instead. It is already limited to the uploads path of this site. The theme does not create or overwrite .htaccess."
+msgstr ""
+
+#: inc/security-hardening/admin.php:668
+msgid "VirtualHost"
+msgstr ""
+
+#: inc/security-hardening/admin.php:683
+msgid "WordPress reports this warning when the PHP user can write core, plugins, or themes."
+msgstr ""
+
+#: inc/security-hardening/admin.php:684
+msgid "That lets a compromised plugin change PHP on disk. It is also required if you install plugins and themes from wp-admin."
+msgstr ""
+
+#: inc/security-hardening/admin.php:687
+msgid "If updates go through git/CI, make those directories owned by the deploy user and not writable by PHP."
+msgstr ""
+
+#: inc/security-hardening/admin.php:688
+msgid "Keep uploads writable so media still works. Run the commands over SSH after deploy; the theme does not change ownership."
+msgstr ""
+
+#: inc/security-hardening/admin.php:691
+msgid "If you update from the admin, skip this. The warning is expected. On Docker the mounted dirs stay writable on purpose."
+msgstr ""
+
+#: inc/security-hardening/admin.php:694
+msgid "DISALLOW_FILE_MODS only hides install buttons in wp-admin. It does not make directories read-only."
+msgstr ""
+
+#: inc/security-hardening/admin.php:698
+msgid "PHP user"
+msgstr ""
+
+#: inc/security-hardening/admin.php:702
+#: inc/security-hardening/admin.php:710
+msgid "Could not detect"
+msgstr ""
+
+#: inc/security-hardening/admin.php:706
+msgid "Owner of WordPress root"
+msgstr ""
+
+#: inc/security-hardening/admin.php:716
+msgid "PHP runs as the same user that owns the files. The commands below remove the owner write bit on core and restore it on uploads."
+msgstr ""
+
+#: inc/security-hardening/admin.php:725
+msgid "Commands for this site"
+msgstr ""
+
+#: inc/security-hardening/admin.php:790
+msgid "Copy these constants into wp-config.php, above the \"That's all, stop editing!\" line. The theme does not change that file."
+msgstr ""
+
+#: inc/security-hardening/admin.php:793
+msgid "DISALLOW_FILE_MODS is optional. Enable it only when updates go through git/CI — it disables installing and updating plugins and themes from the admin, including this theme's GitHub updater. It does not block posts, pages, ACF, users, media, REST API, or already active plugins."
+msgstr ""
+
+#: inc/security-hardening/admin.php:797
+msgid "FORCE_SSL_ADMIN redirects wp-admin and login to HTTPS."
+msgstr ""
+
+#: inc/security-hardening/admin.php:799
+msgid "WP_DEBUG_DISPLAY hides PHP errors from visitors."
+msgstr ""
+
+#: inc/security-hardening/admin.php:802
+msgid "WP_ENVIRONMENT_TYPE accepts only production, staging, development, and local. Without this constant WordPress treats the site as production."
+msgstr ""
+
+#: inc/security-hardening/admin.php:754
+msgid "DISALLOW_FILE_EDIT is currently set by the theme. Declaring it in wp-config.php before the theme loads is slightly more reliable if the theme fails to load."
+msgstr ""
+
+#: inc/security-hardening/checks.php:120
+msgid "Plugin and theme file modifications (DISALLOW_FILE_MODS)"
+msgstr ""
+
+#: inc/security-hardening/checks.php:125
+msgid "Debug display (WP_DEBUG_DISPLAY)"
+msgstr ""
+
+#: inc/security-hardening/checks.php:130
+msgid "Force SSL for admin (FORCE_SSL_ADMIN)"
+msgstr ""
+
+#: inc/security-hardening/checks.php:135
+msgid "Two-factor authentication plugin"
+msgstr ""
+
+#: inc/security-hardening/checks.php:140
+msgid "Two-factor authentication for administrators"
+msgstr ""
+
+#: inc/security-hardening/checks.php:145
+msgid "Query Monitor"
+msgstr ""
+
+#: inc/security-hardening/checks.php:150
+msgid "Plugin and theme updates"
+msgstr ""
+
+#: inc/security-hardening/checks.php:155
+msgid "Writable WordPress directories"
+msgstr ""
+
+#: inc/security-hardening/checks.php:160
+msgid "PHP execution in uploads"
+msgstr ""
+
+#: inc/security-hardening/checks.php:166
+msgid "File editor constant (DISALLOW_FILE_EDIT)"
+msgstr ""
+
+#: inc/security-hardening/checks.php:266
+msgid "This is not marked as a warning or critical issue because the environment type is not production."
+msgstr ""
+
+#: inc/security-hardening/checks.php:316
+msgid "DISALLOW_FILE_MODS is enabled. Installing and updating plugins and themes from the admin is blocked. Posts, pages, ACF, users, media, REST API, and already active plugins still work. Built-in theme updates from GitHub will also be blocked."
+msgstr ""
+
+#: inc/security-hardening/checks.php:325
+msgid "DISALLOW_FILE_MODS is not true. Add it in wp-config.php only if updates go through git/CI. Leave it unset if you install or update plugins and themes from wp-admin (including this theme's GitHub updater)."
+msgstr ""
+
+#: inc/security-hardening/checks.php:344
+msgid "Error display is off. Debug output will not be printed to site visitors."
+msgstr ""
+
+#: inc/security-hardening/checks.php:354
+msgid "WP_DEBUG_DISPLAY is on (or defaults to on because WP_DEBUG is on). On production this can leak paths and errors to visitors. Set WP_DEBUG_DISPLAY to false in wp-config.php."
+msgstr ""
+
+#: inc/security-hardening/checks.php:375
+msgid "FORCE_SSL_ADMIN is enabled."
+msgstr ""
+
+#: inc/security-hardening/checks.php:384
+msgid "The site URL is not HTTPS, so FORCE_SSL_ADMIN is not required yet."
+msgstr ""
+
+#: inc/security-hardening/checks.php:392
+msgid "The site is served over HTTPS but FORCE_SSL_ADMIN is not true. Add it in wp-config.php so wp-admin always uses HTTPS."
+msgstr ""
+
+#: inc/security-hardening/checks.php:410
+msgid "A recognized two-factor authentication plugin is active."
+msgstr ""
+
+#: inc/security-hardening/checks.php:419
+msgid "No recognized two-factor plugin is active (built-in list: Two Factor, WP 2FA). On production administrators should use 2FA. If another 2FA plugin is already in use, extend the list with the wp_theme_security_hardening_two_factor_plugins filter."
+msgstr ""
+
+#: inc/security-hardening/checks.php:442
+msgid "A two-factor plugin is active, but per-user status cannot be checked automatically for this plugin."
+msgstr ""
+
+#: inc/security-hardening/checks.php:478
+msgid "No administrators were found to check for two-factor authentication."
+msgstr ""
+
+#. translators: 1: administrators without 2FA, 2: administrators checked
+#: inc/security-hardening/checks.php:490
+#, php-format
+msgid "%1$d of %2$d checked administrators do not have two-factor authentication enabled."
+msgstr ""
+
+#. translators: 1: administrators checked, 2: total administrators
+#: inc/security-hardening/checks.php:505
+#, php-format
+msgid "The first %1$d of %2$d administrators have two-factor authentication enabled. Additional administrators were not checked."
+msgstr ""
+
+#. translators: %d: number of administrators checked
+#: inc/security-hardening/checks.php:519
+#, php-format
+msgid "All %d checked administrators have two-factor authentication enabled."
+msgstr ""
+
+#: inc/security-hardening/checks.php:540
+msgid "Query Monitor is not active."
+msgstr ""
+
+#: inc/security-hardening/checks.php:549
+msgid "Query Monitor is a temporary diagnostics plugin. It can show administrators SQL, file paths, errors, and HTTP requests. Keep it inactive on production and enable it only while debugging."
+msgstr ""
+
+#: inc/security-hardening/checks.php:577
+msgid "No plugin or theme updates are waiting in the admin."
+msgstr ""
+
+#. translators: 1: plugin update count, 2: theme update count
+#: inc/security-hardening/checks.php:588
+#, php-format
+msgid "%1$d plugin update(s) and %2$d theme update(s) are available. Review and apply them through your usual process (admin, git, or CI)."
+msgstr ""
+
+#: inc/security-hardening/checks.php:622
+msgid "core / plugins / themes are not writable from WordPress. This is preferred on production when updates go through git/CI."
+msgstr ""
+
+#. translators: %s: comma-separated list of core, plugins, themes
+#: inc/security-hardening/checks.php:633
+#, php-format
+msgid "Writable from WordPress: %s. Write access lets PHP on disk be changed and is also required to install plugins and themes from wp-admin. On production prefer read-only if updates go through git/CI. If you update from the admin, this warning is expected."
+msgstr ""
+
+#: inc/security-hardening/checks.php:716
+msgid "The uploads URL could not be determined, so PHP execution in uploads could not be probed."
+msgstr ""
+
+#: inc/security-hardening/checks.php:741
+msgid "The probe request failed (timeout, DNS, loopback, or TLS). This does not confirm missing protection."
+msgstr ""
+
+#: inc/security-hardening/checks.php:752
+msgid "A request for a non-existent PHP file in uploads returned HTTP 403. The web server is blocking PHP there."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: inc/security-hardening/checks.php:763
+#, php-format
+msgid "The uploads PHP probe returned HTTP %d. A 403 response would confirm that PHP is blocked. This is not proof that uploads are executable."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: inc/security-hardening/checks.php:776
+#: inc/security-hardening/checks.php:788
+#, php-format
+msgid "The uploads PHP probe returned HTTP %d. Protection could not be verified automatically."
+msgstr ""
+
+#: inc/security-hardening/checks.php:808
+msgid "DISALLOW_FILE_EDIT is enabled by the theme. Prefer declaring it in wp-config.php before the theme loads so it still applies if the theme fails to load."
+msgstr ""
+
+#: inc/security-hardening/checks.php:817
+msgid "DISALLOW_FILE_EDIT is defined before the theme loads (typically wp-config.php)."
+msgstr ""
+
+#: inc/security-hardening/checks.php:825
+msgid "DISALLOW_FILE_EDIT is not true. The plugin and theme file editor in wp-admin is available. Set it to true in wp-config.php before the theme loads."
+msgstr ""
+
+#: inc/security-hardening/checks.php:923
+#: inc/security-hardening/checks.php:938
+msgid "Security"
+msgstr ""
+
+#: inc/security-hardening/checks.php:926
+msgid "This check does not apply right now."
+msgstr ""
+
+#: inc/security-hardening/checks.php:976
+msgid "Not applicable"
+msgstr ""
+
+#: inc/security-hardening/checks.php:981
+msgid "Warning"
+msgstr ""
+
+#: inc/security-hardening/checks.php:1026
+msgid "Theme security checks. Open Tools → Security Hardening for copy-paste fixes."
+msgstr ""
+
+#: inc/security-hardening/security-hardening.php:82
+msgid "Copied"
+msgstr ""
+
+#: inc/security-hardening/security-hardening.php:83
+msgid "Copy failed"
+msgstr ""
+
+#: inc/theme-features.php:167
+#: inc/theme-features.php:206
 msgid "Unauthorized"
 msgstr ""
 
-#: inc/theme-features.php:171 inc/theme-features.php:210
+#: inc/theme-features.php:171
+#: inc/theme-features.php:210
 msgid "Invalid nonce"
 msgstr ""
 
@@ -398,7 +848,8 @@ msgstr ""
 msgid "Failed to encode settings"
 msgstr ""
 
-#: inc/theme-features.php:215 inc/theme-features.php:222
+#: inc/theme-features.php:215
+#: inc/theme-features.php:222
 msgid "File upload error. Please try again."
 msgstr ""
 
@@ -414,38 +865,43 @@ msgstr ""
 msgid "Settings imported successfully!"
 msgstr ""
 
-#: inc/theme-features.php:265 inc/theme-features.php:266
+#: inc/theme-features.php:265
+#: inc/theme-features.php:266
 msgid "Theme Features"
 msgstr ""
 
-#: inc/theme-features.php:291 inc/theme-features.php:297
+#: inc/theme-features.php:291
+#: inc/theme-features.php:297
 msgid "Admin Features"
 msgstr ""
 
-#: inc/theme-features.php:306 inc/theme-features.php:312
+#: inc/theme-features.php:306
+#: inc/theme-features.php:312
 msgid "Content Features"
 msgstr ""
 
-#: inc/theme-features.php:321 inc/theme-features.php:327
+#: inc/theme-features.php:321
+#: inc/theme-features.php:327
 msgid "Security Features"
 msgstr ""
 
-#: inc/theme-features.php:336 inc/theme-features.php:342
+#: inc/theme-features.php:336
+#: inc/theme-features.php:342
 msgid "Search Features"
 msgstr ""
 
-#: inc/theme-features.php:351 inc/theme-features.php:357
+#: inc/theme-features.php:351
+#: inc/theme-features.php:357
 msgid "Image Optimization"
 msgstr ""
 
-#: inc/theme-features.php:366 inc/theme-features.php:372
+#: inc/theme-features.php:366
+#: inc/theme-features.php:372
 msgid "Performance Features"
 msgstr ""
 
 #: inc/theme-features.php:567
-msgid ""
-"Configure theme features and functionality. Enable or disable specific "
-"features based on your needs."
+msgid "Configure theme features and functionality. Enable or disable specific features based on your needs."
 msgstr ""
 
 #: inc/theme-features.php:571
@@ -453,9 +909,7 @@ msgid "Warning:"
 msgstr ""
 
 #: inc/theme-features.php:571
-msgid ""
-"Settings are using default values. Database option 'wp_theme_settings' not "
-"found. Save settings to create the option."
+msgid "Settings are using default values. Database option 'wp_theme_settings' not found. Save settings to create the option."
 msgstr ""
 
 #: inc/theme-features.php:579
@@ -467,9 +921,7 @@ msgid "About Theme Features"
 msgstr ""
 
 #: inc/theme-features.php:585
-msgid ""
-"This page allows you to enable or disable various theme features. Changes "
-"take effect immediately after saving."
+msgid "This page allows you to enable or disable various theme features. Changes take effect immediately after saving."
 msgstr ""
 
 #: inc/theme-features.php:586
@@ -489,8 +941,7 @@ msgid "Backup & Restore Settings"
 msgstr ""
 
 #: inc/theme-features.php:592
-msgid ""
-"Use these tools to backup or restore theme settings. Useful for migrations."
+msgid "Use these tools to backup or restore theme settings. Useful for migrations."
 msgstr ""
 
 #: inc/theme-features.php:595
@@ -510,14 +961,11 @@ msgid "Import Settings from JSON"
 msgstr ""
 
 #: inc/theme-features.php:620
-msgid ""
-"Admin interface enhancements, WordPress core modifications, and "
-"administrative tools."
+msgid "Admin interface enhancements, WordPress core modifications, and administrative tools."
 msgstr ""
 
 #: inc/theme-features.php:625
-msgid ""
-"Content editing, display, and formatting features including editor settings."
+msgid "Content editing, display, and formatting features including editor settings."
 msgstr ""
 
 #: inc/theme-features.php:630
@@ -533,9 +981,7 @@ msgid "Control how images are handled when uploaded to the Media Library."
 msgstr ""
 
 #: inc/theme-features.php:645
-msgid ""
-"Basic performance optimizations to improve site speed and reduce server "
-"load. These settings are safe to enable and won't conflict with most plugins."
+msgid "Basic performance optimizations to improve site speed and reduce server load. These settings are safe to enable and won't conflict with most plugins."
 msgstr ""
 
 #: inc/theme-features.php:654
@@ -567,9 +1013,7 @@ msgid "Disable comments"
 msgstr ""
 
 #: inc/theme-features.php:657
-msgid ""
-"Removes comments and trackbacks site-wide; hides Comments menu, Discussion "
-"settings, and related admin bar items."
+msgid "Removes comments and trackbacks site-wide; hides Comments menu, Discussion settings, and related admin bar items."
 msgstr ""
 
 #: inc/theme-features.php:658
@@ -601,9 +1045,7 @@ msgid "Polylang REST API language detection"
 msgstr ""
 
 #: inc/theme-features.php:661
-msgid ""
-"Automatically detects language from Accept-Language header in REST API "
-"requests"
+msgid "Automatically detects language from Accept-Language header in REST API requests"
 msgstr ""
 
 #: inc/theme-features.php:670
@@ -771,9 +1213,7 @@ msgid "Optimize images on upload"
 msgstr ""
 
 #: inc/theme-features.php:812
-msgid ""
-"Blocks files over the max MB, shrinks oversized images, and compresses them "
-"using the settings below."
+msgid "Blocks files over the max MB, shrinks oversized images, and compresses them using the settings below."
 msgstr ""
 
 #: inc/theme-features.php:813
@@ -837,9 +1277,7 @@ msgid "Already uploaded images"
 msgstr ""
 
 #: inc/theme-features.php:856
-msgid ""
-"Shrink large images that were uploaded before these settings. Up to 50 "
-"images per click."
+msgid "Shrink large images that were uploaded before these settings. Up to 50 images per click."
 msgstr ""
 
 #: inc/theme-features.php:861
@@ -875,8 +1313,7 @@ msgid "Remove unused image sizes"
 msgstr ""
 
 #: inc/theme-features.php:873
-msgid ""
-"Checked sizes will not be created on upload. Leave empty to keep all sizes."
+msgid "Checked sizes will not be created on upload. Leave empty to keep all sizes."
 msgstr ""
 
 #: inc/theme-features.php:890
@@ -950,12 +1387,9 @@ msgid "Nothing Found"
 msgstr ""
 
 #: template-parts/content-none.php:15
-msgid ""
-"Sorry, but nothing matched your search terms. Please try again with some "
-"different keywords."
+msgid "Sorry, but nothing matched your search terms. Please try again with some different keywords."
 msgstr ""
 
 #: template-parts/content-none.php:20
-msgid ""
-"It seems we can't find what you're looking for. Perhaps searching can help."
+msgid "It seems we can't find what you're looking for. Perhaps searching can help."
 msgstr ""

@@ -1,20 +1,16 @@
-# Russian (Russia) translation for WP Theme
-# Copyright (C) 2026 WP Theme
-# This file is distributed under the same license as the WP Theme package.
 msgid ""
 msgstr ""
 "Project-Id-Version: WP Theme 1.3.0\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-14 09:43+0300\n"
-"PO-Revision-Date: 2026-08-14 09:43+0300\n"
+"Report-Msgid-Bugs-To: https://github.com/mksddn/wp-theme\n"
 "Last-Translator: \n"
 "Language-Team: Russian\n"
-"Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"POT-Creation-Date: 2026-09-18 12:55+0300\n"
+"PO-Revision-Date: 2026-09-18 12:56+0300\n"
+"Language: ru_RU\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #: 404.php:24
 msgid "Oops! That page can't be found."
@@ -28,23 +24,28 @@ msgstr "По этому адресу ничего не найдено."
 msgid "Options Page with specified slug not found"
 msgstr "Страница опций с указанным slug не найдена"
 
-#: inc/category-thumbnails.php:19 inc/category-thumbnails.php:34
+#: inc/category-thumbnails.php:19
+#: inc/category-thumbnails.php:34
 msgid "Category Thumbnail"
 msgstr "Миниатюра категории"
 
-#: inc/category-thumbnails.php:22 inc/category-thumbnails.php:43
+#: inc/category-thumbnails.php:22
+#: inc/category-thumbnails.php:43
 msgid "Upload category thumbnail image"
 msgstr "Загрузить изображение категории"
 
-#: inc/category-thumbnails.php:22 inc/category-thumbnails.php:43
+#: inc/category-thumbnails.php:22
+#: inc/category-thumbnails.php:43
 msgid "Upload Image"
 msgstr "Загрузить изображение"
 
-#: inc/category-thumbnails.php:23 inc/category-thumbnails.php:46
+#: inc/category-thumbnails.php:23
+#: inc/category-thumbnails.php:46
 msgid "Remove category thumbnail image"
 msgstr "Удалить изображение категории"
 
-#: inc/category-thumbnails.php:23 inc/category-thumbnails.php:47
+#: inc/category-thumbnails.php:23
+#: inc/category-thumbnails.php:47
 msgid "Remove Image"
 msgstr "Удалить изображение"
 
@@ -194,7 +195,8 @@ msgstr "Заполнено acf:%1$s (%2$s)."
 msgid "Failed acf:%1$s (%2$s)."
 msgstr "Ошибка acf:%1$s (%2$s)."
 
-#: inc/content-seeder.php:1399 inc/content-seeder.php:1400
+#: inc/content-seeder.php:1399
+#: inc/content-seeder.php:1400
 #: inc/content-seeder.php:1435
 msgid "Content Seeder"
 msgstr "Наполнитель контента"
@@ -204,14 +206,8 @@ msgid "Create missing entities and fill content fields with placeholders?"
 msgstr "Создать недостающие сущности и заполнить поля контента заглушками?"
 
 #: inc/content-seeder.php:1436
-msgid ""
-"Creates sample posts and terms when needed, then fills WordPress and ACF "
-"fields with placeholder values. Post types: pages, posts, and CPTs with ACF "
-"field groups."
-msgstr ""
-"Создаёт тестовые записи и термины при необходимости, затем заполняет "
-"поля WordPress и ACF значениями-заглушками. Типы записей: страницы, "
-"посты и CPT с группами полей ACF."
+msgid "Creates sample posts and terms when needed, then fills WordPress and ACF fields with placeholder values. Post types: pages, posts, and CPTs with ACF field groups."
+msgstr "Создаёт тестовые записи и термины при необходимости, затем заполняет поля WordPress и ACF значениями-заглушками. Типы записей: страницы, посты и CPT с группами полей ACF."
 
 #: inc/content-seeder.php:1444
 msgid "Options"
@@ -243,27 +239,23 @@ msgstr "Лимит"
 
 #: inc/content-seeder.php:1483
 msgid "Optional. Max entities per post type / taxonomy, and max posts to seed."
-msgstr ""
-"Необязательно. Максимум сущностей на тип записи / таксономию и "
-"максимум записей для наполнения."
+msgstr "Необязательно. Максимум сущностей на тип записи / таксономию и максимум записей для наполнения."
 
 #: inc/content-seeder.php:1488
 msgid "Run seeder"
 msgstr "Запустить наполнение"
 
-#: inc/content-seeder.php:1502 inc/image-optimization.php:895
+#: inc/content-seeder.php:1502
+#: inc/image-optimization.php:895
+#: inc/security-hardening/admin.php:409
 msgid "Sorry, you are not allowed to do this."
 msgstr "Недостаточно прав для этого действия."
 
 #. translators: 1: created count, 2: seeded count, 3: skipped count, 4: failed count
 #: inc/content-seeder.php:1561
 #, php-format
-msgid ""
-"Content seeder finished: %1$d created, %2$d seeded, %3$d skipped, %4$d "
-"failed."
-msgstr ""
-"Наполнение завершено: создано %1$d, заполнено %2$d, пропущено %3$d, "
-"ошибок %4$d."
+msgid "Content seeder finished: %1$d created, %2$d seeded, %3$d skipped, %4$d failed."
+msgstr "Наполнение завершено: создано %1$d, заполнено %2$d, пропущено %3$d, ошибок %4$d."
 
 #: inc/content-seeder.php:1575
 msgid "Details"
@@ -383,25 +375,309 @@ msgstr "Не удалось скопировать оригинал поверх
 #: inc/image-optimization.php:940
 #, php-format
 msgid "Image optimization finished: %1$d done, %2$d failed (%3$d total)."
-msgstr ""
-"Оптимизация изображений завершена: %1$d готово, %2$d с ошибкой (всего %3$d)."
+msgstr "Оптимизация изображений завершена: %1$d готово, %2$d с ошибкой (всего %3$d)."
 
 #: inc/image-optimization.php:974
-msgid ""
-"Details are also written to the PHP error log with the prefix [wp-theme "
-"image-opt]."
-msgstr ""
-"Подробности также пишутся в PHP error log с префиксом [wp-theme image-opt]."
+msgid "Details are also written to the PHP error log with the prefix [wp-theme image-opt]."
+msgstr "Подробности также пишутся в PHP error log с префиксом [wp-theme image-opt]."
 
-#: inc/security-features.php:199
+#: inc/security-features.php:207
 msgid "Too many failed login attempts. Please try again later."
 msgstr "Слишком много неудачных попыток входа. Попробуйте позже."
 
-#: inc/theme-features.php:167 inc/theme-features.php:206
+#: inc/security-hardening/admin.php:20
+msgid "Overview"
+msgstr "Обзор"
+
+#: inc/security-hardening/admin.php:601
+msgid "Nginx"
+msgstr "Nginx"
+
+#: inc/security-hardening/admin.php:603
+msgid "Apache"
+msgstr "Apache"
+
+#: inc/security-hardening/admin.php:23
+msgid "wp-config"
+msgstr "wp-config"
+
+#: inc/security-hardening/admin.php:138
+msgid "Unknown"
+msgstr "Неизвестно"
+
+#: inc/security-hardening/admin.php:388
+#: inc/security-hardening/security-hardening.php:81
+msgid "Copy"
+msgstr "Копировать"
+
+#: inc/security-hardening/admin.php:416
+#: inc/security-hardening/checks.php:188
+#: inc/security-hardening/checks.php:1025
+#: inc/security-hardening/security-hardening.php:30
+#: inc/security-hardening/security-hardening.php:31
+msgid "Security Hardening"
+msgstr "Security Hardening"
+
+#: inc/security-hardening/admin.php:459
+#: inc/security-hardening/checks.php:980
+msgid "Critical"
+msgstr "Критические"
+
+#: inc/security-hardening/admin.php:465
+msgid "Warnings"
+msgstr "Предупреждения"
+
+#: inc/security-hardening/admin.php:471
+#: inc/security-hardening/checks.php:983
+msgid "Not scored"
+msgstr "Не оценивается"
+
+#: inc/security-hardening/admin.php:477
+#: inc/security-hardening/checks.php:982
+msgid "Passed"
+msgstr "Успешные"
+
+#: inc/security-hardening/admin.php:483
+#: inc/security-hardening/checks.php:984
+msgid "Could not check automatically"
+msgstr "Невозможно проверить автоматически"
+
+#: inc/security-hardening/admin.php:500
+#: inc/security-hardening/checks.php:1001
+msgid "Environment type"
+msgstr "Тип окружения"
+
+#: inc/security-hardening/admin.php:518
+msgid "None."
+msgstr "Нет."
+
+#: inc/security-hardening/admin.php:616
+msgid "Add this location to the site nginx config, above the general PHP handler. The theme does not change nginx and does not run these commands."
+msgstr "Добавьте этот location в конфиг nginx сайта, выше общего PHP-обработчика. Тема не меняет nginx и не выполняет эти команды."
+
+#: inc/security-hardening/admin.php:628
+msgid "After saving the config, test and reload nginx, then request a dummy PHP file. The expected response is HTTP 403."
+msgstr "После сохранения конфигурации проверьте и перезагрузите nginx, затем запросите тестовый PHP-файл. Ожидаемый ответ — HTTP 403."
+
+#: inc/security-hardening/admin.php:647
+msgid "Paste the first snippet only into wp-content/uploads/.htaccess."
+msgstr "Первый сниппет вставляйте только в wp-content/uploads/.htaccess."
+
+#: inc/security-hardening/admin.php:648
+msgid "Do not put it in the site-root .htaccess or in unscoped VirtualHost extra directives: that FilesMatch would deny PHP for the whole site."
+msgstr "Не кладите его в корневой .htaccess сайта и не в extra-директивы VirtualHost без Directory: такой FilesMatch запретит PHP на всём сайте."
+
+#: inc/security-hardening/admin.php:660
+msgid "If you use a root-owned VirtualHost, paste the Directory block instead. It is already limited to the uploads path of this site. The theme does not create or overwrite .htaccess."
+msgstr "Если используете VirtualHost от root, вставьте блок Directory. Он уже ограничен путём uploads этого сайта. Тема не создаёт и не перезаписывает .htaccess."
+
+#: inc/security-hardening/admin.php:793
+msgid "DISALLOW_FILE_MODS is optional. Enable it only when updates go through git/CI — it disables installing and updating plugins and themes from the admin, including this theme's GitHub updater. It does not block posts, pages, ACF, users, media, REST API, or already active plugins."
+msgstr "DISALLOW_FILE_MODS необязателен. Включайте только если обновления идут через git/CI — константа отключает установку и обновление плагинов и тем из админки, включая GitHub-апдейтер этой темы. Это не мешает записям, страницам, ACF, пользователям, медиа, REST API и уже активным плагинам."
+
+#: inc/security-hardening/admin.php:802
+msgid "WP_ENVIRONMENT_TYPE accepts only production, staging, development, and local. Without this constant WordPress treats the site as production."
+msgstr "WP_ENVIRONMENT_TYPE принимает только production, staging, development и local. Без этой константы WordPress считает сайт production."
+
+#: inc/security-hardening/admin.php:807
+msgid "DISALLOW_FILE_EDIT is currently set by the theme. Declaring it in wp-config.php before the theme loads is slightly more reliable if the theme fails to load."
+msgstr "DISALLOW_FILE_EDIT сейчас задаётся темой. Объявление в wp-config.php до загрузки темы чуть надёжнее, если тема не загрузится."
+
+#: inc/security-hardening/checks.php:266
+msgid "This is not marked as a warning or critical issue because the environment type is not production."
+msgstr "Это не помечается как предупреждение или критическая проблема, потому что тип окружения не production."
+
+#: inc/security-hardening/checks.php:120
+msgid "Plugin and theme file modifications (DISALLOW_FILE_MODS)"
+msgstr "Изменение файлов плагинов и тем (DISALLOW_FILE_MODS)"
+
+#: inc/security-hardening/checks.php:316
+msgid "DISALLOW_FILE_MODS is enabled. Installing and updating plugins and themes from the admin is blocked. Posts, pages, ACF, users, media, REST API, and already active plugins still work. Built-in theme updates from GitHub will also be blocked."
+msgstr "DISALLOW_FILE_MODS включён. Установка и обновление плагинов и тем из админки заблокированы. Записи, страницы, ACF, пользователи, медиа, REST API и уже активные плагины продолжают работать. Встроенные обновления темы с GitHub тоже будут заблокированы."
+
+#: inc/security-hardening/checks.php:325
+msgid "DISALLOW_FILE_MODS is not true. Add it in wp-config.php only if updates go through git/CI. Leave it unset if you install or update plugins and themes from wp-admin (including this theme's GitHub updater)."
+msgstr "DISALLOW_FILE_MODS не равен true. Добавляйте в wp-config.php только если обновления идут через git/CI. Не задавайте константу, если ставите или обновляете плагины и темы из wp-admin (включая GitHub-апдейтер этой темы)."
+
+#: inc/security-hardening/checks.php:125
+msgid "Debug display (WP_DEBUG_DISPLAY)"
+msgstr "Вывод отладки (WP_DEBUG_DISPLAY)"
+
+#: inc/security-hardening/checks.php:344
+msgid "Error display is off. Debug output will not be printed to site visitors."
+msgstr "Вывод ошибок выключен. Отладочный вывод не будет показан посетителям сайта."
+
+#: inc/security-hardening/checks.php:354
+msgid "WP_DEBUG_DISPLAY is on (or defaults to on because WP_DEBUG is on). On production this can leak paths and errors to visitors. Set WP_DEBUG_DISPLAY to false in wp-config.php."
+msgstr "WP_DEBUG_DISPLAY включён (или включён по умолчанию, потому что включён WP_DEBUG). На production это может раскрыть пути и ошибки посетителям. Задайте WP_DEBUG_DISPLAY как false в wp-config.php."
+
+#: inc/security-hardening/checks.php:130
+msgid "Force SSL for admin (FORCE_SSL_ADMIN)"
+msgstr "Принудительный SSL для админки (FORCE_SSL_ADMIN)"
+
+#: inc/security-hardening/checks.php:375
+msgid "FORCE_SSL_ADMIN is enabled."
+msgstr "FORCE_SSL_ADMIN включён."
+
+#: inc/security-hardening/checks.php:384
+msgid "The site URL is not HTTPS, so FORCE_SSL_ADMIN is not required yet."
+msgstr "URL сайта не HTTPS, поэтому FORCE_SSL_ADMIN пока не требуется."
+
+#: inc/security-hardening/checks.php:392
+msgid "The site is served over HTTPS but FORCE_SSL_ADMIN is not true. Add it in wp-config.php so wp-admin always uses HTTPS."
+msgstr "Сайт отдаётся по HTTPS, но FORCE_SSL_ADMIN не равен true. Добавьте константу в wp-config.php, чтобы wp-admin всегда использовал HTTPS."
+
+#: inc/security-hardening/checks.php:135
+msgid "Two-factor authentication plugin"
+msgstr "Плагин двухфакторной аутентификации"
+
+#: inc/security-hardening/checks.php:410
+msgid "A recognized two-factor authentication plugin is active."
+msgstr "Распознанный плагин двухфакторной аутентификации активен."
+
+#: inc/security-hardening/checks.php:419
+msgid "No recognized two-factor plugin is active (built-in list: Two Factor, WP 2FA). On production administrators should use 2FA. If another 2FA plugin is already in use, extend the list with the wp_theme_security_hardening_two_factor_plugins filter."
+msgstr "Нет активного распознанного плагина 2FA (встроенный список: Two Factor, WP 2FA). На production администраторам нужна двухфакторная аутентификация. Если уже используется другой плагин 2FA, расширьте список фильтром wp_theme_security_hardening_two_factor_plugins."
+
+#: inc/security-hardening/checks.php:140
+msgid "Two-factor authentication for administrators"
+msgstr "Двухфакторная аутентификация администраторов"
+
+#: inc/security-hardening/checks.php:442
+msgid "A two-factor plugin is active, but per-user status cannot be checked automatically for this plugin."
+msgstr "Плагин 2FA активен, но статус по пользователям для этого плагина нельзя проверить автоматически."
+
+#: inc/security-hardening/checks.php:478
+msgid "No administrators were found to check for two-factor authentication."
+msgstr "Не найдено администраторов для проверки двухфакторной аутентификации."
+
+#. translators: 1: administrators without 2FA, 2: administrators checked
+#: inc/security-hardening/checks.php:490
+#, php-format
+msgid "%1$d of %2$d checked administrators do not have two-factor authentication enabled."
+msgstr "У %1$d из %2$d проверенных администраторов не включена двухфакторная аутентификация."
+
+#. translators: 1: administrators checked, 2: total administrators
+#: inc/security-hardening/checks.php:505
+#, php-format
+msgid "The first %1$d of %2$d administrators have two-factor authentication enabled. Additional administrators were not checked."
+msgstr "У первых %1$d из %2$d администраторов включена двухфакторная аутентификация. Остальные администраторы не проверялись."
+
+#. translators: %d: number of administrators checked
+#: inc/security-hardening/checks.php:519
+#, php-format
+msgid "All %d checked administrators have two-factor authentication enabled."
+msgstr "У всех %d проверенных администраторов включена двухфакторная аутентификация."
+
+#: inc/security-hardening/checks.php:145
+msgid "Query Monitor"
+msgstr "Query Monitor"
+
+#: inc/security-hardening/checks.php:540
+msgid "Query Monitor is not active."
+msgstr "Query Monitor не активен."
+
+#: inc/security-hardening/checks.php:549
+msgid "Query Monitor is a temporary diagnostics plugin. It can show administrators SQL, file paths, errors, and HTTP requests. Keep it inactive on production and enable it only while debugging."
+msgstr "Query Monitor — плагин для временной диагностики. Он может показывать администраторам SQL, пути, ошибки и HTTP-запросы. На production держите его неактивным и включайте только на время отладки."
+
+#: inc/security-hardening/checks.php:150
+msgid "Plugin and theme updates"
+msgstr "Обновления плагинов и тем"
+
+#: inc/security-hardening/checks.php:577
+msgid "No plugin or theme updates are waiting in the admin."
+msgstr "В админке нет ожидающих обновлений плагинов или тем."
+
+#. translators: 1: plugin update count, 2: theme update count
+#: inc/security-hardening/checks.php:588
+#, php-format
+msgid "%1$d plugin update(s) and %2$d theme update(s) are available. Review and apply them through your usual process (admin, git, or CI)."
+msgstr "Доступно обновлений плагинов: %1$d, тем: %2$d. Проверьте и примените их своим обычным способом (админка, git или CI)."
+
+#: inc/security-hardening/checks.php:155
+msgid "Writable WordPress directories"
+msgstr "Запись в каталоги WordPress"
+
+#: inc/security-hardening/checks.php:622
+msgid "core / plugins / themes are not writable from WordPress. This is preferred on production when updates go through git/CI."
+msgstr "core / plugins / themes недоступны для записи из WordPress. Так предпочтительно на production, если обновления идут через git/CI."
+
+#. translators: %s: comma-separated list of core, plugins, themes
+#: inc/security-hardening/checks.php:633
+#, php-format
+msgid "Writable from WordPress: %s. Write access lets PHP on disk be changed and is also required to install plugins and themes from wp-admin. On production prefer read-only if updates go through git/CI. If you update from the admin, this warning is expected."
+msgstr "Доступны для записи из WordPress: %s. Запись позволяет менять PHP на диске и одновременно нужна для установки плагинов и тем из wp-admin. На production предпочтителен read-only, если обновления идут через git/CI. Если обновляете из админки, это предупреждение ожидаемо."
+
+#: inc/security-hardening/checks.php:160
+msgid "PHP execution in uploads"
+msgstr "Выполнение PHP в uploads"
+
+#: inc/security-hardening/checks.php:716
+msgid "The uploads URL could not be determined, so PHP execution in uploads could not be probed."
+msgstr "Не удалось определить URL uploads, поэтому выполнение PHP в uploads проверить нельзя."
+
+#: inc/security-hardening/checks.php:741
+msgid "The probe request failed (timeout, DNS, loopback, or TLS). This does not confirm missing protection."
+msgstr "Пробный запрос не удался (таймаут, DNS, loopback или TLS). Это не подтверждает отсутствие защиты."
+
+#: inc/security-hardening/checks.php:752
+msgid "A request for a non-existent PHP file in uploads returned HTTP 403. The web server is blocking PHP there."
+msgstr "Запрос несуществующего PHP-файла в uploads вернул HTTP 403. Веб-сервер блокирует PHP в этом каталоге."
+
+#. translators: %d: HTTP status code
+#: inc/security-hardening/checks.php:763
+#, php-format
+msgid "The uploads PHP probe returned HTTP %d. A 403 response would confirm that PHP is blocked. This is not proof that uploads are executable."
+msgstr "Проба PHP в uploads вернула HTTP %d. Ответ 403 подтвердил бы, что PHP заблокирован. Это не доказательство, что uploads исполняемы."
+
+#. translators: %d: HTTP status code
+#: inc/security-hardening/checks.php:776
+#: inc/security-hardening/checks.php:788
+#, php-format
+msgid "The uploads PHP probe returned HTTP %d. Protection could not be verified automatically."
+msgstr "Проба PHP в uploads вернула HTTP %d. Защиту не удалось проверить автоматически."
+
+#: inc/security-hardening/checks.php:166
+msgid "File editor constant (DISALLOW_FILE_EDIT)"
+msgstr "Константа редактора файлов (DISALLOW_FILE_EDIT)"
+
+#: inc/security-hardening/checks.php:808
+msgid "DISALLOW_FILE_EDIT is enabled by the theme. Prefer declaring it in wp-config.php before the theme loads so it still applies if the theme fails to load."
+msgstr "DISALLOW_FILE_EDIT включён темой. Лучше объявить его в wp-config.php до загрузки темы, чтобы константа действовала и при сбое загрузки темы."
+
+#: inc/security-hardening/checks.php:817
+msgid "DISALLOW_FILE_EDIT is defined before the theme loads (typically wp-config.php)."
+msgstr "DISALLOW_FILE_EDIT задана до загрузки темы (обычно в wp-config.php)."
+
+#: inc/security-hardening/checks.php:825
+msgid "DISALLOW_FILE_EDIT is not true. The plugin and theme file editor in wp-admin is available. Set it to true in wp-config.php before the theme loads."
+msgstr "DISALLOW_FILE_EDIT не равен true. Редактор файлов плагинов и тем в wp-admin доступен. Задайте true в wp-config.php до загрузки темы."
+
+#: inc/security-hardening/checks.php:923
+#: inc/security-hardening/checks.php:938
+msgid "Security"
+msgstr "Безопасность"
+
+#: inc/security-hardening/admin.php:41
+msgid "Open Security Hardening"
+msgstr "Открыть Security Hardening"
+
+#: inc/security-hardening/security-hardening.php:82
+msgid "Copied"
+msgstr "Скопировано"
+
+#: inc/security-hardening/security-hardening.php:83
+msgid "Copy failed"
+msgstr "Не удалось скопировать"
+
+#: inc/theme-features.php:167
+#: inc/theme-features.php:206
 msgid "Unauthorized"
 msgstr "Доступ запрещен"
 
-#: inc/theme-features.php:171 inc/theme-features.php:210
+#: inc/theme-features.php:171
+#: inc/theme-features.php:210
 msgid "Invalid nonce"
 msgstr "Ошибка проверки безопасности"
 
@@ -409,7 +685,8 @@ msgstr "Ошибка проверки безопасности"
 msgid "Failed to encode settings"
 msgstr "Не удалось закодировать настройки"
 
-#: inc/theme-features.php:215 inc/theme-features.php:222
+#: inc/theme-features.php:215
+#: inc/theme-features.php:222
 msgid "File upload error. Please try again."
 msgstr "Не удалось загрузить файл"
 
@@ -425,53 +702,52 @@ msgstr "Неверный JSON:"
 msgid "Settings imported successfully!"
 msgstr "Настройки успешно импортированы!"
 
-#: inc/theme-features.php:265 inc/theme-features.php:266
+#: inc/theme-features.php:265
+#: inc/theme-features.php:266
 msgid "Theme Features"
 msgstr "Функции темы"
 
-#: inc/theme-features.php:291 inc/theme-features.php:297
+#: inc/theme-features.php:291
+#: inc/theme-features.php:297
 msgid "Admin Features"
 msgstr "Функции панели управления"
 
-#: inc/theme-features.php:306 inc/theme-features.php:312
+#: inc/theme-features.php:306
+#: inc/theme-features.php:312
 msgid "Content Features"
 msgstr "Функции контента"
 
-#: inc/theme-features.php:321 inc/theme-features.php:327
+#: inc/theme-features.php:321
+#: inc/theme-features.php:327
 msgid "Security Features"
 msgstr "Функции безопасности"
 
-#: inc/theme-features.php:336 inc/theme-features.php:342
+#: inc/theme-features.php:336
+#: inc/theme-features.php:342
 msgid "Search Features"
 msgstr "Функции поиска"
 
-#: inc/theme-features.php:351 inc/theme-features.php:357
+#: inc/theme-features.php:351
+#: inc/theme-features.php:357
 msgid "Image Optimization"
 msgstr "Оптимизация изображений"
 
-#: inc/theme-features.php:366 inc/theme-features.php:372
+#: inc/theme-features.php:366
+#: inc/theme-features.php:372
 msgid "Performance Features"
 msgstr "Оптимизация производительности"
 
 #: inc/theme-features.php:567
-msgid ""
-"Configure theme features and functionality. Enable or disable specific "
-"features based on your needs."
-msgstr ""
-"Настройте функции и возможности темы. Включайте или отключайте конкретные "
-"функции в зависимости от ваших потребностей."
+msgid "Configure theme features and functionality. Enable or disable specific features based on your needs."
+msgstr "Настройте функции и возможности темы. Включайте или отключайте конкретные функции в зависимости от ваших потребностей."
 
 #: inc/theme-features.php:571
 msgid "Warning:"
 msgstr "Предупреждение:"
 
 #: inc/theme-features.php:571
-msgid ""
-"Settings are using default values. Database option 'wp_theme_settings' not "
-"found. Save settings to create the option."
-msgstr ""
-"Используются значения по умолчанию. Опция базы данных 'wp_theme_settings' не "
-"найдена. Сохраните настройки, чтобы создать опцию."
+msgid "Settings are using default values. Database option 'wp_theme_settings' not found. Save settings to create the option."
+msgstr "Используются значения по умолчанию. Опция базы данных 'wp_theme_settings' не найдена. Сохраните настройки, чтобы создать опцию."
 
 #: inc/theme-features.php:579
 msgid "Save Theme Features"
@@ -482,12 +758,8 @@ msgid "About Theme Features"
 msgstr "О функциях темы"
 
 #: inc/theme-features.php:585
-msgid ""
-"This page allows you to enable or disable various theme features. Changes "
-"take effect immediately after saving."
-msgstr ""
-"На этой странице вы можете включать или отключать различные функции темы. "
-"Изменения вступают в силу сразу после сохранения."
+msgid "This page allows you to enable or disable various theme features. Changes take effect immediately after saving."
+msgstr "На этой странице вы можете включать или отключать различные функции темы. Изменения вступают в силу сразу после сохранения."
 
 #: inc/theme-features.php:586
 msgid "Note:"
@@ -506,11 +778,8 @@ msgid "Backup & Restore Settings"
 msgstr "Резервное копирование и восстановление настроек"
 
 #: inc/theme-features.php:592
-msgid ""
-"Use these tools to backup or restore theme settings. Useful for migrations."
-msgstr ""
-"Используйте эти инструменты для резервного копирования или восстановления "
-"настроек темы. Полезно при миграциях."
+msgid "Use these tools to backup or restore theme settings. Useful for migrations."
+msgstr "Используйте эти инструменты для резервного копирования или восстановления настроек темы. Полезно при миграциях."
 
 #: inc/theme-features.php:595
 msgid "Export Settings"
@@ -529,19 +798,12 @@ msgid "Import Settings from JSON"
 msgstr "Импортировать настройки из JSON"
 
 #: inc/theme-features.php:620
-msgid ""
-"Admin interface enhancements, WordPress core modifications, and "
-"administrative tools."
-msgstr ""
-"Улучшения административного интерфейса, модификации ядра WordPress и "
-"административные инструменты."
+msgid "Admin interface enhancements, WordPress core modifications, and administrative tools."
+msgstr "Улучшения административного интерфейса, модификации ядра WordPress и административные инструменты."
 
 #: inc/theme-features.php:625
-msgid ""
-"Content editing, display, and formatting features including editor settings."
-msgstr ""
-"Функции редактирования, отображения и форматирования контента, включая "
-"настройки редактора."
+msgid "Content editing, display, and formatting features including editor settings."
+msgstr "Функции редактирования, отображения и форматирования контента, включая настройки редактора."
 
 #: inc/theme-features.php:630
 msgid "WordPress security enhancements and hardening measures."
@@ -556,13 +818,8 @@ msgid "Control how images are handled when uploaded to the Media Library."
 msgstr "Настройки обработки изображений при загрузке в медиатеку."
 
 #: inc/theme-features.php:645
-msgid ""
-"Basic performance optimizations to improve site speed and reduce server "
-"load. These settings are safe to enable and won't conflict with most plugins."
-msgstr ""
-"Базовые оптимизации производительности для повышения скорости сайта и "
-"снижения нагрузки на сервер. Эти настройки безопасны для включения и не "
-"конфликтуют с большинством плагинов."
+msgid "Basic performance optimizations to improve site speed and reduce server load. These settings are safe to enable and won't conflict with most plugins."
+msgstr "Базовые оптимизации производительности для повышения скорости сайта и снижения нагрузки на сервер. Эти настройки безопасны для включения и не конфликтуют с большинством плагинов."
 
 #: inc/theme-features.php:654
 msgid "Enable headless CMS mode (API only, no theme assets)"
@@ -593,12 +850,8 @@ msgid "Disable comments"
 msgstr "Отключить комментарии"
 
 #: inc/theme-features.php:657
-msgid ""
-"Removes comments and trackbacks site-wide; hides Comments menu, Discussion "
-"settings, and related admin bar items."
-msgstr ""
-"Отключает комментарии и трекбеки на сайте; скрывает пункт «Комментарии», "
-"раздел «Обсуждение» в настройках и связанные элементы админ-бара."
+msgid "Removes comments and trackbacks site-wide; hides Comments menu, Discussion settings, and related admin bar items."
+msgstr "Отключает комментарии и трекбеки на сайте; скрывает пункт «Комментарии», раздел «Обсуждение» в настройках и связанные элементы админ-бара."
 
 #: inc/theme-features.php:658
 msgid "Duplicate Post feature"
@@ -629,9 +882,7 @@ msgid "Polylang REST API language detection"
 msgstr "Определение языка в Polylang REST API"
 
 #: inc/theme-features.php:661
-msgid ""
-"Automatically detects language from Accept-Language header in REST API "
-"requests"
+msgid "Automatically detects language from Accept-Language header in REST API requests"
 msgstr "Автоматически выбирает язык по заголовку Accept-Language в REST API"
 
 #: inc/theme-features.php:670
@@ -748,8 +999,7 @@ msgstr "Добавить заголовки безопасности"
 
 #: inc/theme-features.php:729
 msgid "Adds X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS"
-msgstr ""
-"Добавляет X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS"
+msgstr "Добавляет X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS"
 
 #: inc/theme-features.php:730
 msgid "Disable directory browsing"
@@ -800,12 +1050,8 @@ msgid "Optimize images on upload"
 msgstr "Оптимизировать изображения при загрузке"
 
 #: inc/theme-features.php:812
-msgid ""
-"Blocks files over the max MB, shrinks oversized images, and compresses them "
-"using the settings below."
-msgstr ""
-"Блокирует файлы больше лимита МБ, уменьшает слишком большие изображения и "
-"сжимает их по настройкам ниже."
+msgid "Blocks files over the max MB, shrinks oversized images, and compresses them using the settings below."
+msgstr "Блокирует файлы больше лимита МБ, уменьшает слишком большие изображения и сжимает их по настройкам ниже."
 
 #: inc/theme-features.php:813
 msgid "Load featured images first"
@@ -868,12 +1114,8 @@ msgid "Already uploaded images"
 msgstr "Уже загруженные изображения"
 
 #: inc/theme-features.php:856
-msgid ""
-"Shrink large images that were uploaded before these settings. Up to 50 "
-"images per click."
-msgstr ""
-"Уменьшает крупные изображения, загруженные до этих настроек. До 50 за один "
-"клик."
+msgid "Shrink large images that were uploaded before these settings. Up to 50 images per click."
+msgstr "Уменьшает крупные изображения, загруженные до этих настроек. До 50 за один клик."
 
 #: inc/theme-features.php:861
 msgid "Optimize large images now"
@@ -908,11 +1150,8 @@ msgid "Remove unused image sizes"
 msgstr "Убрать лишние размеры изображений"
 
 #: inc/theme-features.php:873
-msgid ""
-"Checked sizes will not be created on upload. Leave empty to keep all sizes."
-msgstr ""
-"Отмеченные размеры не будут создаваться при загрузке. Оставьте пустым, чтобы "
-"сохранить все."
+msgid "Checked sizes will not be created on upload. Leave empty to keep all sizes."
+msgstr "Отмеченные размеры не будут создаваться при загрузке. Оставьте пустым, чтобы сохранить все."
 
 #: inc/theme-features.php:890
 msgid "Remove WordPress emoji scripts"
@@ -985,14 +1224,170 @@ msgid "Nothing Found"
 msgstr "Ничего не найдено"
 
 #: template-parts/content-none.php:15
-msgid ""
-"Sorry, but nothing matched your search terms. Please try again with some "
-"different keywords."
-msgstr ""
-"К сожалению, по вашему запросу ничего не найдено. Попробуйте другие "
-"ключевые слова."
+msgid "Sorry, but nothing matched your search terms. Please try again with some different keywords."
+msgstr "К сожалению, по вашему запросу ничего не найдено. Попробуйте другие ключевые слова."
 
 #: template-parts/content-none.php:20
-msgid ""
-"It seems we can't find what you're looking for. Perhaps searching can help."
+msgid "It seems we can't find what you're looking for. Perhaps searching can help."
 msgstr "Похоже, здесь ничего нет. Попробуйте воспользоваться поиском."
+
+#. Theme Name of the theme
+#: style.css
+msgid "WP Theme"
+msgstr ""
+
+#. Theme URI of the theme
+#: style.css
+msgid "https://github.com/mksddn/wp-theme"
+msgstr ""
+
+#. Description of the theme
+#: style.css
+msgid "A modern WordPress theme with GitHub auto-updates"
+msgstr ""
+
+#. Author of the theme
+#: style.css
+msgid "Max Dudin"
+msgstr ""
+
+#. Author URI of the theme
+#: style.css
+msgid "https://github.com/mksddn"
+msgstr ""
+
+#: inc/security-hardening/admin.php:21
+#: inc/security-hardening/checks.php:1005
+msgid "Web server"
+msgstr "Веб-сервер"
+
+#: inc/security-hardening/admin.php:574
+msgid "Detected by WordPress from the server signature. A reverse proxy can hide the real server."
+msgstr "WordPress определяет сервер по его сигнатуре. Reverse proxy может скрыть настоящий сервер."
+
+#: inc/security-hardening/admin.php:566
+msgid "Detected web server:"
+msgstr "Определённый веб-сервер:"
+
+#: inc/security-hardening/admin.php:582
+msgid "Apache / LiteSpeed instructions"
+msgstr "Инструкции для Apache / LiteSpeed"
+
+#: inc/security-hardening/admin.php:587
+msgid "If production uses Nginx, open the Nginx instructions below."
+msgstr "Если на production используется Nginx, откройте инструкции для Nginx ниже."
+
+#: inc/security-hardening/admin.php:592
+msgid "Nginx instructions"
+msgstr "Инструкции для Nginx"
+
+#: inc/security-hardening/admin.php:598
+msgid "WordPress could not tell whether this site runs Nginx or Apache. A reverse proxy can hide the real server. Both instruction sets are shown."
+msgstr "WordPress не смог определить, Nginx это или Apache. Reverse proxy может скрыть настоящий сервер. Показаны оба набора инструкций."
+
+#: inc/security-hardening/checks.php:926
+msgid "This check does not apply right now."
+msgstr "Эта проверка сейчас не применяется."
+
+#: inc/security-hardening/checks.php:976
+msgid "Not applicable"
+msgstr "Не применяется"
+
+#: inc/security-hardening/checks.php:981
+msgid "Warning"
+msgstr "Предупреждение"
+
+#: inc/security-hardening/checks.php:1026
+msgid "Theme security checks. Open Tools → Security Hardening for copy-paste fixes."
+msgstr "Проверки безопасности темы. Откройте Инструменты → Security Hardening, чтобы скопировать исправления."
+
+#. translators: %s: admin tab title
+#: inc/security-hardening/admin.php:38
+#, php-format
+msgid "Open %s"
+msgstr "Открыть «%s»"
+
+#: inc/security-hardening/admin.php:504
+msgid "Critical and warning checks count as issues only when the environment type is production."
+msgstr "Критические проверки и предупреждения считаются проблемами только если тип окружения — production."
+
+#: inc/security-hardening/admin.php:506
+msgid "How to set WP_ENVIRONMENT_TYPE"
+msgstr "Как задать WP_ENVIRONMENT_TYPE"
+
+#: inc/security-hardening/admin.php:624
+msgid "Nginx location"
+msgstr "location для Nginx"
+
+#: inc/security-hardening/admin.php:636
+msgid "Reload and test"
+msgstr "Перезагрузить и проверить"
+
+#: inc/security-hardening/admin.php:656
+msgid "uploads/.htaccess"
+msgstr "uploads/.htaccess"
+
+#: inc/security-hardening/admin.php:668
+msgid "VirtualHost"
+msgstr "VirtualHost"
+
+#: inc/security-hardening/admin.php:790
+msgid "Copy these constants into wp-config.php, above the \"That's all, stop editing!\" line. The theme does not change that file."
+msgstr "Скопируйте эти константы в wp-config.php, выше строки That's all, stop editing! Тема этот файл не меняет."
+
+#: inc/security-hardening/admin.php:797
+msgid "FORCE_SSL_ADMIN redirects wp-admin and login to HTTPS."
+msgstr "FORCE_SSL_ADMIN перенаправляет wp-admin и вход на HTTPS."
+
+#: inc/security-hardening/admin.php:799
+msgid "WP_DEBUG_DISPLAY hides PHP errors from visitors."
+msgstr "WP_DEBUG_DISPLAY скрывает ошибки PHP от посетителей."
+
+#: inc/security-hardening/admin.php:22
+msgid "File permissions"
+msgstr "Права на файлы"
+
+#: inc/security-hardening/admin.php:683
+msgid "WordPress reports this warning when the PHP user can write core, plugins, or themes."
+msgstr "WordPress показывает это предупреждение, если пользователь PHP может писать в ядро, плагины или темы."
+
+#: inc/security-hardening/admin.php:684
+msgid "That lets a compromised plugin change PHP on disk. It is also required if you install plugins and themes from wp-admin."
+msgstr "Тогда скомпрометированный плагин может менять PHP на диске. Та же запись нужна, если ставите плагины и темы из wp-admin."
+
+#: inc/security-hardening/admin.php:687
+msgid "If updates go through git/CI, make those directories owned by the deploy user and not writable by PHP."
+msgstr "Если обновления идут через git/CI, эти каталоги должны принадлежать пользователю деплоя и быть недоступны для записи PHP."
+
+#: inc/security-hardening/admin.php:688
+msgid "Keep uploads writable so media still works. Run the commands over SSH after deploy; the theme does not change ownership."
+msgstr "Uploads оставьте доступными для записи, чтобы работала медиатека. Команды выполняйте по SSH после деплоя: тема владельца не меняет."
+
+#: inc/security-hardening/admin.php:691
+msgid "If you update from the admin, skip this. The warning is expected. On Docker the mounted dirs stay writable on purpose."
+msgstr "Если обновляете из админки, этот шаг пропускайте: предупреждение ожидаемо. В Docker примонтированные каталоги специально остаются доступны для записи."
+
+#: inc/security-hardening/admin.php:694
+msgid "DISALLOW_FILE_MODS only hides install buttons in wp-admin. It does not make directories read-only."
+msgstr "DISALLOW_FILE_MODS только прячет кнопки установки в wp-admin. Сами каталоги от этого read-only не становятся."
+
+#: inc/security-hardening/admin.php:698
+msgid "PHP user"
+msgstr "Пользователь PHP"
+
+#: inc/security-hardening/admin.php:702
+#: inc/security-hardening/admin.php:710
+msgid "Could not detect"
+msgstr "Не удалось определить"
+
+#: inc/security-hardening/admin.php:706
+msgid "Owner of WordPress root"
+msgstr "Владелец корня WordPress"
+
+#: inc/security-hardening/admin.php:716
+msgid "PHP runs as the same user that owns the files. The commands below remove the owner write bit on core and restore it on uploads."
+msgstr "PHP работает от того же пользователя, которому принадлежат файлы. Команды ниже снимают право записи у владельца на ядро и возвращают его для uploads."
+
+#: inc/security-hardening/admin.php:725
+msgid "Commands for this site"
+msgstr "Команды для этого сайта"

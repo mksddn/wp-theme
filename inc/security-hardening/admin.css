@@ -1,0 +1,70 @@
+.wp-theme-security-hardening .nav-tab-wrapper {
+    margin-bottom: 16px;
+}
+
+.wp-theme-security-hardening-meta {
+    margin: 12px 0 20px;
+}
+
+.wp-theme-security-hardening-meta p {
+    margin: 0 0 8px;
+}
+
+.wp-theme-security-hardening-group {
+    margin-top: 20px;
+}
+
+.wp-theme-security-hardening-group .notice.inline {
+    margin: 8px 0 0;
+    padding: 8px 12px;
+}
+
+.wp-theme-security-hardening-action {
+    margin: 6px 0 0;
+}
+
+.wp-theme-security-hardening-copy {
+    margin: 12px 0 20px;
+    max-width: 720px;
+}
+
+.wp-theme-security-hardening-copy-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 8px;
+}
+
+.wp-theme-security-hardening-copy-toolbar h3 {
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.wp-theme-security-hardening-copy-toolbar .button {
+    flex-shrink: 0;
+}
+
+.wp-theme-security-hardening-copy textarea.large-text.code,
+.wp-theme-security-hardening-copy pre.code {
+    width: 100%;
+    max-width: 100%;
+}
+
+.wp-theme-security-hardening-copy pre.code {
+    padding: 12px;
+    overflow: auto;
+    background: #fff;
+    border: 1px solid #8c8f94;
+    box-sizing: border-box;
+}
+
+.wp-theme-security-hardening-other-server {
+    margin: 24px 0 8px;
+    max-width: 720px;
+}
+
+.wp-theme-security-hardening-other-server summary {
+    cursor: pointer;
+    font-weight: 600;
+}
