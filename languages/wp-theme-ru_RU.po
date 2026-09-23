@@ -1072,8 +1072,20 @@ msgid "Already uploaded images"
 msgstr "Уже загруженные изображения"
 
 #: inc/theme-features.php:856
-msgid "Shrink large images that were uploaded before these settings. Up to 50 images per click."
-msgstr "Уменьшает крупные изображения, загруженные до этих настроек. До 50 за один клик."
+msgid "Shrink large images that were uploaded before these settings. One click handles up to 50 images, a few at a time, so the server does not time out."
+msgstr "Уменьшает крупные изображения, загруженные до этих настроек. За один клик — до 50, по несколько за раз, чтобы сервер не оборвал запрос по таймауту."
+
+#: inc/image-optimization.php
+msgid "Optimized %1$d of up to %2$d images. The next batch starts automatically."
+msgstr "Оптимизировано %1$d из %2$d. Следующая порция запустится сама."
+
+#: inc/image-optimization.php
+msgid "Optimizing images"
+msgstr "Оптимизация изображений"
+
+#: inc/image-optimization.php
+msgid "Continue"
+msgstr "Продолжить"
 
 #: inc/theme-features.php:861
 msgid "Optimize large images now"

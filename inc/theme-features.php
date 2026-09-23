@@ -853,7 +853,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
 
         // Re-optimize existing library images.
         echo '<h4>' . esc_html__('Already uploaded images', 'wp-theme') . '</h4>';
-        echo '<p class="description">' . esc_html__('Shrink large images that were uploaded before these settings. Up to 50 images per click.', 'wp-theme') . '</p>';
+        echo '<p class="description">' . esc_html__('Shrink large images that were uploaded before these settings. One click handles up to 50 images, a few at a time, so the server does not time out.', 'wp-theme') . '</p>';
         $reoptimize_url = wp_nonce_url(
             admin_url('admin-post.php?action=wp_theme_reoptimize_images&limit=50'),
             'wp_theme_reoptimize_images'

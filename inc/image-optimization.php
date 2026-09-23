@@ -713,8 +713,10 @@ function wp_theme_attachment_needs_reoptimize(int $attachment_id): bool {
     $width  = isset($metadata['width']) ? (int) $metadata['width'] : 0;
     $height = isset($metadata['height']) ? (int) $metadata['height'] : 0;
 
-    if (max($width, $height) > $max_dimension) {
-        return true;
+    // Trust stored dimensions. Reading every file with getimagesize()
+    // times out on a large library before any image is optimized.
+    if ($width > 0 && $height > 0) {
+        return max($width, $height) > $max_dimension;
     }
 
     $file = get_attached_file($attachment_id);
@@ -816,38 +818,91 @@ function wp_theme_reoptimize_attachment(int $attachment_id) {
 
 
 /**
+ * Next page of image attachment IDs with ID greater than $after_id.
+ *
+ * @since 1.3.0
+ * @param int $after_id Last scanned attachment ID (0 = from the start).
+ * @param int $per_page Page size.
+ * @return int[]
+ */
+function wp_theme_get_image_attachment_ids_after(int $after_id, int $per_page): array {
+    $filter = static function (string $where) use ($after_id): string {
+        if ($after_id <= 0) {
+            return $where;
+        }
+
+        global $wpdb;
+
+        return $where . $wpdb->prepare(" AND {$wpdb->posts}.ID > %d", $after_id);
+    };
+
+    add_filter('posts_where', $filter);
+
+    $ids = get_posts(
+        array(
+            'post_type'              => 'attachment',
+            'post_mime_type'         => wp_theme_image_opt_supported_mimes(),
+            'post_status'            => 'inherit',
+            'posts_per_page'         => max(1, $per_page),
+            'fields'                 => 'ids',
+            'orderby'                => 'ID',
+            'order'                  => 'ASC',
+            'no_found_rows'          => true,
+            'suppress_filters'       => false,
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
+        )
+    );
+
+    remove_filter('posts_where', $filter);
+
+    if (! is_array($ids) || $ids === array()) {
+        return array();
+    }
+
+    $ids  = array_map(intval(...), $ids);
+    $last = end($ids);
+    if ($last <= $after_id) {
+        return array();
+    }
+
+    update_meta_cache('post', $ids);
+
+    return $ids;
+}
+
+
+/**
  * Collect attachment IDs that need re-optimization.
  *
  * @since 1.3.0
- * @param int $limit Max number of IDs to return (0 = no limit).
+ * @param int $limit    Max number of IDs to return (0 = no limit).
+ * @param int $after_id Skip attachments with ID less than or equal to this.
  * @return int[]
  */
-function wp_theme_get_reoptimize_candidate_ids(int $limit = 0): array {
-    $query_args = array(
-        'post_type'              => 'attachment',
-        'post_mime_type'         => wp_theme_image_opt_supported_mimes(),
-        'post_status'            => 'inherit',
-        'posts_per_page'         => -1,
-        'fields'                 => 'ids',
-        'orderby'                => 'ID',
-        'order'                  => 'ASC',
-        'no_found_rows'          => true,
-        'update_post_meta_cache' => false,
-        'update_post_term_cache' => false,
-    );
-
-    $ids        = get_posts($query_args);
+function wp_theme_get_reoptimize_candidate_ids(int $limit = 0, int $after_id = 0): array {
     $candidates = array();
+    $cursor     = max(0, $after_id);
+    $per_page   = 100;
 
-    foreach ($ids as $id) {
-        $attachment_id = (int) $id;
-        if (wp_theme_attachment_needs_reoptimize($attachment_id)) {
+    do {
+        $ids = wp_theme_get_image_attachment_ids_after($cursor, $per_page);
+        if ($ids === array()) {
+            break;
+        }
+
+        foreach ($ids as $attachment_id) {
+            $cursor = $attachment_id;
+            if (! wp_theme_attachment_needs_reoptimize($attachment_id)) {
+                continue;
+            }
+
             $candidates[] = $attachment_id;
             if ($limit > 0 && count($candidates) >= $limit) {
-                break;
+                return $candidates;
             }
         }
-    }
+    } while (count($ids) === $per_page);
 
     return $candidates;
 }
@@ -897,23 +952,197 @@ function wp_theme_handle_reoptimize_images(): void {
 
     check_admin_referer('wp_theme_reoptimize_images');
 
-    $limit  = isset($_GET['limit']) ? absint(wp_unslash($_GET['limit'])) : 50;
-    $limit  = $limit > 0 ? min($limit, 200) : 50;
-    $result = wp_theme_reoptimize_existing_images($limit);
-
-    set_transient(
-        'wp_theme_reoptimize_notice_' . get_current_user_id(),
-        $result,
-        MINUTE_IN_SECONDS * 5
-    );
-
-    $redirect = wp_get_referer();
-    if (! $redirect) {
-        $redirect = admin_url('themes.php?page=wp-theme-settings');
+    // Keep PHP alive for one large file. The gateway still cuts the request
+    // off (504) if the whole batch runs too long, so work stays short below.
+    if (function_exists('set_time_limit')) {
+        set_time_limit(120);
     }
 
-    wp_safe_redirect($redirect);
+    $user_id = get_current_user_id();
+    $run = isset($_GET['run']) ? sanitize_key(wp_unslash((string) $_GET['run'])) : '';
+    if (! is_string($run)) {
+        $run = '';
+    }
+
+    $state = null;
+
+    if ('' !== $run) {
+        $stored = get_transient(wp_theme_reoptimize_run_transient_key($user_id, $run));
+        if (is_array($stored) && ($stored['run'] ?? '') === $run) {
+            $state = $stored;
+        }
+    }
+
+    if (! is_array($state)) {
+        $limit = isset($_GET['limit']) ? absint(wp_unslash($_GET['limit'])) : 50;
+        $limit = $limit > 0 ? min($limit, 200) : 50;
+        $run   = strtolower(wp_generate_password(12, false, false));
+        $state = wp_theme_reoptimize_run_state($limit, $run);
+    }
+
+    $batch = wp_theme_reoptimize_http_batch($state);
+    $state = $batch['state'];
+    $key   = wp_theme_reoptimize_run_transient_key($user_id, (string) $state['run']);
+
+    if ($batch['has_more']) {
+        set_transient($key, $state, 2 * HOUR_IN_SECONDS);
+        wp_theme_render_reoptimize_continue($state);
+        exit;
+    }
+
+    delete_transient($key);
+
+    set_transient(
+        'wp_theme_reoptimize_notice_' . $user_id,
+        array(
+            'processed' => (int) $state['processed'],
+            'success'   => (int) $state['success'],
+            'failed'    => (int) $state['failed'],
+            'errors'    => is_array($state['errors']) ? $state['errors'] : array(),
+        ),
+        5 * MINUTE_IN_SECONDS
+    );
+
+    wp_safe_redirect(admin_url('themes.php?page=wp-theme-settings'));
     exit;
+}
+
+
+/**
+ * Transient key for one in-progress re-optimize run.
+ *
+ * @since 1.3.0
+ * @param int    $user_id Current user ID.
+ * @param string $run     Run token.
+ */
+function wp_theme_reoptimize_run_transient_key(int $user_id, string $run): string {
+    return 'wp_theme_reopt_' . $user_id . '_' . $run;
+}
+
+
+/**
+ * Fresh counters for a re-optimize run.
+ *
+ * @since 1.3.0
+ * @param int    $limit Max attachments for the whole run.
+ * @param string $run   Run token.
+ * @return array{run:string,limit:int,processed:int,success:int,failed:int,errors:array<int,string>,after_id:int}
+ */
+function wp_theme_reoptimize_run_state(int $limit, string $run): array {
+    return array(
+        'run'       => $run,
+        'limit'     => $limit,
+        'processed' => 0,
+        'success'   => 0,
+        'failed'    => 0,
+        'errors'    => array(),
+        'after_id'  => 0,
+    );
+}
+
+
+/**
+ * Optimize a few images inside one HTTP request.
+ *
+ * Stops before the next image once about 15 seconds have passed, so a
+ * reverse proxy does not answer 504. The image already started is finished.
+ *
+ * @since 1.3.0
+ * @param array $state Run state.
+ * @return array{state:array,has_more:bool}
+ */
+function wp_theme_reoptimize_http_batch(array $state): array {
+    $limit     = (int) $state['limit'];
+    $remaining = max(0, $limit - (int) $state['processed']);
+    $batch_cap = min(3, $remaining);
+    $has_more  = false;
+
+    if ($batch_cap <= 0) {
+        return array(
+            'state'    => $state,
+            'has_more' => false,
+        );
+    }
+
+    $found    = wp_theme_get_reoptimize_candidate_ids($batch_cap + 1, (int) $state['after_id']);
+    $has_more = count($found) > $batch_cap;
+    $ids      = array_slice($found, 0, $batch_cap);
+    $started  = microtime(true);
+    $done     = 0;
+
+    foreach ($ids as $attachment_id) {
+        if ($done > 0 && (microtime(true) - $started) >= 15) {
+            $has_more = true;
+            break;
+        }
+
+        ++$state['processed'];
+        ++$done;
+        $state['after_id'] = (int) $attachment_id;
+
+        $optimized = wp_theme_reoptimize_attachment((int) $attachment_id);
+        if ($optimized instanceof WP_Error) {
+            ++$state['failed'];
+            if (count($state['errors']) < 20) {
+                $state['errors'][(int) $attachment_id] = $optimized->get_error_message();
+            }
+
+            continue;
+        }
+
+        ++$state['success'];
+    }
+
+    if ((int) $state['processed'] >= $limit) {
+        $has_more = false;
+    }
+
+    return array(
+        'state'    => $state,
+        'has_more' => $has_more,
+    );
+}
+
+
+/**
+ * Auto-continue page between short re-optimize batches.
+ *
+ * A chain of HTTP redirects hits the browser limit. This page loads the
+ * next batch itself and shows progress.
+ *
+ * @since 1.3.0
+ * @param array $state Run state.
+ */
+function wp_theme_render_reoptimize_continue(array $state): void {
+    $next_url = add_query_arg(
+        array(
+            'action'   => 'wp_theme_reoptimize_images',
+            'limit'    => (int) $state['limit'],
+            'run'      => (string) $state['run'],
+            '_wpnonce' => wp_create_nonce('wp_theme_reoptimize_images'),
+        ),
+        admin_url('admin-post.php')
+    );
+
+    $message = sprintf(
+        /* translators: 1: images optimized so far, 2: run limit */
+        __('Optimized %1$d of up to %2$d images. The next batch starts automatically.', 'wp-theme'),
+        (int) $state['processed'],
+        (int) $state['limit']
+    );
+
+    nocache_headers();
+    status_header(200);
+    header('Content-Type: text/html; charset=utf-8');
+
+    echo '<!DOCTYPE html><html><head><meta charset="utf-8">';
+    echo '<title>' . esc_html__('Optimizing images', 'wp-theme') . '</title>';
+    echo '<style>body{font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:2rem;color:#1d2327}a{color:#2271b1}</style>';
+    echo '</head><body>';
+    echo '<p>' . esc_html($message) . '</p>';
+    echo '<p><a href="' . esc_url($next_url) . '">' . esc_html__('Continue', 'wp-theme') . '</a></p>';
+    echo '<script>window.location.replace(' . wp_json_encode($next_url) . ');</script>';
+    echo '</body></html>';
 }
 
 
