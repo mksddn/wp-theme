@@ -1003,8 +1003,21 @@ function wp_theme_handle_reoptimize_images(): void {
         5 * MINUTE_IN_SECONDS
     );
 
-    wp_safe_redirect(admin_url('themes.php?page=wp-theme-settings'));
+    wp_safe_redirect(wp_theme_reoptimize_settings_url());
     exit;
+}
+
+
+/**
+ * Settings screen that hosts the re-optimize button.
+ *
+ * Registered with add_options_page(), so the parent file is options-general.php.
+ * themes.php?page=wp-theme-settings is denied by WordPress.
+ *
+ * @since 1.3.0
+ */
+function wp_theme_reoptimize_settings_url(): string {
+    return admin_url('options-general.php?page=wp-theme-settings');
 }
 
 
