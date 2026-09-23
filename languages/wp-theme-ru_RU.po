@@ -471,10 +471,6 @@ msgstr "Не кладите его в корневой .htaccess сайта и �
 msgid "If you use a root-owned VirtualHost, paste the Directory block instead. It is already limited to the uploads path of this site. The theme does not create or overwrite .htaccess."
 msgstr "Если используете VirtualHost от root, вставьте блок Directory. Он уже ограничен путём uploads этого сайта. Тема не создаёт и не перезаписывает .htaccess."
 
-#: inc/security-hardening/admin.php:793
-msgid "DISALLOW_FILE_MODS is optional. Enable it only when updates go through git/CI — it disables installing and updating plugins and themes from the admin, including this theme's GitHub updater. It does not block posts, pages, ACF, users, media, REST API, or already active plugins."
-msgstr "DISALLOW_FILE_MODS необязателен. Включайте только если обновления идут через git/CI — константа отключает установку и обновление плагинов и тем из админки, включая GitHub-апдейтер этой темы. Это не мешает записям, страницам, ACF, пользователям, медиа, REST API и уже активным плагинам."
-
 #: inc/security-hardening/admin.php:802
 msgid "WP_ENVIRONMENT_TYPE accepts only production, staging, development, and local. Without this constant WordPress treats the site as production."
 msgstr "WP_ENVIRONMENT_TYPE принимает только production, staging, development и local. Без этой константы WordPress считает сайт production."
@@ -486,18 +482,6 @@ msgstr "DISALLOW_FILE_EDIT сейчас задаётся темой. Объяв�
 #: inc/security-hardening/checks.php:266
 msgid "This is not marked as a warning or critical issue because the environment type is not production."
 msgstr "Это не помечается как предупреждение или критическая проблема, потому что тип окружения не production."
-
-#: inc/security-hardening/checks.php:120
-msgid "Plugin and theme file modifications (DISALLOW_FILE_MODS)"
-msgstr "Изменение файлов плагинов и тем (DISALLOW_FILE_MODS)"
-
-#: inc/security-hardening/checks.php:316
-msgid "DISALLOW_FILE_MODS is enabled. Installing and updating plugins and themes from the admin is blocked. Posts, pages, ACF, users, media, REST API, and already active plugins still work. Built-in theme updates from GitHub will also be blocked."
-msgstr "DISALLOW_FILE_MODS включён. Установка и обновление плагинов и тем из админки заблокированы. Записи, страницы, ACF, пользователи, медиа, REST API и уже активные плагины продолжают работать. Встроенные обновления темы с GitHub тоже будут заблокированы."
-
-#: inc/security-hardening/checks.php:325
-msgid "DISALLOW_FILE_MODS is not true. Add it in wp-config.php only if updates go through git/CI. Leave it unset if you install or update plugins and themes from wp-admin (including this theme's GitHub updater)."
-msgstr "DISALLOW_FILE_MODS не равен true. Добавляйте в wp-config.php только если обновления идут через git/CI. Не задавайте константу, если ставите или обновляете плагины и темы из wp-admin (включая GitHub-апдейтер этой темы)."
 
 #: inc/security-hardening/checks.php:125
 msgid "Debug display (WP_DEBUG_DISPLAY)"
@@ -569,18 +553,6 @@ msgstr "У первых %1$d из %2$d администраторов включ
 msgid "All %d checked administrators have two-factor authentication enabled."
 msgstr "У всех %d проверенных администраторов включена двухфакторная аутентификация."
 
-#: inc/security-hardening/checks.php:145
-msgid "Query Monitor"
-msgstr "Query Monitor"
-
-#: inc/security-hardening/checks.php:540
-msgid "Query Monitor is not active."
-msgstr "Query Monitor не активен."
-
-#: inc/security-hardening/checks.php:549
-msgid "Query Monitor is a temporary diagnostics plugin. It can show administrators SQL, file paths, errors, and HTTP requests. Keep it inactive on production and enable it only while debugging."
-msgstr "Query Monitor — плагин для временной диагностики. Он может показывать администраторам SQL, пути, ошибки и HTTP-запросы. На production держите его неактивным и включайте только на время отладки."
-
 #: inc/security-hardening/checks.php:150
 msgid "Plugin and theme updates"
 msgstr "Обновления плагинов и тем"
@@ -594,20 +566,6 @@ msgstr "В админке нет ожидающих обновлений пла�
 #, php-format
 msgid "%1$d plugin update(s) and %2$d theme update(s) are available. Review and apply them through your usual process (admin, git, or CI)."
 msgstr "Доступно обновлений плагинов: %1$d, тем: %2$d. Проверьте и примените их своим обычным способом (админка, git или CI)."
-
-#: inc/security-hardening/checks.php:155
-msgid "Writable WordPress directories"
-msgstr "Запись в каталоги WordPress"
-
-#: inc/security-hardening/checks.php:622
-msgid "core / plugins / themes are not writable from WordPress. This is preferred on production when updates go through git/CI."
-msgstr "core / plugins / themes недоступны для записи из WordPress. Так предпочтительно на production, если обновления идут через git/CI."
-
-#. translators: %s: comma-separated list of core, plugins, themes
-#: inc/security-hardening/checks.php:633
-#, php-format
-msgid "Writable from WordPress: %s. Write access lets PHP on disk be changed and is also required to install plugins and themes from wp-admin. On production prefer read-only if updates go through git/CI. If you update from the admin, this warning is expected."
-msgstr "Доступны для записи из WordPress: %s. Запись позволяет менять PHP на диске и одновременно нужна для установки плагинов и тем из wp-admin. На production предпочтителен read-only, если обновления идут через git/CI. Если обновляете из админки, это предупреждение ожидаемо."
 
 #: inc/security-hardening/checks.php:160
 msgid "PHP execution in uploads"
@@ -1342,52 +1300,3 @@ msgstr "FORCE_SSL_ADMIN перенаправляет wp-admin и вход на H
 #: inc/security-hardening/admin.php:799
 msgid "WP_DEBUG_DISPLAY hides PHP errors from visitors."
 msgstr "WP_DEBUG_DISPLAY скрывает ошибки PHP от посетителей."
-
-#: inc/security-hardening/admin.php:22
-msgid "File permissions"
-msgstr "Права на файлы"
-
-#: inc/security-hardening/admin.php:683
-msgid "WordPress reports this warning when the PHP user can write core, plugins, or themes."
-msgstr "WordPress показывает это предупреждение, если пользователь PHP может писать в ядро, плагины или темы."
-
-#: inc/security-hardening/admin.php:684
-msgid "That lets a compromised plugin change PHP on disk. It is also required if you install plugins and themes from wp-admin."
-msgstr "Тогда скомпрометированный плагин может менять PHP на диске. Та же запись нужна, если ставите плагины и темы из wp-admin."
-
-#: inc/security-hardening/admin.php:687
-msgid "If updates go through git/CI, make those directories owned by the deploy user and not writable by PHP."
-msgstr "Если обновления идут через git/CI, эти каталоги должны принадлежать пользователю деплоя и быть недоступны для записи PHP."
-
-#: inc/security-hardening/admin.php:688
-msgid "Keep uploads writable so media still works. Run the commands over SSH after deploy; the theme does not change ownership."
-msgstr "Uploads оставьте доступными для записи, чтобы работала медиатека. Команды выполняйте по SSH после деплоя: тема владельца не меняет."
-
-#: inc/security-hardening/admin.php:691
-msgid "If you update from the admin, skip this. The warning is expected. On Docker the mounted dirs stay writable on purpose."
-msgstr "Если обновляете из админки, этот шаг пропускайте: предупреждение ожидаемо. В Docker примонтированные каталоги специально остаются доступны для записи."
-
-#: inc/security-hardening/admin.php:694
-msgid "DISALLOW_FILE_MODS only hides install buttons in wp-admin. It does not make directories read-only."
-msgstr "DISALLOW_FILE_MODS только прячет кнопки установки в wp-admin. Сами каталоги от этого read-only не становятся."
-
-#: inc/security-hardening/admin.php:698
-msgid "PHP user"
-msgstr "Пользователь PHP"
-
-#: inc/security-hardening/admin.php:702
-#: inc/security-hardening/admin.php:710
-msgid "Could not detect"
-msgstr "Не удалось определить"
-
-#: inc/security-hardening/admin.php:706
-msgid "Owner of WordPress root"
-msgstr "Владелец корня WordPress"
-
-#: inc/security-hardening/admin.php:716
-msgid "PHP runs as the same user that owns the files. The commands below remove the owner write bit on core and restore it on uploads."
-msgstr "PHP работает от того же пользователя, которому принадлежат файлы. Команды ниже снимают право записи у владельца на ядро и возвращают его для uploads."
-
-#: inc/security-hardening/admin.php:725
-msgid "Commands for this site"
-msgstr "Команды для этого сайта"

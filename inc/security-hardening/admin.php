@@ -17,10 +17,9 @@ if (! defined('ABSPATH')) {
  */
 function wp_theme_security_hardening_tabs(): array {
     return array(
-        'overview'    => __('Overview', 'wp-theme'),
-        'web-server'  => __('Web server', 'wp-theme'),
-        'permissions' => __('File permissions', 'wp-theme'),
-        'wp-config'   => __('wp-config', 'wp-theme'),
+        'overview'   => __('Overview', 'wp-theme'),
+        'web-server' => __('Web server', 'wp-theme'),
+        'wp-config'  => __('wp-config', 'wp-theme'),
     );
 }
 
@@ -204,231 +203,10 @@ function wp_theme_security_hardening_apache_vhost_snippet(): string {
 
 
 /**
- * Quote a filesystem path for a POSIX shell snippet.
- *
- * @param string $path Absolute path.
- */
-function wp_theme_security_hardening_shell_quote_path(string $path): string {
-    $path = untrailingslashit(wp_normalize_path($path));
-
-    return escapeshellarg($path);
-}
-
-
-/**
- * POSIX account name for a uid, or empty when unavailable.
- *
- * @param int $uid User id.
- */
-function wp_theme_security_hardening_posix_user_name(int $uid): string {
-    if ($uid < 0 || ! function_exists('posix_getpwuid')) {
-        return '';
-    }
-
-    $info = posix_getpwuid($uid);
-    if (! is_array($info) || empty($info['name'])) {
-        return '';
-    }
-
-    $name = (string) $info['name'];
-    if (! preg_match('/^[A-Za-z_][A-Za-z0-9_-]*\$?$/', $name)) {
-        return '';
-    }
-
-    return $name;
-}
-
-
-/**
- * User the PHP process runs as.
- */
-function wp_theme_security_hardening_php_user_name(): string {
-    if (! function_exists('posix_geteuid')) {
-        return '';
-    }
-
-    return wp_theme_security_hardening_posix_user_name(posix_geteuid());
-}
-
-
-/**
- * Owner of a path, or empty when unavailable.
- *
- * @param string $path Filesystem path.
- */
-function wp_theme_security_hardening_path_owner_name(string $path): string {
-    if (! is_dir($path) && ! is_file($path)) {
-        return '';
-    }
-
-    $uid = fileowner($path);
-    if (! is_int($uid)) {
-        return '';
-    }
-
-    return wp_theme_security_hardening_posix_user_name($uid);
-}
-
-
-/**
- * Normalize a directory path for comparisons and snippets.
- *
- * @param string $path Path.
- */
-function wp_theme_security_hardening_normalize_dir(string $path): string {
-    return untrailingslashit(wp_normalize_path($path));
-}
-
-
-/**
- * Directories to drop write bits on (code only — not uploads/cache/logs).
- *
- * @return string[]
- */
-function wp_theme_security_hardening_lock_directories(): array {
-    $root = wp_theme_security_hardening_normalize_dir(ABSPATH);
-    $paths = array(
-        $root . '/wp-admin',
-        $root . '/wp-includes',
-        defined('WP_PLUGIN_DIR') ? (string) WP_PLUGIN_DIR : $root . '/wp-content/plugins',
-        (string) get_theme_root(),
-    );
-
-    $normalized = array();
-    foreach ($paths as $candidate) {
-        $candidate = wp_theme_security_hardening_normalize_dir($candidate);
-        if ('' === $candidate || ! is_dir($candidate)) {
-            continue;
-        }
-
-        $normalized[] = $candidate;
-    }
-
-    return array_values(array_unique($normalized));
-}
-
-
-/**
- * Root PHP/bootstrap files to lock without touching the whole ABSPATH tree.
- *
- * @return string[]
- */
-function wp_theme_security_hardening_lock_root_files(): array {
-    $root  = wp_theme_security_hardening_normalize_dir(ABSPATH);
-    $names = array(
-        'index.php',
-        'wp-activate.php',
-        'wp-blog-header.php',
-        'wp-comments-post.php',
-        'wp-config-sample.php',
-        'wp-cron.php',
-        'wp-links-opml.php',
-        'wp-load.php',
-        'wp-login.php',
-        'wp-mail.php',
-        'wp-settings.php',
-        'wp-signup.php',
-        'wp-trackback.php',
-        'xmlrpc.php',
-    );
-
-    $files = array();
-    foreach ($names as $name) {
-        $path = $root . '/' . $name;
-        if (is_file($path)) {
-            $files[] = $path;
-        }
-    }
-
-    return $files;
-}
-
-
-/**
- * Uploads basedir for this site.
- */
-function wp_theme_security_hardening_uploads_dir(): string {
-    $uploads = wp_upload_dir();
-    $basedir = is_array($uploads) ? (string) ($uploads['basedir'] ?? '') : '';
-
-    if ('' === $basedir) {
-        $basedir = ABSPATH . 'wp-content/uploads';
-    }
-
-    return wp_theme_security_hardening_normalize_dir($basedir);
-}
-
-
-/**
- * chmod/chown commands for this site's real paths and users.
- */
-function wp_theme_security_hardening_permissions_snippet(): string {
-    $lock_dirs  = wp_theme_security_hardening_lock_directories();
-    $lock_files = wp_theme_security_hardening_lock_root_files();
-    $lock_all   = array_merge($lock_dirs, $lock_files);
-    $lock_quoted = array_map(
-        wp_theme_security_hardening_shell_quote_path(...),
-        $lock_all
-    );
-    $dirs_quoted = array_map(
-        wp_theme_security_hardening_shell_quote_path(...),
-        $lock_dirs
-    );
-    $files_quoted = array_map(
-        wp_theme_security_hardening_shell_quote_path(...),
-        $lock_files
-    );
-    $uploads_q = wp_theme_security_hardening_shell_quote_path(
-        wp_theme_security_hardening_uploads_dir()
-    );
-    $php_user   = wp_theme_security_hardening_php_user_name();
-    $root_owner = wp_theme_security_hardening_path_owner_name(ABSPATH);
-    $lines      = array();
-
-    if (array() === $lock_quoted) {
-        return "# No lockable WordPress code paths were found.\n";
-    }
-
-    if ('' !== $php_user && '' !== $root_owner && $php_user !== $root_owner) {
-        $lines[] = 'sudo chown -R ' . $root_owner . ':' . $root_owner . ' ' . implode(' ', $lock_quoted);
-        if (array() !== $dirs_quoted) {
-            $lines[] = 'sudo chmod -R u=rwX,go=rX ' . implode(' ', $dirs_quoted);
-        }
-
-        if (array() !== $files_quoted) {
-            $lines[] = 'sudo chmod u=rw,go=r ' . implode(' ', $files_quoted);
-        }
-
-        $lines[] = '';
-        $lines[] = 'sudo chown -R ' . $php_user . ':' . $php_user . ' ' . $uploads_q;
-        $lines[] = 'sudo chmod -R u=rwX,go=rX ' . $uploads_q;
-    } else {
-        if (array() !== $dirs_quoted) {
-            $lines[] = 'sudo chmod -R u=rX,go=rX ' . implode(' ', $dirs_quoted);
-        }
-
-        if (array() !== $files_quoted) {
-            $lines[] = 'sudo chmod u=r,go=r ' . implode(' ', $files_quoted);
-        }
-
-        $lines[] = 'sudo chmod -R u=rwX,go=rX ' . $uploads_q;
-    }
-
-    return implode("\n", $lines) . "\n";
-}
-
-
-/**
  * wp-config.php constants snippet.
- *
- * DISALLOW_FILE_MODS is optional: include it only when updates go through
- * git/CI. Leaving it out keeps admin installs and the GitHub theme updater working.
  */
 function wp_theme_security_hardening_wp_config_snippet(): string {
     return <<<'PHP'
-// Optional: only when updates go through git/CI (blocks admin installs and GitHub theme updates).
-// define( 'DISALLOW_FILE_MODS', true );
-
 define( 'DISALLOW_FILE_EDIT', true );
 define( 'FORCE_SSL_ADMIN', true );
 define( 'WP_DEBUG_DISPLAY', false );
@@ -506,7 +284,6 @@ function wp_theme_security_hardening_render_admin_page(): void {
         <?php
         match ($current) {
             'web-server' => wp_theme_security_hardening_render_tab_web_server(),
-            'permissions' => wp_theme_security_hardening_render_tab_permissions(),
             'wp-config' => wp_theme_security_hardening_render_tab_wp_config(),
             default => wp_theme_security_hardening_render_tab_overview(),
         };
@@ -734,74 +511,12 @@ function wp_theme_security_hardening_render_section_apache(): void {
 
 
 /**
- * File permissions tab (writable core / plugins / themes).
- */
-function wp_theme_security_hardening_render_tab_permissions(): void {
-    $php_user   = wp_theme_security_hardening_php_user_name();
-    $root_owner = wp_theme_security_hardening_path_owner_name(ABSPATH);
-    $snippet    = wp_theme_security_hardening_permissions_snippet();
-    $rows       = max(6, substr_count($snippet, "\n") + 1);
-    ?>
-    <p>
-        <?php esc_html_e('WordPress reports this warning when the PHP user can write core, plugins, or themes.', 'wp-theme'); ?>
-        <?php esc_html_e('That lets a compromised plugin change PHP on disk. It is also required if you install plugins and themes from wp-admin.', 'wp-theme'); ?>
-    </p>
-    <p>
-        <?php esc_html_e('If updates go through git/CI, make those directories owned by the deploy user and not writable by PHP.', 'wp-theme'); ?>
-        <?php esc_html_e('Keep uploads writable so media still works. Run the commands over SSH after deploy; the theme does not change ownership.', 'wp-theme'); ?>
-    </p>
-    <p>
-        <?php esc_html_e('If you update from the admin, skip this. The warning is expected. On Docker the mounted dirs stay writable on purpose.', 'wp-theme'); ?>
-    </p>
-    <p class="description">
-        <?php esc_html_e('DISALLOW_FILE_MODS only hides install buttons in wp-admin. It does not make directories read-only.', 'wp-theme'); ?>
-    </p>
-    <div class="wp-theme-security-hardening-meta">
-        <p>
-            <strong><?php esc_html_e('PHP user', 'wp-theme'); ?>:</strong>
-            <?php if ('' !== $php_user) : ?>
-                <code><?php echo esc_html($php_user); ?></code>
-            <?php else : ?>
-                <?php esc_html_e('Could not detect', 'wp-theme'); ?>
-            <?php endif; ?>
-        </p>
-        <p>
-            <strong><?php esc_html_e('Owner of WordPress root', 'wp-theme'); ?>:</strong>
-            <?php if ('' !== $root_owner) : ?>
-                <code><?php echo esc_html($root_owner); ?></code>
-            <?php else : ?>
-                <?php esc_html_e('Could not detect', 'wp-theme'); ?>
-            <?php endif; ?>
-        </p>
-    </div>
-    <?php if ('' !== $php_user && $php_user === $root_owner) : ?>
-        <p class="description">
-            <?php esc_html_e('PHP runs as the same user that owns the files. The commands below remove the owner write bit on core and restore it on uploads.', 'wp-theme'); ?>
-        </p>
-    <?php endif; ?>
-    <?php
-    wp_theme_security_hardening_render_copyable(
-        'wp-theme-hardening-permissions-snippet',
-        $snippet,
-        false,
-        $rows,
-        __('Commands for this site', 'wp-theme')
-    );
-}
-
-
-/**
  * wp-config tab.
  */
 function wp_theme_security_hardening_render_tab_wp_config(): void {
     ?>
     <p>
         <?php esc_html_e('Copy these constants into wp-config.php, above the "That\'s all, stop editing!" line. The theme does not change that file.', 'wp-theme'); ?>
-    </p>
-    <p>
-        <?php esc_html_e('DISALLOW_FILE_MODS is optional. Enable it only when updates go through git/CI.', 'wp-theme'); ?>
-        <?php esc_html_e('It disables installing and updating plugins and themes from the admin, including this theme\'s GitHub updater.', 'wp-theme'); ?>
-        <?php esc_html_e('It does not block posts, pages, ACF, users, media, REST API, or already active plugins.', 'wp-theme'); ?>
     </p>
     <p>
         <?php esc_html_e('FORCE_SSL_ADMIN redirects wp-admin and login to HTTPS.', 'wp-theme'); ?>
@@ -822,7 +537,7 @@ function wp_theme_security_hardening_render_tab_wp_config(): void {
         'wp-theme-hardening-wp-config-snippet',
         wp_theme_security_hardening_wp_config_snippet(),
         false,
-        11,
+        6,
         'wp-config.php'
     );
 }

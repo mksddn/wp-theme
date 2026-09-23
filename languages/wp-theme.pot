@@ -421,10 +421,6 @@ msgstr ""
 msgid "Web server"
 msgstr ""
 
-#: inc/security-hardening/admin.php:22
-msgid "File permissions"
-msgstr ""
-
 #: inc/security-hardening/admin.php:23
 msgid "wp-config"
 msgstr ""
@@ -565,57 +561,8 @@ msgstr ""
 msgid "VirtualHost"
 msgstr ""
 
-#: inc/security-hardening/admin.php:683
-msgid "WordPress reports this warning when the PHP user can write core, plugins, or themes."
-msgstr ""
-
-#: inc/security-hardening/admin.php:684
-msgid "That lets a compromised plugin change PHP on disk. It is also required if you install plugins and themes from wp-admin."
-msgstr ""
-
-#: inc/security-hardening/admin.php:687
-msgid "If updates go through git/CI, make those directories owned by the deploy user and not writable by PHP."
-msgstr ""
-
-#: inc/security-hardening/admin.php:688
-msgid "Keep uploads writable so media still works. Run the commands over SSH after deploy; the theme does not change ownership."
-msgstr ""
-
-#: inc/security-hardening/admin.php:691
-msgid "If you update from the admin, skip this. The warning is expected. On Docker the mounted dirs stay writable on purpose."
-msgstr ""
-
-#: inc/security-hardening/admin.php:694
-msgid "DISALLOW_FILE_MODS only hides install buttons in wp-admin. It does not make directories read-only."
-msgstr ""
-
-#: inc/security-hardening/admin.php:698
-msgid "PHP user"
-msgstr ""
-
-#: inc/security-hardening/admin.php:702
-#: inc/security-hardening/admin.php:710
-msgid "Could not detect"
-msgstr ""
-
-#: inc/security-hardening/admin.php:706
-msgid "Owner of WordPress root"
-msgstr ""
-
-#: inc/security-hardening/admin.php:716
-msgid "PHP runs as the same user that owns the files. The commands below remove the owner write bit on core and restore it on uploads."
-msgstr ""
-
-#: inc/security-hardening/admin.php:725
-msgid "Commands for this site"
-msgstr ""
-
 #: inc/security-hardening/admin.php:790
 msgid "Copy these constants into wp-config.php, above the \"That's all, stop editing!\" line. The theme does not change that file."
-msgstr ""
-
-#: inc/security-hardening/admin.php:793
-msgid "DISALLOW_FILE_MODS is optional. Enable it only when updates go through git/CI — it disables installing and updating plugins and themes from the admin, including this theme's GitHub updater. It does not block posts, pages, ACF, users, media, REST API, or already active plugins."
 msgstr ""
 
 #: inc/security-hardening/admin.php:797
@@ -634,10 +581,6 @@ msgstr ""
 msgid "DISALLOW_FILE_EDIT is currently set by the theme. Declaring it in wp-config.php before the theme loads is slightly more reliable if the theme fails to load."
 msgstr ""
 
-#: inc/security-hardening/checks.php:120
-msgid "Plugin and theme file modifications (DISALLOW_FILE_MODS)"
-msgstr ""
-
 #: inc/security-hardening/checks.php:125
 msgid "Debug display (WP_DEBUG_DISPLAY)"
 msgstr ""
@@ -654,16 +597,8 @@ msgstr ""
 msgid "Two-factor authentication for administrators"
 msgstr ""
 
-#: inc/security-hardening/checks.php:145
-msgid "Query Monitor"
-msgstr ""
-
 #: inc/security-hardening/checks.php:150
 msgid "Plugin and theme updates"
-msgstr ""
-
-#: inc/security-hardening/checks.php:155
-msgid "Writable WordPress directories"
 msgstr ""
 
 #: inc/security-hardening/checks.php:160
@@ -676,14 +611,6 @@ msgstr ""
 
 #: inc/security-hardening/checks.php:266
 msgid "This is not marked as a warning or critical issue because the environment type is not production."
-msgstr ""
-
-#: inc/security-hardening/checks.php:316
-msgid "DISALLOW_FILE_MODS is enabled. Installing and updating plugins and themes from the admin is blocked. Posts, pages, ACF, users, media, REST API, and already active plugins still work. Built-in theme updates from GitHub will also be blocked."
-msgstr ""
-
-#: inc/security-hardening/checks.php:325
-msgid "DISALLOW_FILE_MODS is not true. Add it in wp-config.php only if updates go through git/CI. Leave it unset if you install or update plugins and themes from wp-admin (including this theme's GitHub updater)."
 msgstr ""
 
 #: inc/security-hardening/checks.php:344
@@ -740,14 +667,6 @@ msgstr ""
 msgid "All %d checked administrators have two-factor authentication enabled."
 msgstr ""
 
-#: inc/security-hardening/checks.php:540
-msgid "Query Monitor is not active."
-msgstr ""
-
-#: inc/security-hardening/checks.php:549
-msgid "Query Monitor is a temporary diagnostics plugin. It can show administrators SQL, file paths, errors, and HTTP requests. Keep it inactive on production and enable it only while debugging."
-msgstr ""
-
 #: inc/security-hardening/checks.php:577
 msgid "No plugin or theme updates are waiting in the admin."
 msgstr ""
@@ -756,16 +675,6 @@ msgstr ""
 #: inc/security-hardening/checks.php:588
 #, php-format
 msgid "%1$d plugin update(s) and %2$d theme update(s) are available. Review and apply them through your usual process (admin, git, or CI)."
-msgstr ""
-
-#: inc/security-hardening/checks.php:622
-msgid "core / plugins / themes are not writable from WordPress. This is preferred on production when updates go through git/CI."
-msgstr ""
-
-#. translators: %s: comma-separated list of core, plugins, themes
-#: inc/security-hardening/checks.php:633
-#, php-format
-msgid "Writable from WordPress: %s. Write access lets PHP on disk be changed and is also required to install plugins and themes from wp-admin. On production prefer read-only if updates go through git/CI. If you update from the admin, this warning is expected."
 msgstr ""
 
 #: inc/security-hardening/checks.php:716

@@ -63,7 +63,7 @@ function wp_theme_security_hardening_ensure_plugin_admin(): void {
 /**
  * Whether a plugin is active on the site or network.
  *
- * @param string $plugin Plugin basename, e.g. query-monitor/query-monitor.php.
+ * @param string $plugin Plugin basename, e.g. two-factor/two-factor.php.
  */
 function wp_theme_security_hardening_is_plugin_active(string $plugin): bool {
     wp_theme_security_hardening_ensure_plugin_admin();
@@ -133,11 +133,6 @@ function wp_theme_security_hardening_catalog(): array {
 
     if (! is_array($base)) {
         $base = array(
-            'file_mods'        => array(
-                'label'       => __('Plugin and theme file modifications (DISALLOW_FILE_MODS)', 'wp-theme'),
-                'callback'    => 'wp_theme_security_hardening_check_file_mods',
-                'site_health' => true,
-            ),
             'debug_display'    => array(
                 'label'       => __('Debug display (WP_DEBUG_DISPLAY)', 'wp-theme'),
                 'callback'    => 'wp_theme_security_hardening_check_debug_display',
@@ -158,19 +153,9 @@ function wp_theme_security_hardening_catalog(): array {
                 'callback'    => 'wp_theme_security_hardening_check_two_factor_users',
                 'site_health' => true,
             ),
-            'query_monitor'    => array(
-                'label'       => __('Query Monitor', 'wp-theme'),
-                'callback'    => 'wp_theme_security_hardening_check_query_monitor',
-                'site_health' => true,
-            ),
             'updates'          => array(
                 'label'       => __('Plugin and theme updates', 'wp-theme'),
                 'callback'    => 'wp_theme_security_hardening_check_updates',
-                'site_health' => true,
-            ),
-            'writable'         => array(
-                'label'       => __('Writable WordPress directories', 'wp-theme'),
-                'callback'    => 'wp_theme_security_hardening_check_writable',
                 'site_health' => true,
             ),
             'uploads_php'      => array(
@@ -321,42 +306,6 @@ function wp_theme_security_hardening_get_results(): array {
     }
 
     return $results;
-}
-
-
-/**
- * DISALLOW_FILE_MODS — warning on production when not true.
- *
- * Warning (not critical): this theme ships a GitHub updater that needs
- * admin file mods. Prefer the constant only when updates go through git/CI.
- *
- * @return array<string, mixed>
- */
-function wp_theme_security_hardening_check_file_mods(): array {
-    $defined = defined('DISALLOW_FILE_MODS') && DISALLOW_FILE_MODS;
-    $title   = wp_theme_security_hardening_check_label('file_mods');
-
-    if ($defined) {
-        return wp_theme_security_hardening_make_item(
-            'file_mods',
-            'good',
-            $title,
-            __(
-                'DISALLOW_FILE_MODS is enabled. Installing and updating plugins and themes from the admin is blocked. ' .
-                'Posts, pages, ACF, users, media, REST API, and already active plugins still work. Built-in theme updates from GitHub will also be blocked.',
-                'wp-theme'
-            ),
-            true
-        );
-    }
-
-    return wp_theme_security_hardening_make_item(
-        'file_mods',
-        'warning',
-        $title,
-        __('DISALLOW_FILE_MODS is not true. Add it in wp-config.php only if updates go through git/CI. Leave it unset if you install or update plugins and themes from wp-admin (including this theme\'s GitHub updater).', 'wp-theme'),
-        true
-    );
 }
 
 
@@ -564,34 +513,6 @@ function wp_theme_security_hardening_check_two_factor_users(): array {
 
 
 /**
- * Query Monitor active — warning on production, not treated as malware.
- *
- * @return array<string, mixed>
- */
-function wp_theme_security_hardening_check_query_monitor(): array {
-    $title = wp_theme_security_hardening_check_label('query_monitor');
-
-    if (! wp_theme_security_hardening_is_plugin_active('query-monitor/query-monitor.php')) {
-        return wp_theme_security_hardening_make_item(
-            'query_monitor',
-            'good',
-            $title,
-            __('Query Monitor is not active.', 'wp-theme'),
-            true
-        );
-    }
-
-    return wp_theme_security_hardening_make_item(
-        'query_monitor',
-        'warning',
-        $title,
-        __('Query Monitor is a temporary diagnostics plugin. It can show administrators SQL, file paths, errors, and HTTP requests. Keep it inactive on production and enable it only while debugging.', 'wp-theme'),
-        true
-    );
-}
-
-
-/**
  * Available plugin or theme updates — warning on production.
  *
  * @return array<string, mixed>
@@ -627,54 +548,6 @@ function wp_theme_security_hardening_check_updates(): array {
             __('%1$d plugin update(s) and %2$d theme update(s) are available. Review and apply them through your usual process (admin, git, or CI).', 'wp-theme'),
             $plugin_count,
             $theme_count
-        ),
-        true
-    );
-}
-
-
-/**
- * Writable core / plugins / themes — warning on production, never critical.
- *
- * @return array<string, mixed>
- */
-function wp_theme_security_hardening_check_writable(): array {
-    $title     = wp_theme_security_hardening_check_label('writable');
-    $locations = array(
-        'core'    => ABSPATH,
-        'plugins' => defined('WP_PLUGIN_DIR') ? WP_PLUGIN_DIR : ABSPATH . 'wp-content/plugins',
-        'themes'  => get_theme_root(),
-    );
-
-    $writable = array();
-    foreach ($locations as $label => $path) {
-        if (function_exists('wp_is_writable') && wp_is_writable($path)) {
-            $writable[] = $label;
-        }
-    }
-
-    if (array() === $writable) {
-        return wp_theme_security_hardening_make_item(
-            'writable',
-            'good',
-            $title,
-            __('core / plugins / themes are not writable from WordPress. This is preferred on production when updates go through git/CI.', 'wp-theme'),
-            true
-        );
-    }
-
-    return wp_theme_security_hardening_make_item(
-        'writable',
-        'warning',
-        $title,
-        sprintf(
-            /* translators: %s: comma-separated list of core, plugins, themes */
-            __(
-                'Writable from WordPress: %s. Write access lets PHP on disk be changed and is also required to install plugins and themes from wp-admin. ' .
-                'On production prefer read-only if updates go through git/CI. If you update from the admin, this warning is expected.',
-                'wp-theme'
-            ),
-            implode(', ', $writable)
         ),
         true
     );
@@ -867,11 +740,7 @@ function wp_theme_security_hardening_tab_for_check(string $id): string {
         return 'web-server';
     }
 
-    if ('writable' === $id) {
-        return 'permissions';
-    }
-
-    if (in_array($id, array('file_mods', 'ssl_admin', 'file_edit_source', 'debug_display'), true)) {
+    if (in_array($id, array('ssl_admin', 'file_edit_source', 'debug_display'), true)) {
         return 'wp-config';
     }
 

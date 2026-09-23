@@ -82,6 +82,7 @@ final class GitHub_Theme_Updater {
      */
     private function init_hooks(): void {
         add_filter('pre_set_site_transient_update_themes', $this->check_for_updates(...));
+        add_filter('site_transient_update_themes', $this->discard_current_version_updates(...));
         add_filter('themes_api', $this->theme_api_call(...), 10, 3);
         add_action('upgrader_process_complete', $this->after_theme_update(...), 10, 2);
         add_action('upgrader_post_install', $this->after_theme_install(...), 10, 2);
@@ -96,19 +97,88 @@ final class GitHub_Theme_Updater {
 
 
     /**
-     * Get theme version from style.css
+     * Stylesheet of the parent theme this updater tracks.
+     *
+     * wp_get_theme() without a slug is the active stylesheet. With a child
+     * theme that is the child, whose version must not be compared to the parent release.
      */
-    private function get_theme_version() {
-        $theme_data = wp_get_theme();
-        return $theme_data->get('Version') ?: '1.0.0';
+    private function get_parent_stylesheet(): string {
+        $template = get_template();
+        if (is_string($template) && $template !== '') {
+            return $template;
+        }
+
+        return $this->theme_slug;
     }
 
 
     /**
-     * Get GitHub Theme URI from style.css
+     * Theme directories this updater may store in the update transient.
+     *
+     * @return string[]
+     */
+    private function get_possible_slugs(): array {
+        $slugs = [$this->theme_slug];
+        $parent = $this->get_parent_stylesheet();
+        if (!in_array($parent, $slugs, true)) {
+            $slugs[] = $parent;
+        }
+
+        return $slugs;
+    }
+
+
+    /**
+     * Strip a single leading "v" and surrounding whitespace.
+     */
+    private function normalize_version(string $version): string {
+        $version = trim($version);
+        $stripped = preg_replace('/^v/i', '', $version);
+
+        return is_string($stripped) ? $stripped : '';
+    }
+
+
+    /**
+     * Version header of a specific theme directory.
+     */
+    private function get_theme_version_for_slug(string $slug): string {
+        if ($slug === '') {
+            return '';
+        }
+
+        $theme = wp_get_theme($slug);
+        if (!$theme->exists()) {
+            return '';
+        }
+
+        $version = $theme->get('Version');
+        if (!is_string($version) || $version === '') {
+            return '';
+        }
+
+        return $this->normalize_version($version);
+    }
+
+
+    /**
+     * Get the parent theme version from style.css.
+     */
+    private function get_theme_version(): string {
+        $version = $this->get_theme_version_for_slug($this->get_parent_stylesheet());
+        if ($version === '') {
+            $version = $this->get_theme_version_for_slug($this->theme_slug);
+        }
+
+        return $version !== '' ? $version : '1.0.0';
+    }
+
+
+    /**
+     * Get GitHub Theme URI from the parent theme style.css.
      */
     private function get_github_theme_uri() {
-        $theme_data = wp_get_theme();
+        $theme_data = wp_get_theme($this->get_parent_stylesheet());
 
         // Try different ways to get GitHub URI
         $github_uri = $theme_data->get('GitHub Theme URI');
@@ -142,29 +212,21 @@ final class GitHub_Theme_Updater {
      * @return object
      */
     public function check_for_updates($transient) {
-        if (empty($transient->checked)) {
+        if (!is_object($transient) || empty($transient->checked)) {
             return $transient;
         }
 
-        // Get current version dynamically to ensure it's up to date
-        $current_version = $this->get_theme_version();
-        $remote_version = $this->get_remote_version();
-
-        // Get all possible theme slugs (base name and versioned)
-        $possible_slugs = [$this->theme_slug];
-        $actual_theme_slug = get_template();
-        if ($actual_theme_slug !== $this->theme_slug) {
-            $possible_slugs[] = $actual_theme_slug;
-        }
-
-        // Remove any existing entries for this theme to prevent stale data
-        foreach ($possible_slugs as $slug) {
+        // Drop previous offers so an equal release cannot stay in response.
+        foreach ($this->get_possible_slugs() as $slug) {
             if (isset($transient->response[$slug])) {
                 unset($transient->response[$slug]);
             }
         }
 
-        // Only add update entry if remote version is newer
+        $current_version = $this->get_theme_version();
+        $remote_version = $this->get_remote_version();
+
+        // The themes screen lists every response entry, even when versions match.
         if ($remote_version && version_compare($current_version, $remote_version, '<')) {
             $transient->response[$this->theme_slug] = [
                 'theme' => $this->theme_slug,
@@ -179,15 +241,76 @@ final class GitHub_Theme_Updater {
 
 
     /**
+     * Hide an update offer that is not newer than the installed copy.
+     *
+     * A stale transient keeps showing in wp-admin until the next update check.
+     * Compare the offered version with that theme's own style.css.
+     *
+     * @param mixed $transient
+     * @return mixed
+     */
+    public function discard_current_version_updates($transient) {
+        if (!is_object($transient) || empty($transient->response) || !is_array($transient->response)) {
+            return $transient;
+        }
+
+        foreach ($this->get_possible_slugs() as $slug) {
+            if (!isset($transient->response[$slug])) {
+                continue;
+            }
+
+            $new_version = $this->read_update_version($transient->response[$slug]);
+            $installed = $this->get_theme_version_for_slug($slug);
+            if ($installed === '' && isset($transient->checked[$slug])) {
+                $installed = $this->normalize_version((string) $transient->checked[$slug]);
+            }
+
+            if ($installed === '') {
+                $installed = $this->get_theme_version_for_slug($this->get_parent_stylesheet());
+            }
+
+            if ($new_version === '' || $installed === '') {
+                continue;
+            }
+
+            if (version_compare($installed, $new_version, '>=')) {
+                unset($transient->response[$slug]);
+            }
+        }
+
+        return $transient;
+    }
+
+
+    /**
+     * Read new_version from a theme update payload.
+     *
+     * @param mixed $update
+     */
+    private function read_update_version($update): string {
+        $version = '';
+        if (is_array($update) && isset($update['new_version'])) {
+            $version = (string) $update['new_version'];
+        } elseif (is_object($update) && isset($update->new_version)) {
+            $version = (string) $update->new_version;
+        }
+
+        return $this->normalize_version($version);
+    }
+
+
+    /**
      * Get remote version from GitHub API
      */
     private function get_remote_version(): ?string {
         $data = $this->get_latest_release_data();
-        if (isset($data['tag_name'])) {
-            return ltrim((string) $data['tag_name'], 'v');
+        if (!isset($data['tag_name'])) {
+            return null;
         }
 
-        return null;
+        $version = $this->normalize_version((string) $data['tag_name']);
+
+        return $version !== '' ? $version : null;
     }
 
 
@@ -263,7 +386,10 @@ final class GitHub_Theme_Updater {
             return $result;
         }
 
-        $remote_version = ltrim((string) $data['tag_name'], 'v');
+        $remote_version = $this->normalize_version((string) $data['tag_name']);
+        if ($remote_version === '') {
+            return $result;
+        }
 
         $result = [
             'name' => $this->repo,
