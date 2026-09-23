@@ -527,9 +527,21 @@ msgstr "Нет активного распознанного плагина 2FA 
 msgid "Two-factor authentication for administrators"
 msgstr "Двухфакторная аутентификация администраторов"
 
-#: inc/security-hardening/checks.php:442
-msgid "A two-factor plugin is active, but per-user status cannot be checked automatically for this plugin."
-msgstr "Плагин 2FA активен, но статус по пользователям для этого плагина нельзя проверить автоматически."
+#: inc/security-hardening/checks.php
+msgid "A two-factor plugin is active. Require two-factor authentication for the administrator role in its settings. This plugin does not expose that setting for an automatic check."
+msgstr "Плагин 2FA активен. В его настройках потребуйте двухфакторную аутентификацию для роли администратора. Этот плагин не отдаёт эту настройку для автоматической проверки."
+
+#: inc/security-hardening/checks.php
+msgid "WP 2FA requires two-factor authentication for the administrator role."
+msgstr "WP 2FA требует двухфакторную аутентификацию для роли администратора."
+
+#: inc/security-hardening/checks.php
+msgid "WP 2FA does not require two-factor authentication for the administrator role. Require it for that role in the plugin policy."
+msgstr "WP 2FA не требует двухфакторную аутентификацию для роли администратора. Включите это требование для роли в политике плагина."
+
+#: inc/security-hardening/checks.php
+msgid "WP 2FA is active, but this check could not confirm that the administrator role is required to use two-factor authentication. Set that requirement in the plugin policy."
+msgstr "WP 2FA активен, но проверка не подтвердила, что для роли администратора двухфакторная аутентификация обязательна. Задайте это требование в политике плагина."
 
 #: inc/security-hardening/checks.php:478
 msgid "No administrators were found to check for two-factor authentication."

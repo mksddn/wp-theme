@@ -641,8 +641,20 @@ msgstr ""
 msgid "No recognized two-factor plugin is active (built-in list: Two Factor, WP 2FA). On production administrators should use 2FA. If another 2FA plugin is already in use, extend the list with the wp_theme_security_hardening_two_factor_plugins filter."
 msgstr ""
 
-#: inc/security-hardening/checks.php:442
-msgid "A two-factor plugin is active, but per-user status cannot be checked automatically for this plugin."
+#: inc/security-hardening/checks.php
+msgid "A two-factor plugin is active. Require two-factor authentication for the administrator role in its settings. This plugin does not expose that setting for an automatic check."
+msgstr ""
+
+#: inc/security-hardening/checks.php
+msgid "WP 2FA requires two-factor authentication for the administrator role."
+msgstr ""
+
+#: inc/security-hardening/checks.php
+msgid "WP 2FA does not require two-factor authentication for the administrator role. Require it for that role in the plugin policy."
+msgstr ""
+
+#: inc/security-hardening/checks.php
+msgid "WP 2FA is active, but this check could not confirm that the administrator role is required to use two-factor authentication. Set that requirement in the plugin policy."
 msgstr ""
 
 #: inc/security-hardening/checks.php:478

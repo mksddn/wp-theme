@@ -1,4 +1,6 @@
 <?php
+use WP2FA\Utils\Settings_Utils;
+
 /**
  * Security Hardening checks shared by Overview and Site Health.
  *
@@ -411,27 +413,186 @@ function wp_theme_security_hardening_check_two_factor(): array {
 
 
 /**
- * Per-user 2FA for administrators (official Two Factor API only).
+ * 2FA for administrators.
+ *
+ * Official Two Factor is checked per user. WP 2FA is checked by policy:
+ * the administrator role must be required to use 2FA.
  *
  * @return array<string, mixed>
  */
 function wp_theme_security_hardening_check_two_factor_users(): array {
     $title = wp_theme_security_hardening_check_label('two_factor_users');
 
-    if (! class_exists('Two_Factor_Core') || ! method_exists(Two_Factor_Core::class, 'is_user_using_two_factor')) {
-        if (! wp_theme_security_hardening_is_two_factor_plugin_active()) {
-            return array();
+    if (class_exists('Two_Factor_Core') && method_exists(Two_Factor_Core::class, 'is_user_using_two_factor')) {
+        return wp_theme_security_hardening_check_two_factor_core_users($title);
+    }
+
+    if (wp_theme_security_hardening_is_plugin_active('wp-2fa/wp-2fa.php')) {
+        return wp_theme_security_hardening_check_wp2fa_administrators($title);
+    }
+
+    if (! wp_theme_security_hardening_is_two_factor_plugin_active()) {
+        return array();
+    }
+
+    return wp_theme_security_hardening_make_item(
+        'two_factor_users',
+        'unknown',
+        $title,
+        __(
+            'A two-factor plugin is active. Require two-factor authentication for the administrator role in its settings. This plugin does not expose that setting for an automatic check.',
+            'wp-theme'
+        ),
+        true
+    );
+}
+
+
+/**
+ * Whether WP 2FA requires 2FA for the administrator role.
+ *
+ * True and false are definite. Null means the saved policy is not a role rule
+ * this check can confirm (for example, a list of specific users).
+ *
+ * @param array<string, mixed> $policy Stored WP 2FA policy.
+ */
+function wp_theme_security_hardening_wp2fa_administrator_required(array $policy): ?bool {
+    $enforcement = isset($policy['enforcement-policy']) ? sanitize_key((string) $policy['enforcement-policy']) : '';
+
+    if ('do-not-enforce' === $enforcement) {
+        return false;
+    }
+
+    if ('all-users' === $enforcement) {
+        $excluded = wp_theme_security_hardening_wp2fa_role_list($policy['excluded_roles'] ?? array());
+
+        return ! in_array('administrator', $excluded, true);
+    }
+
+    if ('certain-roles-only' === $enforcement) {
+        $enforced = wp_theme_security_hardening_wp2fa_role_list($policy['enforced_roles'] ?? array());
+
+        return in_array('administrator', $enforced, true);
+    }
+
+    if ('superadmins-siteadmins-only' === $enforcement) {
+        return true;
+    }
+
+    return null;
+}
+
+
+/**
+ * Normalize a WP 2FA role list (array or comma-separated string).
+ *
+ * @param mixed $value Raw policy value.
+ * @return string[]
+ */
+function wp_theme_security_hardening_wp2fa_role_list(mixed $value): array {
+    if (is_string($value)) {
+        $value = explode(',', $value);
+    }
+
+    if (! is_array($value)) {
+        return array();
+    }
+
+    $roles = array();
+    foreach ($value as $role) {
+        if (! is_string($role)) {
+            continue;
         }
 
+        $role = sanitize_key(trim($role));
+        if ('' === $role) {
+            continue;
+        }
+
+        $roles[] = $role;
+    }
+
+    return $roles;
+}
+
+
+/**
+ * Stored WP 2FA policy, or null when the plugin has not saved one.
+ *
+ * @return array<string, mixed>|null
+ */
+function wp_theme_security_hardening_wp2fa_policy(): ?array {
+    $name = defined('WP_2FA_POLICY_SETTINGS_NAME') ? WP_2FA_POLICY_SETTINGS_NAME : 'wp_2fa_policy';
+
+    if (class_exists(Settings_Utils::class) && method_exists(Settings_Utils::class, 'get_option')) {
+        $stored = Settings_Utils::get_option($name, array());
+    } elseif (is_multisite()) {
+        $stored = get_site_option($name, array());
+    } else {
+        $stored = get_option($name, array());
+    }
+
+    if (! is_array($stored) || array() === $stored) {
+        return null;
+    }
+
+    return $stored;
+}
+
+
+/**
+ * WP 2FA: pass when the administrator role is required to use 2FA.
+ *
+ * @param string $title Check title.
+ * @return array<string, mixed>
+ */
+function wp_theme_security_hardening_check_wp2fa_administrators(string $title): array {
+    $policy   = wp_theme_security_hardening_wp2fa_policy();
+    $required = is_array($policy) ? wp_theme_security_hardening_wp2fa_administrator_required($policy) : null;
+
+    if (true === $required) {
         return wp_theme_security_hardening_make_item(
             'two_factor_users',
-            'unknown',
+            'good',
             $title,
-            __('A two-factor plugin is active, but per-user status cannot be checked automatically for this plugin.', 'wp-theme'),
+            __('WP 2FA requires two-factor authentication for the administrator role.', 'wp-theme'),
             true
         );
     }
 
+    if (false === $required) {
+        return wp_theme_security_hardening_make_item(
+            'two_factor_users',
+            'critical',
+            $title,
+            __(
+                'WP 2FA does not require two-factor authentication for the administrator role. Require it for that role in the plugin policy.',
+                'wp-theme'
+            ),
+            true
+        );
+    }
+
+    return wp_theme_security_hardening_make_item(
+        'two_factor_users',
+        'unknown',
+        $title,
+        __(
+            'WP 2FA is active, but this check could not confirm that the administrator role is required to use two-factor authentication. Set that requirement in the plugin policy.',
+            'wp-theme'
+        ),
+        true
+    );
+}
+
+
+/**
+ * Official Two Factor plugin: each administrator must have 2FA enabled.
+ *
+ * @param string $title Check title.
+ * @return array<string, mixed>
+ */
+function wp_theme_security_hardening_check_two_factor_core_users(string $title): array {
     $max_check = 50;
     $query     = new WP_User_Query(
         array(
