@@ -126,6 +126,131 @@ function wp_theme_security_hardening_is_two_factor_plugin_active(): bool
 
 
 /**
+ * Plugin basenames intentionally hidden from the admin Plugins screen.
+ *
+ * Empty by default. Child themes and plugins may allowlist via
+ * `wp_theme_security_hardening_hidden_plugin_basenames`.
+ *
+ * @return string[]
+ */
+function wp_theme_security_hardening_hidden_plugin_basenames(): array {
+    $plugins = array();
+
+    /**
+     * Filter the list of plugin basenames allowed to be missing from get_plugins().
+     *
+     * @param string[] $plugins Plugin basenames, e.g. folder/file.php.
+     */
+    $filtered = apply_filters('wp_theme_security_hardening_hidden_plugin_basenames', $plugins);
+
+    if (! is_array($filtered)) {
+        return $plugins;
+    }
+
+    $normalized = array();
+    foreach ($filtered as $plugin) {
+        if (! is_string($plugin) || '' === $plugin) {
+            continue;
+        }
+
+        $normalized[] = $plugin;
+    }
+
+    return array_values(array_unique($normalized));
+}
+
+
+/**
+ * Scan WP_PLUGIN_DIR for plugin basenames with a valid Plugin Name header.
+ *
+ * Mirrors get_plugins() depth (root PHP and one subdirectory level) but does
+ * not apply the all_plugins filter or touch the plugins object-cache group.
+ *
+ * @return string[]|null Basenames relative to WP_PLUGIN_DIR, or null if unreadable.
+ */
+function wp_theme_security_hardening_scan_plugin_basenames(): ?array {
+    static $done      = false;
+    static $basenames = null;
+
+    if ($done) {
+        return $basenames;
+    }
+
+    $done = true;
+
+    wp_theme_security_hardening_ensure_plugin_admin();
+
+    if (! function_exists('get_plugin_data')) {
+        return null;
+    }
+
+    if (! defined('WP_PLUGIN_DIR') || ! is_string(WP_PLUGIN_DIR) || '' === WP_PLUGIN_DIR) {
+        return null;
+    }
+
+    $plugin_root = WP_PLUGIN_DIR;
+    if (! is_dir($plugin_root) || ! is_readable($plugin_root)) {
+        return null;
+    }
+
+    $dir = @opendir($plugin_root);
+    if (false === $dir) {
+        return null;
+    }
+
+    $candidate_files = array();
+
+    while (false !== ($file = readdir($dir))) {
+        if (str_starts_with($file, '.')) {
+            continue;
+        }
+
+        $path = $plugin_root . '/' . $file;
+
+        if (is_dir($path)) {
+            $subdir = @opendir($path);
+            if (false === $subdir) {
+                continue;
+            }
+
+            while (false !== ($subfile = readdir($subdir))) {
+                if (str_starts_with($subfile, '.')) {
+                    continue;
+                }
+
+                if (str_ends_with($subfile, '.php')) {
+                    $candidate_files[] = $file . '/' . $subfile;
+                }
+            }
+
+            closedir($subdir);
+            continue;
+        }
+
+        if (str_ends_with($file, '.php')) {
+            $candidate_files[] = $file;
+        }
+    }
+
+    closedir($dir);
+
+    $found = array();
+    foreach ($candidate_files as $plugin_file) {
+        $plugin_data = get_plugin_data($plugin_root . '/' . $plugin_file, false, false);
+        if (empty($plugin_data['Name'])) {
+            continue;
+        }
+
+        $found[] = $plugin_file;
+    }
+
+    $basenames = array_values(array_unique($found));
+
+    return $basenames;
+}
+
+
+/**
  * Catalog of hardening checks (callbacks, Site Health, labels).
  *
  * @return array<string, array{label:string, callback:string, site_health:bool, skip_cron?:bool}>
@@ -135,38 +260,50 @@ function wp_theme_security_hardening_catalog(): array {
 
     if (! is_array($base)) {
         $base = array(
-            'debug_display'    => array(
-                'label'       => __('Debug display (WP_DEBUG_DISPLAY)', 'wp-theme'),
-                'callback'    => 'wp_theme_security_hardening_check_debug_display',
+            'debug_mode'        => array(
+                'label'       => __('Debug mode', 'wp-theme'),
+                'callback'    => 'wp_theme_security_hardening_check_debug_mode',
+                // Overview only: core Site Health already tests debug display/log.
                 'site_health' => false,
             ),
-            'ssl_admin'        => array(
+            'ssl_admin'         => array(
                 'label'       => __('Force SSL for admin (FORCE_SSL_ADMIN)', 'wp-theme'),
                 'callback'    => 'wp_theme_security_hardening_check_ssl_admin',
                 'site_health' => true,
             ),
-            'two_factor'       => array(
-                'label'       => __('Two-factor authentication plugin', 'wp-theme'),
+            'two_factor'        => array(
+                'label'       => __('Two-factor authentication for administrators', 'wp-theme'),
                 'callback'    => 'wp_theme_security_hardening_check_two_factor',
                 'site_health' => true,
             ),
-            'two_factor_users' => array(
-                'label'       => __('Two-factor authentication for administrators', 'wp-theme'),
-                'callback'    => 'wp_theme_security_hardening_check_two_factor_users',
+            'user_registration' => array(
+                'label'       => __('Open user registration', 'wp-theme'),
+                'callback'    => 'wp_theme_security_hardening_check_user_registration',
                 'site_health' => true,
             ),
-            'updates'          => array(
+            'admin_login'       => array(
+                'label'       => __('Predictable login names', 'wp-theme'),
+                'callback'    => 'wp_theme_security_hardening_check_admin_login',
+                'site_health' => true,
+            ),
+            'updates'           => array(
                 'label'       => __('Plugin and theme updates', 'wp-theme'),
                 'callback'    => 'wp_theme_security_hardening_check_updates',
                 'site_health' => true,
             ),
-            'uploads_php'      => array(
+            'hidden_plugins'    => array(
+                'label'       => __('Hidden plugins', 'wp-theme'),
+                'callback'    => 'wp_theme_security_hardening_check_hidden_plugins',
+                'site_health' => true,
+                'skip_cron'   => true,
+            ),
+            'uploads_php'       => array(
                 'label'       => __('PHP execution in uploads', 'wp-theme'),
                 'callback'    => 'wp_theme_security_hardening_check_uploads_php',
                 'site_health' => true,
                 'skip_cron'   => true,
             ),
-            'file_edit_source' => array(
+            'file_edit_source'  => array(
                 'label'       => __('File editor constant (DISALLOW_FILE_EDIT)', 'wp-theme'),
                 'callback'    => 'wp_theme_security_hardening_check_file_edit_source',
                 'site_health' => true,
@@ -226,7 +363,7 @@ function wp_theme_security_hardening_run_check(string $id): ?array {
  * Build one check item.
  *
  * @param string $id          Check id.
- * @param string $status      critical, warning, good, skipped, or unknown.
+ * @param string $status      critical, warning, good, skipped, not_counted, or unknown.
  * @param string $title       Short title.
  * @param string $description Explanation.
  * @param bool   $elevated    Only raise severity on production.
@@ -256,8 +393,9 @@ function wp_theme_security_hardening_make_item(
 /**
  * Soften elevated checks outside production.
  *
- * Critical and warning results stay visible but are not scored as issues.
- * Checks that already passed keep the Passed group.
+ * Critical and warning findings keep base_status for Overview grouping and
+ * color. status becomes not_counted so Site Health and exports can mark them
+ * as deferred. Checks that already passed keep the Passed group.
  *
  * @param array<string, mixed> $item Check item.
  * @return array<string, mixed>
@@ -273,13 +411,7 @@ function wp_theme_security_hardening_apply_environment(array $item): array {
         return $item;
     }
 
-    $item['status']      = 'skipped';
-    $item['description'] = trim(
-        $item['description'] . ' ' . __(
-            'This is not marked as a warning or critical issue because the environment type is not production.',
-            'wp-theme'
-        )
-    );
+    $item['status'] = 'not_counted';
 
     return $item;
 }
@@ -312,31 +444,225 @@ function wp_theme_security_hardening_get_results(): array {
 
 
 /**
- * WP_DEBUG_DISPLAY — Overview only (Site Health already has a core test).
+ * Enabled debug-oriented constants (names only).
+ *
+ * Complements Site Health is_in_debug_mode (core still covers display/log
+ * separately). This list feeds the merged Debug mode check.
+ *
+ * @return string[] Constant names that are currently true.
+ */
+function wp_theme_security_hardening_enabled_debug_constants(): array {
+    $enabled = array();
+
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        $enabled[] = 'WP_DEBUG';
+    }
+
+    if (defined('WP_DEBUG_DISPLAY') && WP_DEBUG_DISPLAY) {
+        $enabled[] = 'WP_DEBUG_DISPLAY';
+    } elseif (! defined('WP_DEBUG_DISPLAY') && defined('WP_DEBUG') && WP_DEBUG) {
+        $enabled[] = 'WP_DEBUG_DISPLAY';
+    }
+
+    if (defined('SCRIPT_DEBUG') && SCRIPT_DEBUG) {
+        $enabled[] = 'SCRIPT_DEBUG';
+    }
+
+    if (defined('SAVEQUERIES') && SAVEQUERIES) {
+        $enabled[] = 'SAVEQUERIES';
+    }
+
+    return array_values(array_unique($enabled));
+}
+
+
+/**
+ * Debug mode: WP_DEBUG_DISPLAY, WP_DEBUG, SCRIPT_DEBUG, SAVEQUERIES.
+ *
+ * Critical when visitors can see errors. Warning when other debug flags
+ * are on. Site Health core still ships its own display/log test.
  *
  * @return array<string, mixed>
  */
-function wp_theme_security_hardening_check_debug_display(): array {
-    $title = wp_theme_security_hardening_check_label('debug_display');
+function wp_theme_security_hardening_check_debug_mode(): array {
+    $title   = wp_theme_security_hardening_check_label('debug_mode');
+    $enabled = wp_theme_security_hardening_enabled_debug_constants();
 
-    if (! wp_theme_security_hardening_is_debug_display_on()) {
+    if (array() === $enabled) {
         return wp_theme_security_hardening_make_item(
-            'debug_display',
+            'debug_mode',
             'good',
             $title,
-            __('Error display is off. Debug output will not be printed to site visitors.', 'wp-theme'),
-            true,
-            false
+            __('WP_DEBUG, WP_DEBUG_DISPLAY, SCRIPT_DEBUG, and SAVEQUERIES are off.', 'wp-theme'),
+            true
+        );
+    }
+
+    $names = implode(', ', $enabled);
+
+    if (wp_theme_security_hardening_is_debug_display_on()) {
+        return wp_theme_security_hardening_make_item(
+            'debug_mode',
+            'critical',
+            $title,
+            sprintf(
+                /* translators: %s: comma-separated constant names */
+                __('Debug constants are enabled: %s. Visitors may see error details. Set them to false in wp-config.php.', 'wp-theme'),
+                $names
+            ),
+            true
         );
     }
 
     return wp_theme_security_hardening_make_item(
-        'debug_display',
+        'debug_mode',
+        'warning',
+        $title,
+        sprintf(
+            /* translators: %s: comma-separated constant names */
+            __('Debug constants are enabled: %s. Set them to false in wp-config.php on production.', 'wp-theme'),
+            $names
+        ),
+        true
+    );
+}
+
+
+/**
+ * Any open membership registration (stricter than core Site Health).
+ *
+ * Core insecure_registration only fails when the default role is editor or
+ * administrator. Corporate sites should keep registration closed entirely.
+ *
+ * @return array<string, mixed>
+ */
+function wp_theme_security_hardening_check_user_registration(): array {
+    $title = wp_theme_security_hardening_check_label('user_registration');
+
+    if (! get_option('users_can_register')) {
+        return wp_theme_security_hardening_make_item(
+            'user_registration',
+            'good',
+            $title,
+            __('Anyone can register is disabled in Settings → General.', 'wp-theme'),
+            true
+        );
+    }
+
+    $default_role = (string) get_option('default_role', 'subscriber');
+    $privileged   = in_array($default_role, array('editor', 'administrator'), true);
+
+    if ($privileged) {
+        return wp_theme_security_hardening_make_item(
+            'user_registration',
+            'critical',
+            $title,
+            sprintf(
+                /* translators: %s: default role slug */
+                __('Anyone can register is enabled and the default role is %s. Disable registration in Settings → General.', 'wp-theme'),
+                $default_role
+            ),
+            true
+        );
+    }
+
+    return wp_theme_security_hardening_make_item(
+        'user_registration',
         'critical',
         $title,
-        __('WP_DEBUG_DISPLAY is on (or defaults to on because WP_DEBUG is on). On production this can leak paths and errors to visitors. Set WP_DEBUG_DISPLAY to false in wp-config.php.', 'wp-theme'),
-        true,
-        false
+        __('Anyone can register is enabled. Disable registration in Settings → General.', 'wp-theme'),
+        true
+    );
+}
+
+
+/**
+ * Logins that should not exist (classic brute-force targets).
+ *
+ * Child themes and plugins may extend the list via
+ * `wp_theme_security_hardening_risky_admin_logins`.
+ *
+ * @return string[]
+ */
+function wp_theme_security_hardening_risky_admin_logins(): array {
+    $logins = array(
+        'admin',
+        'administrator',
+        'root',
+        'wpadmin',
+        'wp-admin',
+    );
+
+    /**
+     * Filter the list of risky administrator login names.
+     *
+     * @param string[] $logins User login names, e.g. admin.
+     */
+    $filtered = apply_filters('wp_theme_security_hardening_risky_admin_logins', $logins);
+
+    if (! is_array($filtered)) {
+        return $logins;
+    }
+
+    $normalized = array();
+    foreach ($filtered as $login) {
+        if (! is_string($login) || '' === $login) {
+            continue;
+        }
+
+        $normalized[] = $login;
+    }
+
+    return array_values(array_unique($normalized));
+}
+
+
+/**
+ * Presence of a privileged user with a predictable default login.
+ *
+ * Only accounts that can manage_options are scored. Subscriber-level
+ * accounts with common names are ignored to avoid false positives.
+ *
+ * @return array<string, mixed>
+ */
+function wp_theme_security_hardening_check_admin_login(): array {
+    $title  = wp_theme_security_hardening_check_label('admin_login');
+    $found  = array();
+    $logins = wp_theme_security_hardening_risky_admin_logins();
+
+    foreach ($logins as $login) {
+        $user = get_user_by('login', $login);
+        if (! $user instanceof WP_User) {
+            continue;
+        }
+
+        if (! user_can($user, 'manage_options')) {
+            continue;
+        }
+
+        $found[] = $login;
+    }
+
+    if (array() === $found) {
+        return wp_theme_security_hardening_make_item(
+            'admin_login',
+            'good',
+            $title,
+            __('No administrator accounts use a predictable default login name.', 'wp-theme'),
+            true
+        );
+    }
+
+    return wp_theme_security_hardening_make_item(
+        'admin_login',
+        'warning',
+        $title,
+        sprintf(
+            /* translators: %s: comma-separated user logins */
+            __('An administrator account exists with a predictable login (%s). Rename that account so attackers cannot target a default username.', 'wp-theme'),
+            implode(', ', $found)
+        ),
+        true
     );
 }
 
@@ -364,7 +690,7 @@ function wp_theme_security_hardening_check_ssl_admin(): array {
             'ssl_admin',
             'skipped',
             $title,
-            __('The site URL is not HTTPS, so FORCE_SSL_ADMIN is not required yet.', 'wp-theme')
+            __('The site URL is not HTTPS.', 'wp-theme')
         );
     }
 
@@ -378,50 +704,26 @@ function wp_theme_security_hardening_check_ssl_admin(): array {
 
 
 /**
- * Active 2FA plugin — warning on production when no known plugin is active.
+ * Two-factor authentication for administrators.
  *
- * Warning (not critical): only a short built-in list is recognized. Extend
- * it with `wp_theme_security_hardening_two_factor_plugins` for other plugins.
+ * One card: plugin presence plus whether administrators must use 2FA.
+ * Official Two Factor is checked per user. WP 2FA is checked by policy.
+ * Extend recognized plugins with wp_theme_security_hardening_two_factor_plugins.
  *
  * @return array<string, mixed>
  */
 function wp_theme_security_hardening_check_two_factor(): array {
     $title = wp_theme_security_hardening_check_label('two_factor');
 
-    if (wp_theme_security_hardening_is_two_factor_plugin_active()) {
+    if (! wp_theme_security_hardening_is_two_factor_plugin_active()) {
         return wp_theme_security_hardening_make_item(
             'two_factor',
-            'good',
+            'warning',
             $title,
-            __('A recognized two-factor authentication plugin is active.', 'wp-theme'),
+            __('No recognized two-factor plugin is active. On production administrators should use two-factor authentication.', 'wp-theme'),
             true
         );
     }
-
-    return wp_theme_security_hardening_make_item(
-        'two_factor',
-        'warning',
-        $title,
-        __(
-            'No recognized two-factor plugin is active (built-in list: Two Factor, WP 2FA). On production administrators should use 2FA. ' .
-            'If another 2FA plugin is already in use, extend the list with the wp_theme_security_hardening_two_factor_plugins filter.',
-            'wp-theme'
-        ),
-        true
-    );
-}
-
-
-/**
- * 2FA for administrators.
- *
- * Official Two Factor is checked per user. WP 2FA is checked by policy:
- * the administrator role must be required to use 2FA.
- *
- * @return array<string, mixed>
- */
-function wp_theme_security_hardening_check_two_factor_users(): array {
-    $title = wp_theme_security_hardening_check_label('two_factor_users');
 
     if (class_exists('Two_Factor_Core') && method_exists(Two_Factor_Core::class, 'is_user_using_two_factor')) {
         return wp_theme_security_hardening_check_two_factor_core_users($title);
@@ -431,18 +733,11 @@ function wp_theme_security_hardening_check_two_factor_users(): array {
         return wp_theme_security_hardening_check_wp2fa_administrators($title);
     }
 
-    if (! wp_theme_security_hardening_is_two_factor_plugin_active()) {
-        return array();
-    }
-
     return wp_theme_security_hardening_make_item(
-        'two_factor_users',
+        'two_factor',
         'unknown',
         $title,
-        __(
-            'A two-factor plugin is active. Require two-factor authentication for the administrator role in its settings. This plugin does not expose that setting for an automatic check.',
-            'wp-theme'
-        ),
+        __('A two-factor plugin is active, but this check could not confirm that administrators are required to use it. Require two-factor authentication for the administrator role in the plugin settings.', 'wp-theme'),
         true
     );
 }
@@ -552,7 +847,7 @@ function wp_theme_security_hardening_check_wp2fa_administrators(string $title): 
 
     if (true === $required) {
         return wp_theme_security_hardening_make_item(
-            'two_factor_users',
+            'two_factor',
             'good',
             $title,
             __('WP 2FA requires two-factor authentication for the administrator role.', 'wp-theme'),
@@ -562,7 +857,7 @@ function wp_theme_security_hardening_check_wp2fa_administrators(string $title): 
 
     if (false === $required) {
         return wp_theme_security_hardening_make_item(
-            'two_factor_users',
+            'two_factor',
             'critical',
             $title,
             __(
@@ -574,7 +869,7 @@ function wp_theme_security_hardening_check_wp2fa_administrators(string $title): 
     }
 
     return wp_theme_security_hardening_make_item(
-        'two_factor_users',
+        'two_factor',
         'unknown',
         $title,
         __(
@@ -621,7 +916,7 @@ function wp_theme_security_hardening_check_two_factor_core_users(string $title):
 
     if ($checked <= 0) {
         return wp_theme_security_hardening_make_item(
-            'two_factor_users',
+            'two_factor',
             'unknown',
             $title,
             __('No administrators were found to check for two-factor authentication.', 'wp-theme'),
@@ -631,7 +926,7 @@ function wp_theme_security_hardening_check_two_factor_core_users(string $title):
 
     if ($without > 0) {
         return wp_theme_security_hardening_make_item(
-            'two_factor_users',
+            'two_factor',
             'critical',
             $title,
             sprintf(
@@ -646,7 +941,7 @@ function wp_theme_security_hardening_check_two_factor_core_users(string $title):
 
     if ($total_found > $checked) {
         return wp_theme_security_hardening_make_item(
-            'two_factor_users',
+            'two_factor',
             'unknown',
             $title,
             sprintf(
@@ -660,7 +955,7 @@ function wp_theme_security_hardening_check_two_factor_core_users(string $title):
     }
 
     return wp_theme_security_hardening_make_item(
-        'two_factor_users',
+        'two_factor',
         'good',
         $title,
         sprintf(
@@ -706,11 +1001,83 @@ function wp_theme_security_hardening_check_updates(): array {
         $title,
         sprintf(
             /* translators: 1: plugin update count, 2: theme update count */
-            __('%1$d plugin update(s) and %2$d theme update(s) are available. Review and apply them through your usual process (admin, git, or CI).', 'wp-theme'),
+            __('%1$d plugin update(s) and %2$d theme update(s) are available. Review and apply them.', 'wp-theme'),
             $plugin_count,
             $theme_count
         ),
         true
+    );
+}
+
+
+/**
+ * Plugins present on disk with a Plugin Name header but missing from get_plugins().
+ *
+ * A mismatch usually means something removed entries via the all_plugins filter.
+ *
+ * @return array<string, mixed>
+ */
+function wp_theme_security_hardening_check_hidden_plugins(): array {
+    $title = wp_theme_security_hardening_check_label('hidden_plugins');
+
+    wp_theme_security_hardening_ensure_plugin_admin();
+
+    $on_disk = wp_theme_security_hardening_scan_plugin_basenames();
+    if (null === $on_disk) {
+        return wp_theme_security_hardening_make_item(
+            'hidden_plugins',
+            'unknown',
+            $title,
+            __('The plugins directory could not be read, so hidden plugins could not be checked.', 'wp-theme')
+        );
+    }
+
+    if (! function_exists('get_plugins')) {
+        return wp_theme_security_hardening_make_item(
+            'hidden_plugins',
+            'unknown',
+            $title,
+            __('Plugin listing helpers are unavailable, so hidden plugins could not be checked.', 'wp-theme')
+        );
+    }
+
+    $visible   = get_plugins();
+    $visible   = is_array($visible) ? array_keys($visible) : array();
+    $allowlist = wp_theme_security_hardening_hidden_plugin_basenames();
+    $hidden    = array();
+
+    foreach ($on_disk as $basename) {
+        if (in_array($basename, $allowlist, true)) {
+            continue;
+        }
+
+        if (in_array($basename, $visible, true)) {
+            continue;
+        }
+
+        $hidden[] = $basename;
+    }
+
+    sort($hidden, SORT_STRING);
+
+    if (array() === $hidden) {
+        return wp_theme_security_hardening_make_item(
+            'hidden_plugins',
+            'good',
+            $title,
+            __('Every plugin with a valid header under wp-content/plugins appears in the admin Plugins list.', 'wp-theme')
+        );
+    }
+
+    return wp_theme_security_hardening_make_item(
+        'hidden_plugins',
+        'critical',
+        $title,
+        sprintf(
+            /* translators: %s: comma-separated plugin basenames */
+            __('Plugins with a valid header exist on disk but are missing from the admin Plugins list: %s. Review those paths under wp-content/plugins.', 'wp-theme'),
+            implode(', ', $hidden)
+        )
     );
 }
 
@@ -809,7 +1176,7 @@ function wp_theme_security_hardening_check_uploads_php(): array {
             'uploads_php',
             'unknown',
             $title,
-            __('The probe request failed (timeout, DNS, loopback, or TLS). This does not confirm missing protection.', 'wp-theme')
+            __('The probe request failed. Open the Web server tab to add protection for PHP in uploads.', 'wp-theme')
         );
     }
 
@@ -831,7 +1198,7 @@ function wp_theme_security_hardening_check_uploads_php(): array {
             $title,
             sprintf(
                 /* translators: %d: HTTP status code */
-                __('The uploads PHP probe returned HTTP %d. A 403 response would confirm that PHP is blocked. This is not proof that uploads are executable.', 'wp-theme'),
+                __('The uploads PHP probe returned HTTP %d. A 403 response would confirm that PHP is blocked. This is not proof that uploads are executable. Open the Web server tab for the fix.', 'wp-theme'),
                 $code
             )
         );
@@ -843,7 +1210,7 @@ function wp_theme_security_hardening_check_uploads_php(): array {
         $title,
         sprintf(
             /* translators: %d: HTTP status code */
-            __('The uploads PHP probe returned HTTP %d. Protection could not be verified automatically.', 'wp-theme'),
+            __('The uploads PHP probe returned HTTP %d. Open the Web server tab to add protection for PHP in uploads.', 'wp-theme'),
             $code
         )
     );
@@ -854,7 +1221,7 @@ function wp_theme_security_hardening_check_uploads_php(): array {
  * DISALLOW_FILE_EDIT origin: theme vs wp-config.
  *
  * Theme-defined counts as passed: the editor is already disabled. Prefer
- * wp-config.php for earlier bootstrap, but do not warn on every fresh site.
+ * wp-config.php for earlier bootstrap; that tip lives on the wp-config tab.
  *
  * @return array<string, mixed>
  */
@@ -866,7 +1233,7 @@ function wp_theme_security_hardening_check_file_edit_source(): array {
             'file_edit_source',
             'good',
             $title,
-            __('DISALLOW_FILE_EDIT is enabled by the theme. Prefer declaring it in wp-config.php before the theme loads so it still applies if the theme fails to load.', 'wp-theme'),
+            __('DISALLOW_FILE_EDIT is enabled. The plugin and theme file editor in wp-admin is disabled.', 'wp-theme'),
             true
         );
     }
@@ -885,14 +1252,14 @@ function wp_theme_security_hardening_check_file_edit_source(): array {
         'file_edit_source',
         'warning',
         $title,
-        __('DISALLOW_FILE_EDIT is not true. The plugin and theme file editor in wp-admin is available. Set it to true in wp-config.php before the theme loads.', 'wp-theme'),
+        __('DISALLOW_FILE_EDIT is not true. The plugin and theme file editor in wp-admin is available. Set it to true in wp-config.php.', 'wp-theme'),
         true
     );
 }
 
 
 /**
- * Tools tab that holds the copy-paste fix for a check.
+ * Tools tab that holds the copy-paste fix for a check, or empty when none.
  *
  * @param string $id Check id.
  */
@@ -901,23 +1268,91 @@ function wp_theme_security_hardening_tab_for_check(string $id): string {
         return 'web-server';
     }
 
-    if (in_array($id, array('ssl_admin', 'file_edit_source', 'debug_display'), true)) {
+    if (in_array($id, array('ssl_admin', 'file_edit_source', 'debug_mode'), true)) {
         return 'wp-config';
     }
 
-    return 'overview';
+    return '';
 }
 
 
 /**
- * Tools screen URL for a check (relevant tab).
+ * Admin action link for a failed or inconclusive check.
+ *
+ * @param string $id Check id.
+ * @return array{url:string, label:string}|null
+ */
+function wp_theme_security_hardening_action_for_check(string $id): ?array {
+    $tab = wp_theme_security_hardening_tab_for_check($id);
+
+    if ('web-server' === $tab) {
+        return array(
+            'url'   => wp_theme_security_hardening_tab_url('web-server'),
+            'label' => __('Web server', 'wp-theme'),
+        );
+    }
+
+    if ('wp-config' === $tab) {
+        return array(
+            'url'   => wp_theme_security_hardening_tab_url('wp-config'),
+            'label' => 'wp-config.php',
+        );
+    }
+
+    if ('two_factor' === $id) {
+        if (wp_theme_security_hardening_is_two_factor_plugin_active()) {
+            return array(
+                'url'   => admin_url('users.php'),
+                'label' => __('Users', 'wp-theme'),
+            );
+        }
+
+        return array(
+            'url'   => admin_url('plugins.php'),
+            'label' => __('Plugins', 'wp-theme'),
+        );
+    }
+
+    $external = array(
+        'user_registration' => array(
+            'url'   => admin_url('options-general.php'),
+            'label' => __('Settings → General', 'wp-theme'),
+        ),
+        'admin_login'       => array(
+            'url'   => admin_url('users.php'),
+            'label' => __('Users', 'wp-theme'),
+        ),
+        'updates'           => array(
+            'url'   => admin_url('update-core.php'),
+            'label' => __('Updates', 'wp-theme'),
+        ),
+        'hidden_plugins'    => array(
+            'url'   => admin_url('plugins.php'),
+            'label' => __('Plugins', 'wp-theme'),
+        ),
+    );
+
+    if (! isset($external[ $id ])) {
+        return null;
+    }
+
+    return $external[ $id ];
+}
+
+
+/**
+ * Tools screen URL for a check (relevant tab or overview).
  *
  * @param string $id Check id.
  */
 function wp_theme_security_hardening_admin_url_for_check(string $id): string {
-    return wp_theme_security_hardening_tab_url(
-        wp_theme_security_hardening_tab_for_check($id)
-    );
+    $action = wp_theme_security_hardening_action_for_check($id);
+
+    if (is_array($action)) {
+        return $action['url'];
+    }
+
+    return wp_theme_security_hardening_tab_url('overview');
 }
 
 
@@ -927,6 +1362,7 @@ function wp_theme_security_hardening_admin_url_for_check(string $id): string {
  * Critical findings stay critical only on production. Off production they
  * still appear as recommended improvements so Site Health lists them.
  * Not-applicable skipped checks (e.g. FORCE_SSL_ADMIN on HTTP) pass.
+ * Empty/null results are recommended, not good.
  *
  * @param array<string, mixed> $item Check item.
  * @return array{status:string, color:string}
@@ -934,7 +1370,6 @@ function wp_theme_security_hardening_admin_url_for_check(string $id): string {
 function wp_theme_security_hardening_site_health_status(array $item): array {
     $status      = (string) ($item['status'] ?? 'unknown');
     $base_status = (string) ($item['base_status'] ?? $status);
-    $elevated    = ! empty($item['elevated']);
     $production  = wp_theme_security_hardening_is_production();
 
     if ('good' === $status) {
@@ -944,7 +1379,7 @@ function wp_theme_security_hardening_site_health_status(array $item): array {
         );
     }
 
-    if ('skipped' === $status && (! $elevated || $production)) {
+    if ('skipped' === $status) {
         return array(
             'status' => 'good',
             'color'  => 'blue',
@@ -978,12 +1413,12 @@ function wp_theme_security_hardening_format_site_health_test(string $id): array 
     if (! is_array($item)) {
         return array(
             'label'       => $label,
-            'status'      => 'good',
+            'status'      => 'recommended',
             'badge'       => array(
                 'label' => __('Security', 'wp-theme'),
-                'color' => 'blue',
+                'color' => 'orange',
             ),
-            'description' => '<p>' . esc_html__('This check does not apply right now.', 'wp-theme') . '</p>',
+            'description' => '<p>' . esc_html__('This check could not run.', 'wp-theme') . '</p>',
             'actions'     => wp_theme_security_hardening_site_health_actions($id),
             'test'        => 'wp_theme_security_hardening_' . $id,
         );
@@ -1006,7 +1441,7 @@ function wp_theme_security_hardening_format_site_health_test(string $id): array 
 
 
 /**
- * Site Health actions HTML linking to the Tools screen.
+ * Site Health actions HTML linking to the fix screen.
  *
  * @param string $id Check id.
  */
@@ -1015,10 +1450,15 @@ function wp_theme_security_hardening_site_health_actions(string $id): string {
         return '';
     }
 
+    $action = wp_theme_security_hardening_action_for_check($id);
+    if (! is_array($action)) {
+        return '';
+    }
+
     return sprintf(
         '<p><a href="%s">%s</a></p>',
-        esc_url(wp_theme_security_hardening_admin_url_for_check($id)),
-        esc_html(wp_theme_security_hardening_action_label_for_tab(wp_theme_security_hardening_tab_for_check($id)))
+        esc_url($action['url']),
+        esc_html($action['label'])
     );
 }
 
@@ -1026,13 +1466,15 @@ function wp_theme_security_hardening_site_health_actions(string $id): string {
 /**
  * Human-readable status for Site Health → Info.
  *
+ * Deferred findings keep their inherent severity in the label so exports do
+ * not lose base_status.
+ *
  * @param array<string, mixed> $item Check item.
  */
 function wp_theme_security_hardening_status_label(array $item): string {
-    $status   = (string) ($item['status'] ?? 'unknown');
-    $elevated = ! empty($item['elevated']);
+    $status = (string) ($item['status'] ?? 'unknown');
 
-    if ('skipped' === $status && ! $elevated) {
+    if ('skipped' === $status) {
         return __('Not applicable', 'wp-theme');
     }
 
@@ -1040,9 +1482,19 @@ function wp_theme_security_hardening_status_label(array $item): string {
         'critical' => __('Critical', 'wp-theme'),
         'warning'  => __('Warning', 'wp-theme'),
         'good'     => __('Passed', 'wp-theme'),
-        'skipped'  => __('Not scored', 'wp-theme'),
         'unknown'  => __('Could not check automatically', 'wp-theme'),
     );
+
+    if ('not_counted' === $status) {
+        $base       = (string) ($item['base_status'] ?? 'unknown');
+        $base_label = $labels[ $base ] ?? $base;
+
+        return sprintf(
+            /* translators: %s: Critical or Warning */
+            __('%s, not counted outside production', 'wp-theme'),
+            $base_label
+        );
+    }
 
     return $labels[ $status ] ?? $status;
 }

@@ -25,23 +25,6 @@ function wp_theme_security_hardening_tabs(): array {
 
 
 /**
- * Link label to a Tools tab (or the screen itself).
- *
- * @param string $tab Tab slug.
- */
-function wp_theme_security_hardening_action_label_for_tab(string $tab): string {
-    $tabs = wp_theme_security_hardening_tabs();
-
-    if (isset($tabs[ $tab ]) && 'overview' !== $tab) {
-        /* translators: %s: admin tab title */
-        return sprintf(__('Open %s', 'wp-theme'), $tabs[ $tab ]);
-    }
-
-    return __('Open Security Hardening', 'wp-theme');
-}
-
-
-/**
  * Current tab from the request.
  */
 function wp_theme_security_hardening_current_tab(): string {
@@ -209,7 +192,10 @@ function wp_theme_security_hardening_wp_config_snippet(): string {
     return <<<'PHP'
 define( 'DISALLOW_FILE_EDIT', true );
 define( 'FORCE_SSL_ADMIN', true );
+define( 'WP_DEBUG', false );
 define( 'WP_DEBUG_DISPLAY', false );
+define( 'SCRIPT_DEBUG', false );
+define( 'SAVEQUERIES', false );
 define( 'WP_ENVIRONMENT_TYPE', 'production' );
 PHP;
 }
@@ -295,45 +281,75 @@ function wp_theme_security_hardening_render_admin_page(): void {
 
 /**
  * Overview tab.
+ *
+ * Cards group by inherent severity (base_status). Deferred elevated findings
+ * outside production stay in Critical or Warnings with a badge; color always
+ * matches the group.
  */
 function wp_theme_security_hardening_render_tab_overview(): void {
     $env = wp_get_environment_type();
     $groups = array(
         'critical' => array(
-            'title' => __('Critical', 'wp-theme'),
-            'class' => 'notice-error',
-            'items' => array(),
+            'title'           => __('Critical', 'wp-theme'),
+            'class'           => 'notice-error',
+            'items'           => array(),
             'hide_when_empty' => false,
         ),
         'warning'  => array(
-            'title' => __('Warnings', 'wp-theme'),
-            'class' => 'notice-warning',
-            'items' => array(),
-            'hide_when_empty' => false,
-        ),
-        'skipped'  => array(
-            'title' => __('Not scored', 'wp-theme'),
-            'class' => 'notice-info',
-            'items' => array(),
-            'hide_when_empty' => true,
-        ),
-        'good'     => array(
-            'title' => __('Passed', 'wp-theme'),
-            'class' => 'notice-success',
-            'items' => array(),
+            'title'           => __('Warnings', 'wp-theme'),
+            'class'           => 'notice-warning',
+            'items'           => array(),
             'hide_when_empty' => false,
         ),
         'unknown'  => array(
-            'title' => __('Could not check automatically', 'wp-theme'),
-            'class' => 'notice-info',
-            'items' => array(),
+            'title'           => __('Could not check automatically', 'wp-theme'),
+            'class'           => 'notice-info',
+            'items'           => array(),
             'hide_when_empty' => true,
+        ),
+        'good'     => array(
+            'title'           => __('Passed', 'wp-theme'),
+            'class'           => 'notice-success',
+            'items'           => array(),
+            'hide_when_empty' => false,
         ),
     );
 
     foreach (wp_theme_security_hardening_get_results() as $item) {
-        $status = isset($groups[ $item['status'] ]) ? $item['status'] : 'unknown';
+        $status = (string) ($item['status'] ?? 'unknown');
+
+        // Not-applicable checks (e.g. FORCE_SSL_ADMIN on HTTP) stay off Overview.
+        if ('skipped' === $status) {
+            continue;
+        }
+
+        // Deferred findings keep their group by inherent severity.
+        if ('not_counted' === $status) {
+            $base = (string) ($item['base_status'] ?? 'unknown');
+            $status = in_array($base, array('critical', 'warning'), true) ? $base : 'unknown';
+        }
+
+        if (! isset($groups[ $status ])) {
+            $status = 'unknown';
+        }
+
         $groups[ $status ]['items'][] = $item;
+    }
+
+    // Counted findings first, then deferred; catalog order within each part.
+    foreach (array('critical', 'warning') as $key) {
+        $counted  = array();
+        $deferred = array();
+
+        foreach ($groups[ $key ]['items'] as $item) {
+            if ('not_counted' === (string) ($item['status'] ?? '')) {
+                $deferred[] = $item;
+            } else {
+                $counted[] = $item;
+            }
+        }
+
+        $groups[ $key ]['items'] = array_merge($counted, $deferred);
     }
     ?>
     <div class="wp-theme-security-hardening-meta">
@@ -342,7 +358,12 @@ function wp_theme_security_hardening_render_tab_overview(): void {
             <code><?php echo esc_html($env); ?></code>
         </p>
         <p class="description">
-            <?php esc_html_e('Critical and warning checks count as issues only when the environment type is production.', 'wp-theme'); ?>
+            <?php
+            esc_html_e(
+                'While the environment type is not production, checks marked Not counted outside production stay in Critical or Warnings but are not counted. Checks without that badge are counted in every environment.',
+                'wp-theme'
+            );
+            ?>
             <a href="<?php echo esc_url(wp_theme_security_hardening_tab_url('wp-config')); ?>">
                 <?php esc_html_e('How to set WP_ENVIRONMENT_TYPE', 'wp-theme'); ?>
             </a>
@@ -357,9 +378,18 @@ function wp_theme_security_hardening_render_tab_overview(): void {
                     <p><?php esc_html_e('None.', 'wp-theme'); ?></p>
                 <?php else : ?>
                     <?php foreach ($group['items'] as $item) : ?>
+                        <?php
+                        $is_deferred = 'not_counted' === (string) ($item['status'] ?? '');
+                        ?>
                         <div class="notice <?php echo esc_attr($group['class']); ?> inline">
                             <p>
-                                <strong><?php echo esc_html((string) $item['title']); ?></strong><br>
+                                <strong><?php echo esc_html((string) $item['title']); ?></strong>
+                                <?php if ($is_deferred) : ?>
+                                    <span class="wp-theme-security-hardening-badge">
+                                        <?php esc_html_e('Not counted outside production', 'wp-theme'); ?>
+                                    </span>
+                                <?php endif; ?>
+                                <br>
                                 <?php echo esc_html((string) $item['description']); ?>
                             </p>
                             <?php wp_theme_security_hardening_render_check_action($item); ?>
@@ -374,22 +404,26 @@ function wp_theme_security_hardening_render_tab_overview(): void {
 
 
 /**
- * Link from a failed check to the tab with the fix, if any.
+ * Link from a check that is not Passed to its fix screen, if any.
  *
  * @param array<string, mixed> $item Check item.
  */
 function wp_theme_security_hardening_render_check_action(array $item): void {
     $id     = isset($item['id']) ? (string) $item['id'] : '';
     $status = isset($item['status']) ? (string) $item['status'] : '';
-    $tab    = wp_theme_security_hardening_tab_for_check($id);
 
-    if ('' === $id || 'overview' === $tab || 'good' === $status) {
+    if ('' === $id || 'good' === $status) {
+        return;
+    }
+
+    $action = wp_theme_security_hardening_action_for_check($id);
+    if (! is_array($action)) {
         return;
     }
 
     echo '<p class="wp-theme-security-hardening-action">';
-    echo '<a href="' . esc_url(wp_theme_security_hardening_tab_url($tab)) . '">';
-    echo esc_html(wp_theme_security_hardening_action_label_for_tab($tab));
+    echo '<a href="' . esc_url($action['url']) . '">';
+    echo esc_html($action['label']);
     echo '</a>';
     echo '</p>';
 }
@@ -522,7 +556,7 @@ function wp_theme_security_hardening_render_tab_wp_config(): void {
         <?php esc_html_e('FORCE_SSL_ADMIN redirects wp-admin and login to HTTPS.', 'wp-theme'); ?>
     </p>
     <p>
-        <?php esc_html_e('WP_DEBUG_DISPLAY hides PHP errors from visitors.', 'wp-theme'); ?>
+        <?php esc_html_e('WP_DEBUG, WP_DEBUG_DISPLAY, SCRIPT_DEBUG, and SAVEQUERIES should be false on production so visitors and logs do not receive debug output.', 'wp-theme'); ?>
     </p>
     <p>
         <?php esc_html_e('WP_ENVIRONMENT_TYPE accepts only production, staging, development, and local. Without this constant WordPress treats the site as production.', 'wp-theme'); ?>
@@ -537,7 +571,7 @@ function wp_theme_security_hardening_render_tab_wp_config(): void {
         'wp-theme-hardening-wp-config-snippet',
         wp_theme_security_hardening_wp_config_snippet(),
         false,
-        6,
+        9,
         'wp-config.php'
     );
 }

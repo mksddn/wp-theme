@@ -95,7 +95,7 @@ add_action('admin_enqueue_scripts', 'wp_theme_security_hardening_enqueue_assets'
  *
  * Tests are always registered. Environment softening is applied inside
  * each test so local/staging still lists recommended improvements.
- * WP_DEBUG_DISPLAY is omitted: WordPress already ships that test.
+ * Debug mode is omitted: WordPress already ships display/log tests.
  *
  * @param array<string, mixed> $tests Site Health tests.
  * @return array<string, mixed>
