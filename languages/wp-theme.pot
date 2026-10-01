@@ -950,7 +950,7 @@ msgid "Plugins logger"
 msgstr ""
 
 #: inc/theme-features.php:659
-msgid "Logs plugin activation/deactivation events"
+msgid "Logs installed plugins (adds on install/activation, removes on delete)"
 msgstr ""
 
 #: inc/theme-features.php:660
@@ -1158,7 +1158,39 @@ msgid "Allow SVG uploads"
 msgstr ""
 
 #: inc/theme-features.php:815
-msgid "Lets you upload SVG files safely."
+msgid "Sanitizes SVG files on upload. Anyone who can upload media can upload them."
+msgstr ""
+
+#: inc/svg-support.php:83
+msgid "Sorry, you are not allowed to upload SVG files."
+msgstr ""
+
+#: inc/svg-support.php:91
+msgid "This SVG file could not be read."
+msgstr ""
+
+#: inc/svg-support.php:99
+msgid "This SVG file is empty."
+msgstr ""
+
+#: inc/svg-support.php:115
+msgid "This SVG file could not be saved after sanitizing."
+msgstr ""
+
+#: inc/svg-support.php:683
+msgid "This SVG file contains styles, scripts, or animation and was blocked. Export shapes with fill and stroke attributes, without a style block or animation."
+msgstr ""
+
+#: inc/svg-support.php:694
+msgid "This SVG file contains an external image or link and was blocked."
+msgstr ""
+
+#: inc/svg-support.php
+msgid "This SVG file has no drawable shapes (path, rect, circle, text, etc.) and was blocked."
+msgstr ""
+
+#: inc/svg-support.php:705
+msgid "This SVG file was blocked because it could not be sanitized."
 msgstr ""
 
 #: inc/theme-features.php:823

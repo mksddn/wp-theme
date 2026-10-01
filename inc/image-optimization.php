@@ -71,6 +71,9 @@ function wp_theme_image_optimization_init(): void {
         add_filter('wp_editor_set_quality', 'wp_theme_set_image_quality', 10, 2);
         // If WP fallback still keeps a full original beside -scaled, drop it.
         add_filter('wp_generate_attachment_metadata', 'wp_theme_maybe_delete_full_original', 20, 2);
+        // Client-side image size check before plupload starts the transfer.
+        add_action('wp_enqueue_media', 'wp_theme_enqueue_image_upload_limit_script');
+        add_action('admin_enqueue_scripts', 'wp_theme_enqueue_image_upload_limit_script', 20);
     }
 
     if (! empty($settings['image_opt_priority_loading'])) {
@@ -414,6 +417,129 @@ function wp_theme_optimize_image_file(string $file_path, string $mime_type = '',
 
 
 /**
+ * Theme max image upload size in bytes.
+ *
+ * @since 1.3.1
+ */
+function wp_theme_get_image_max_upload_bytes(): int {
+    $settings = wp_theme_get_settings();
+
+    return (int) $settings['image_opt_max_file_size'] * 1024 * 1024;
+}
+
+
+/**
+ * Localized message for oversized image uploads.
+ *
+ * @since 1.3.1
+ */
+function wp_theme_get_image_max_upload_message(): string {
+    $settings = wp_theme_get_settings();
+
+    return sprintf(
+        /* translators: %d: maximum upload size in megabytes */
+        __('Image is too large. Maximum size is %d MB.', 'wp-theme'),
+        (int) $settings['image_opt_max_file_size']
+    );
+}
+
+
+/**
+ * Add client-side image upload size check before plupload transfers the file.
+ *
+ * Covers wp.media (Library, editor) and the legacy Add New screen
+ * (plupload-handlers), which does not use wp.Uploader.
+ *
+ * @since 1.3.1
+ */
+function wp_theme_enqueue_image_upload_limit_script(): void {
+    static $script   = '';
+    static $attached = array();
+
+    $max_bytes = wp_theme_get_image_max_upload_bytes();
+    $message   = wp_theme_get_image_max_upload_message();
+
+    if ($max_bytes <= 0 || '' === $message) {
+        return;
+    }
+
+    $handles = array();
+
+    foreach (array('wp-plupload', 'plupload-handlers') as $handle) {
+        if (wp_script_is($handle, 'enqueued') && empty($attached[ $handle ])) {
+            $handles[] = $handle;
+        }
+    }
+
+    if ($handles === []) {
+        return;
+    }
+
+    if ('' === $script) {
+        $script  = 'window.wpThemeImageUploadLimit=' . wp_json_encode(
+            array(
+                'maxBytes' => $max_bytes,
+                'message'  => $message,
+            )
+        ) . ';';
+        $script .= <<<'JS'
+(function () {
+	if (!window.plupload || !plupload.Uploader || plupload.Uploader.prototype._wpThemeImageLimitPatched) {
+		return;
+	}
+	if (!window.wpThemeImageUploadLimit) {
+		return;
+	}
+	var maxBytes = parseInt(wpThemeImageUploadLimit.maxBytes, 10) || 0;
+	var message = wpThemeImageUploadLimit.message || '';
+	if (!maxBytes || !message) {
+		return;
+	}
+	plupload.Uploader.prototype._wpThemeImageLimitPatched = true;
+	var originalStart = plupload.Uploader.prototype.start;
+	function isImage(file) {
+		return (file.type && file.type.indexOf('image/') === 0) ||
+			/\.(jpe?g|png|gif|webp|bmp|ico|svg)$/i.test(file.name || '');
+	}
+	plupload.Uploader.prototype.start = function () {
+		var uploader = this;
+		var files = (uploader.files || []).slice();
+		plupload.each(files, function (file) {
+			var notice;
+			if (!isImage(file) || file.size <= maxBytes) {
+				return;
+			}
+			uploader.removeFile(file);
+			if (file.attachment && file.attachment.destroy) {
+				file.attachment.destroy();
+			}
+			if (window.jQuery) {
+				jQuery('#media-item-' + file.id).remove();
+			}
+			if (window.wp && wp.Uploader && wp.Uploader.errors) {
+				wp.Uploader.errors.unshift({ message: message, data: {}, file: file });
+			} else if (window.jQuery) {
+				notice = jQuery('#media-upload-error');
+				if (notice.length) {
+					notice.show().empty().append(jQuery('<div class="notice notice-error"><p></p></div>'));
+					notice.find('p').text(message);
+				}
+			}
+		});
+		return originalStart.apply(this, arguments);
+	};
+})();
+JS;
+    }
+
+    foreach ($handles as $handle) {
+        wp_add_inline_script($handle, $script);
+        $attached[ $handle ] = true;
+    }
+}
+
+
+/**
  * Reject uploads that exceed the configured max file size (MB).
  *
  * Files over the limit are rejected (not compressed). Dimension/quality
@@ -435,15 +561,10 @@ function wp_theme_optimize_image_upload(array $file): array {
         return $file;
     }
 
-    $settings = wp_theme_get_settings();
-    $max_size = (int) $settings['image_opt_max_file_size'] * 1024 * 1024;
+    $max_size = wp_theme_get_image_max_upload_bytes();
 
     if ((int) $file['size'] > $max_size) {
-        $file['error'] = sprintf(
-            /* translators: %d: maximum upload size in megabytes */
-            __('Image is too large. Maximum size is %d MB.', 'wp-theme'),
-            (int) $settings['image_opt_max_file_size']
-        );
+        $file['error'] = wp_theme_get_image_max_upload_message();
     }
 
     return $file;
@@ -615,9 +736,7 @@ function wp_theme_add_priority_loading(array $attr, $attachment, $_size): array 
         $attr['fetchpriority'] = 'high';
     }
 
-    if (! isset($attr['decoding'])) {
-        $attr['decoding'] = 'async';
-    }
+    $attr['decoding'] ??= 'async';
 
     return $attr;
 }

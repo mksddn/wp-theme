@@ -1,69 +1,214 @@
 <?php
-
 /**
- * Plugin Name: Plugin Domain Logger
- * Description: This plugin logs the text domain of activated and deactivated plugins to a `plugins.txt` file in the active theme directory.
- * Version: 1.0
- * Author: mksddn
+ * Plugin domain logger.
+ *
+ * Logs text domains of installed plugins to plugins.txt in the active theme
+ * directory. Entries are added on install/activation and removed on delete.
+ *
+ * @package WP_Theme
  */
 
-// Hook to log plugin activation
-function log_plugin_activation( string $plugin ): void {
-    // Get full plugin data
-    $plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
-
-    // Extract the plugin's text domain
-    $plugin_text_domain = $plugin_data['TextDomain'];
-
-    // Set the path to the plugins.txt file in the active theme directory (child or parent)
-    $log_file = get_stylesheet_directory() . '/plugins.txt';
-
-    // Check if the log file exists
-    if (file_exists( $log_file )) {
-        // Read the file contents into an array of lines
-        $lines = @file( $log_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
-
-        // If the text domain already exists in the file, do not add it again
-        if (is_array($lines) && in_array( $plugin_text_domain, $lines )) {
-            return;
-        }
-    } else {
-        // If the file doesn't exist, create it
-        @file_put_contents( $log_file, '', LOCK_EX );
-    }
-
-    // Append the text domain to the log file if it hasn't been added yet
-    @file_put_contents( $log_file, $plugin_text_domain . "\n", FILE_APPEND | LOCK_EX );
+if (! defined('ABSPATH')) {
+    exit;
 }
 
 
-add_action( 'activated_plugin', 'log_plugin_activation', 10, 1 );
+/**
+ * Path to plugins.txt in the active theme directory (child or parent).
+ */
+function wp_theme_plugins_log_file(): string {
+    return get_stylesheet_directory() . '/plugins.txt';
+}
 
-// Hook to log plugin deactivation
-function log_plugin_deactivation( string $plugin ): void {
-    // Get full plugin data
-    $plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 
-    // Extract the plugin's text domain
-    $plugin_text_domain = $plugin_data['TextDomain'];
+/**
+ * Update plugins.txt under an exclusive lock (read, modify, write).
+ *
+ * @param callable $callback Receives the list of identifiers; returns the new list.
+ */
+function wp_theme_plugins_log_update(callable $callback): void {
+    $handle = @fopen(wp_theme_plugins_log_file(), 'c+');
 
-    // Set the path to the plugins.txt file in the active theme directory (child or parent)
-    $log_file = get_stylesheet_directory() . '/plugins.txt';
+    if (! $handle) {
+        return;
+    }
 
-    // Check if the log file exists
-    if (file_exists( $log_file )) {
-        // Read the file contents into an array of lines
-        $lines = @file( $log_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+    if (flock($handle, LOCK_EX)) {
+        $content = (string) stream_get_contents($handle);
+        $lines   = array_values(
+            array_filter(
+                (array) preg_split('/\r?\n/', $content),
+                static fn($line): bool => '' !== $line
+            )
+        );
+        $updated = $callback($lines);
 
-        // Search for the text domain and remove it from the array if found
-        if (is_array($lines) && ( $key = array_search( $plugin_text_domain, $lines, true ) ) !== false) {
-            unset( $lines[ $key ] );
-
-            // Rewrite the file without the removed text domain
-            @file_put_contents( $log_file, implode( "\n", $lines ) . "\n", LOCK_EX );
+        if (is_array($updated) && $updated !== $lines) {
+            ftruncate($handle, 0);
+            rewind($handle);
+            fwrite($handle, implode("\n", $updated) . ($updated !== [] ? "\n" : ''));
+            fflush($handle);
         }
+
+        flock($handle, LOCK_UN);
+    }
+
+    fclose($handle);
+}
+
+
+/**
+ * Resolve a stable plugin identifier for plugins.txt.
+ *
+ * Prefers TextDomain; falls back to the plugin directory (or file) slug when
+ * the header is empty or plugin files are already gone (e.g. after delete).
+ *
+ * @param string $plugin Plugin basename relative to WP_PLUGIN_DIR.
+ * @return string Identifier, or empty string when unresolved.
+ */
+function wp_theme_plugins_log_get_identifier(string $plugin): string {
+    if (! function_exists('get_plugin_data')) {
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
+
+    $plugin_path = WP_PLUGIN_DIR . '/' . $plugin;
+
+    if (file_exists($plugin_path)) {
+        $plugin_data = get_plugin_data($plugin_path, false, false);
+
+        if (! empty($plugin_data['TextDomain'])) {
+            return (string) $plugin_data['TextDomain'];
+        }
+    }
+
+    if (str_contains($plugin, '/')) {
+        return dirname($plugin);
+    }
+
+    return basename($plugin, '.php');
+}
+
+
+/**
+ * Append a plugin identifier to plugins.txt if not already present.
+ *
+ * @param string $plugin Plugin basename relative to WP_PLUGIN_DIR.
+ */
+function wp_theme_plugins_log_add(string $plugin): void {
+    $identifier = wp_theme_plugins_log_get_identifier($plugin);
+
+    if ('' === $identifier) {
+        return;
+    }
+
+    wp_theme_plugins_log_update(
+        static function (array $lines) use ($identifier): array {
+            if (! in_array($identifier, $lines, true)) {
+                $lines[] = $identifier;
+            }
+
+            return $lines;
+        }
+    );
+}
+
+
+/**
+ * Remove an identifier line from plugins.txt.
+ *
+ * @param string $identifier Plugin text domain or slug.
+ */
+function wp_theme_plugins_log_remove_identifier(string $identifier): void {
+    if ('' === $identifier || ! file_exists(wp_theme_plugins_log_file())) {
+        return;
+    }
+
+    wp_theme_plugins_log_update(
+        static fn(array $lines): array => array_values(array_diff($lines, array($identifier)))
+    );
+}
+
+
+/**
+ * Log a newly installed plugin after the upgrader finishes.
+ *
+ * @param WP_Upgrader $upgrader WP_Upgrader instance.
+ * @param array       $options  Array of bulk item update data.
+ */
+function wp_theme_plugins_log_on_install($upgrader, $options): void {
+    if (! is_array($options)) {
+        return;
+    }
+
+    if (( $options['type'] ?? '' ) !== 'plugin' || ( $options['action'] ?? '' ) !== 'install') {
+        return;
+    }
+
+    if (! $upgrader instanceof Plugin_Upgrader) {
+        return;
+    }
+
+    $plugin = $upgrader->plugin_info();
+
+    if (! is_string($plugin) || '' === $plugin) {
+        return;
+    }
+
+    wp_theme_plugins_log_add($plugin);
+}
+
+
+/**
+ * Mutable store for identifiers captured on delete_plugin.
+ *
+ * @return object{pending: array<string, string>}
+ */
+function wp_theme_plugins_log_pending_store(): object {
+    static $store = null;
+
+    if (null === $store) {
+        $store        = new stdClass();
+        $store->pending = array();
+    }
+
+    return $store;
+}
+
+
+/**
+ * Remember plugin identifier before files are removed from disk.
+ *
+ * @param string $plugin_file Plugin basename relative to WP_PLUGIN_DIR.
+ */
+function wp_theme_plugins_log_before_delete(string $plugin_file): void {
+    $store = wp_theme_plugins_log_pending_store();
+
+    $store->pending[ $plugin_file ] = wp_theme_plugins_log_get_identifier($plugin_file);
+}
+
+
+/**
+ * Remove a plugin from the log after a successful delete.
+ *
+ * Uses the identifier captured on delete_plugin so TextDomain is available
+ * even after plugin files are gone.
+ *
+ * @param string $plugin_file Plugin basename relative to WP_PLUGIN_DIR.
+ * @param bool   $deleted     Whether the plugin was deleted successfully.
+ */
+function wp_theme_plugins_log_on_delete(string $plugin_file, bool $deleted): void {
+    $store      = wp_theme_plugins_log_pending_store();
+    $identifier = $store->pending[ $plugin_file ] ?? '';
+
+    unset($store->pending[ $plugin_file ]);
+
+    if ($deleted) {
+        wp_theme_plugins_log_remove_identifier($identifier);
     }
 }
 
 
-add_action( 'deactivated_plugin', 'log_plugin_deactivation', 10, 1 );
+add_action('activated_plugin', 'wp_theme_plugins_log_add', 10, 1);
+add_action('upgrader_process_complete', 'wp_theme_plugins_log_on_install', 10, 2);
+add_action('delete_plugin', 'wp_theme_plugins_log_before_delete', 10, 1);
+add_action('deleted_plugin', 'wp_theme_plugins_log_on_delete', 10, 2);

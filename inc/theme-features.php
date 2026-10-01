@@ -656,7 +656,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         'acf_local_json'    => '<b>' . __('Enable ACF Local JSON with automatic path management', 'wp-theme') . '</b> - ' . __('Saves ACF field groups as JSON files in theme', 'wp-theme'),
         'disable_comments'  => '<b>' . __('Disable comments', 'wp-theme') . '</b> - ' . __('Removes comments and trackbacks site-wide; hides Comments menu, Discussion settings, and related admin bar items.', 'wp-theme'),
         'duplicate_post'    => '<b>' . __('Duplicate Post feature', 'wp-theme') . '</b> - ' . __('Adds duplicate button to post edit screens', 'wp-theme'),
-        'plugins_logger'    => '<b>' . __('Plugins logger', 'wp-theme') . '</b> - ' . __('Logs plugin activation/deactivation events', 'wp-theme'),
+        'plugins_logger'    => '<b>' . __('Plugins logger', 'wp-theme') . '</b> - ' . __('Logs installed plugins (adds on install/activation, removes on delete)', 'wp-theme'),
         'woocommerce_support'=> '<b>' . __('WooCommerce support', 'wp-theme') . '</b> - ' . __('Adds theme support for WooCommerce plugin', 'wp-theme'),
         'polylang_rest_api' => '<b>' . __('Polylang REST API language detection', 'wp-theme') . '</b> - ' . __('Automatically detects language from Accept-Language header in REST API requests', 'wp-theme'),
         ];
@@ -812,7 +812,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         'image_opt_upload_limits'    => '<b>' . __('Optimize images on upload', 'wp-theme') . '</b> - ' . __('Blocks files over the max MB, shrinks oversized images, and compresses them using the settings below.', 'wp-theme'),
         'image_opt_priority_loading' => '<b>' . __('Load featured images first', 'wp-theme') . '</b> - ' . __('Helps the main image appear sooner on the page.', 'wp-theme'),
         'file_size_column'           => '<b>' . __('Show file size in Media Library', 'wp-theme') . '</b> - ' . __('Adds a file size column in the list view.', 'wp-theme'),
-        'svg_support'                => '<b>' . __('Allow SVG uploads', 'wp-theme') . '</b> - ' . __('Lets you upload SVG files safely.', 'wp-theme'),
+        'svg_support'                => '<b>' . __('Allow SVG uploads', 'wp-theme') . '</b> - ' . __('Sanitizes SVG files on upload. Anyone who can upload media can upload them.', 'wp-theme'),
         ];
 
         // Note: WordPress 5.5+ has built-in lazy loading and responsive images
@@ -939,7 +939,7 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
     }
 
     if ($settings['svg_support']) {
-        // Allow SVG uploads safely
+        // Allow sanitized SVG uploads for users who can upload media
         require_once get_template_directory() . '/inc/svg-support.php';
     }
 

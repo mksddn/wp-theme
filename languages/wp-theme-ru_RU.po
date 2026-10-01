@@ -836,8 +836,8 @@ msgid "Plugins logger"
 msgstr "Логгер плагинов"
 
 #: inc/theme-features.php:659
-msgid "Logs plugin activation/deactivation events"
-msgstr "Ведёт логи активации и деактивации плагинов"
+msgid "Logs installed plugins (adds on install/activation, removes on delete)"
+msgstr "Фиксирует установленные плагины (добавляет при установке/активации, удаляет при удалении)"
 
 #: inc/theme-features.php:660
 msgid "WooCommerce support"
@@ -1044,8 +1044,40 @@ msgid "Allow SVG uploads"
 msgstr "Разрешить загрузку SVG"
 
 #: inc/theme-features.php:815
-msgid "Lets you upload SVG files safely."
-msgstr "Позволяет безопасно загружать SVG-файлы."
+msgid "Sanitizes SVG files on upload. Anyone who can upload media can upload them."
+msgstr "Очищает SVG при загрузке. Загружать может любой, кому разрешена медиатека."
+
+#: inc/svg-support.php:83
+msgid "Sorry, you are not allowed to upload SVG files."
+msgstr "У вас нет прав загружать SVG-файлы."
+
+#: inc/svg-support.php:91
+msgid "This SVG file could not be read."
+msgstr "Не удалось прочитать SVG-файл."
+
+#: inc/svg-support.php:99
+msgid "This SVG file is empty."
+msgstr "SVG-файл пустой."
+
+#: inc/svg-support.php:115
+msgid "This SVG file could not be saved after sanitizing."
+msgstr "Не удалось сохранить SVG-файл после очистки."
+
+#: inc/svg-support.php:683
+msgid "This SVG file contains styles, scripts, or animation and was blocked. Export shapes with fill and stroke attributes, without a style block or animation."
+msgstr "SVG-файл заблокирован: в нём есть стили, скрипты или анимация. Экспортируйте фигуры с fill и stroke на тегах, без блока style и без анимации."
+
+#: inc/svg-support.php:694
+msgid "This SVG file contains an external image or link and was blocked."
+msgstr "SVG-файл заблокирован: в нём есть внешняя картинка или ссылка."
+
+#: inc/svg-support.php
+msgid "This SVG file has no drawable shapes (path, rect, circle, text, etc.) and was blocked."
+msgstr "SVG-файл не содержит рисуемых фигур (path, rect, circle, text и т. д.) и заблокирован."
+
+#: inc/svg-support.php:705
+msgid "This SVG file was blocked because it could not be sanitized."
+msgstr "SVG-файл заблокирован: его не удалось очистить."
 
 #: inc/theme-features.php:823
 msgid "Limits"

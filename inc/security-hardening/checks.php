@@ -121,7 +121,13 @@ function wp_theme_security_hardening_two_factor_plugins(): array {
  */
 function wp_theme_security_hardening_is_two_factor_plugin_active(): bool
 {
-    return array_any(wp_theme_security_hardening_two_factor_plugins(), fn(string $plugin): bool => wp_theme_security_hardening_is_plugin_active($plugin));
+    foreach (wp_theme_security_hardening_two_factor_plugins() as $plugin) {
+        if (wp_theme_security_hardening_is_plugin_active($plugin)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
