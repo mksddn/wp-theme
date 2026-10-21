@@ -1356,3 +1356,47 @@ msgstr "FORCE_SSL_ADMIN перенаправляет wp-admin и вход на H
 #: inc/security-hardening/admin.php:799
 msgid "WP_DEBUG_DISPLAY hides PHP errors from visitors."
 msgstr "WP_DEBUG_DISPLAY скрывает ошибки PHP от посетителей."
+
+#: inc/theme-features.php:308
+msgid "Headless CMS"
+msgstr "Headless CMS"
+
+#: inc/theme-features.php:314
+msgid "Allowed frontend origins"
+msgstr "Разрешённые домены фронтенда"
+
+#: inc/theme-features.php:321
+msgid "robots.txt"
+msgstr "robots.txt"
+
+#: inc/theme-features.php:828
+msgid "Applies only when Headless CMS mode is enabled."
+msgstr "Действует только при включённом режиме Headless CMS."
+
+#: inc/theme-features.php:841
+msgid "One per line; a domain without a scheme is saved as https. An empty list keeps the WordPress default (any browser origin is allowed). Fill the list to restrict REST CORS to these origins plus this site."
+msgstr "По одному в строке; домен без схемы сохраняется как https. Пустой список оставляет поведение WordPress по умолчанию (разрешён любой браузерный origin). Заполните список, чтобы ограничить REST CORS этими доменами и этим сайтом."
+
+#: inc/theme-features.php:854
+msgid "Leave empty to block all crawlers (Disallow: /)."
+msgstr "Оставьте пустым, чтобы закрыть сайт от всех поисковых роботов (Disallow: /)."
+
+#: inc/theme-features.php:567
+msgid "Inactive: Headless CMS mode is off."
+msgstr "Не активно: режим Headless CMS выключен."
+
+#: inc/theme-features.php:573
+msgid "Inactive: the list is empty, so the WordPress default applies (any browser origin can use the API). For production, add your frontend domain."
+msgstr "Не активно: список пуст, действует поведение WordPress по умолчанию (API доступен любому браузерному origin). Для продакшена укажите домен фронтенда."
+
+#. translators: %d: number of allowed origins.
+#: inc/theme-features.php:577
+#, php-format
+msgid "Active: only this site and %d listed origin(s) receive Access-Control-Allow-Origin."
+msgstr "Активно: Access-Control-Allow-Origin получают только этот сайт и %d origin(ов) из списка."
+
+#. translators: %s: comma-separated list of rejected entries.
+#: inc/theme-features.php:676
+#, php-format
+msgid "Ignored invalid origins: %s"
+msgstr "Пропущены некорректные домены: %s"

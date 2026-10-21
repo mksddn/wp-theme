@@ -5,27 +5,78 @@
  * @package wp-theme
  */
 
-// // Enable CORS on JSON API WordPress
-// function add_cors_http_header()
-// {
-// header("Access-Control-Allow-Origin: *");
-// }
-// add_action('init', 'add_cors_http_header');
+if (! defined( 'ABSPATH' )) {
+    exit;
+}
+
+/**
+ * Allow only REST API, robots.txt and wp-admin; redirect everything else to wp-admin.
+ */
+add_action(
+    'template_redirect',
+    static function (): void {
+        if (is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_robots()) {
+            return;
+        }
+
+        wp_redirect( admin_url() );
+        exit;
+    }
+);
 
 
 /**
- * Allow only REST API and wp-admin, redirect everything else to /wp-admin
+ * Headless robots.txt: default Disallow all, or custom text from settings.
+ *
+ * Runs after SEO plugins (e.g. Yoast at 99999) so their Allow/Sitemap block
+ * cannot append to and contradict the headless policy.
+ *
+ * @param string $output Default robots.txt body from core.
+ * @param bool   $public Whether the site is public (blog_public).
  */
-add_action('template_redirect', function (): void {
-    // Allow access to admin and REST API
-    if (is_admin() || (defined('REST_REQUEST') && REST_REQUEST)) {
-        return;
+function wp_theme_filter_headless_robots_txt( string $output, bool $public ): string {
+    $settings = wp_theme_get_settings();
+
+    if (empty( $settings['headless'] )) {
+        return $output;
     }
 
-    wp_redirect(admin_url());
-    exit;
-});
+    // "Discourage search engines" in Reading settings always wins over custom text.
+    if (! $public) {
+        return "User-agent: *\nDisallow: /\n";
+    }
 
+    $custom = isset( $settings['headless_robots_txt'] ) ? trim( (string) $settings['headless_robots_txt'] ) : '';
+
+    if ('' !== $custom) {
+        return $custom . "\n";
+    }
+
+    return "User-agent: *\nDisallow: /\n";
+}
+
+
+add_filter( 'robots_txt', 'wp_theme_filter_headless_robots_txt', PHP_INT_MAX, 2 );
+
+
+/**
+ * Re-register the robots.txt filter right before core applies it.
+ *
+ * A plugin that hooks robots_txt at the same PHP_INT_MAX priority after the theme
+ * loads would otherwise run last; re-adding here puts ours at the end of the queue.
+ */
+function wp_theme_requeue_headless_robots_filter(): void {
+    remove_filter( 'robots_txt', 'wp_theme_filter_headless_robots_txt', PHP_INT_MAX );
+    add_filter( 'robots_txt', 'wp_theme_filter_headless_robots_txt', PHP_INT_MAX, 2 );
+}
+
+
+add_action( 'do_robotstxt', 'wp_theme_requeue_headless_robots_filter', PHP_INT_MAX );
+
+/**
+ * CORS allowlist for headless frontend origins.
+ */
+require get_template_directory() . '/inc/api/rest-cors.php';
 
 /**
  * Custom endpoint to get Options Page data by slug.
@@ -46,22 +97,6 @@ require get_template_directory() . '/inc/api/featured-media-enhancements.php';
  * Add enhanced categories and tags support to posts REST API.
  */
 require get_template_directory() . '/inc/api/categories-tags-enhancements.php';
-
-
-/**
- * Complete REST API disable for unauthorized users.
- */
-// add_filter('rest_authentication_errors', function ($result) {
-// if (!is_user_logged_in()) {
-// return new WP_Error(
-// 'rest_forbidden',
-// __('You must be authorized to access the API.', 'wp-theme'),
-// ['status' => 401]
-// );
-// }
-// return $result;
-// });
-
 
 /**
  * Auto-enable show_in_rest for all ACF field groups when Headless CMS is enabled.

@@ -27,7 +27,9 @@ function wp_theme_get_default_settings(): array {
         'clean_pagination'   => false,
         'category_thumbnails'=> false,
         // Headless CMS
-        'headless'           => false,
+        'headless'              => false,
+        'rest_allowed_origins'  => [],
+        'headless_robots_txt'   => '',
         // SEO Features
         'schema_markup'      => false,
         // Security features
@@ -300,6 +302,28 @@ function wp_theme_settings_register(): void {
         'wp_theme_section_admin'
     );
 
+    // Headless CMS Section (CORS allowlist and robots.txt)
+    add_settings_section(
+        'wp_theme_section_headless',
+        __('Headless CMS', 'wp-theme'),
+        'wp_theme_headless_section_callback',
+        'wp-theme-settings'
+    );
+    add_settings_field(
+        'wp_theme_headless_origins',
+        __('Allowed frontend origins', 'wp-theme'),
+        'wp_theme_render_headless_origins_field',
+        'wp-theme-settings',
+        'wp_theme_section_headless'
+    );
+    add_settings_field(
+        'wp_theme_headless_robots',
+        __('robots.txt', 'wp-theme'),
+        'wp_theme_render_headless_robots_field',
+        'wp-theme-settings',
+        'wp_theme_section_headless'
+    );
+
     // Content Features Section
     add_settings_section(
         'wp_theme_section_content',
@@ -384,6 +408,36 @@ add_action('admin_init', 'wp_theme_settings_register');
 
 
 /**
+ * Enqueue admin assets only on the Theme Features settings screen.
+ *
+ * @param string $hook_suffix Current admin page hook suffix.
+ */
+function wp_theme_settings_enqueue_admin_assets(string $hook_suffix): void {
+    if ('settings_page_wp-theme-settings' !== $hook_suffix) {
+        return;
+    }
+
+    $js_rel  = '/js/theme-settings-admin.js';
+    $js_path = get_template_directory() . $js_rel;
+
+    if (! is_readable($js_path)) {
+        return;
+    }
+
+    wp_enqueue_script(
+        'wp-theme-settings-admin',
+        get_template_directory_uri() . $js_rel,
+        [],
+        (string) filemtime($js_path),
+        true
+    );
+}
+
+
+add_action('admin_enqueue_scripts', 'wp_theme_settings_enqueue_admin_assets');
+
+
+/**
  * Clear settings cache on theme activation.
  *
  * @since 1.0.0
@@ -433,6 +487,125 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
      */
     function wp_theme_sanitize_boolean($value): bool {
         return isset($value) && (int) $value === 1;
+    }
+
+
+    /**
+     * Normalize a raw URL or Origin to scheme://host[:port].
+     *
+     * @param string $raw             Raw origin or URL.
+     * @param bool   $allow_bare_host Treat "example.com" as https://example.com (settings input only).
+     * @return string Normalized origin, or empty string if invalid.
+     */
+    function wp_theme_normalize_http_origin( string $raw, bool $allow_bare_host = false ): string {
+        $raw = trim( $raw );
+
+        if ('' === $raw || 'null' === strtolower( $raw )) {
+            return '';
+        }
+
+        if ($allow_bare_host && ! preg_match( '#^[a-z][a-z0-9+.-]*://#i', $raw )) {
+            $raw = 'https://' . $raw;
+        }
+
+        if (! preg_match( '#^https?://#i', $raw )) {
+            return '';
+        }
+
+        $parts = wp_parse_url( $raw );
+
+        if (! is_array( $parts ) || empty( $parts['scheme'] ) || empty( $parts['host'] )) {
+            return '';
+        }
+
+        $scheme = strtolower( (string) $parts['scheme'] );
+
+        if (! in_array( $scheme, array( 'http', 'https' ), true )) {
+            return '';
+        }
+
+        $host = strtolower( (string) $parts['host'] );
+
+        // Accept localhost or a dotted hostname / IPv4 only; rejects typos like "not-a-url".
+        if (! preg_match( '/^(localhost|[a-z0-9-]+(\.[a-z0-9-]+)+)$/', $host )) {
+            return '';
+        }
+
+        $port = isset( $parts['port'] ) ? (int) $parts['port'] : 0;
+
+        $origin = $scheme . '://' . $host;
+
+        $is_default_port = ( 'http' === $scheme && 80 === $port )
+        || ( 'https' === $scheme && 443 === $port );
+
+        if ($port > 0 && ! $is_default_port) {
+            $origin .= ':' . $port;
+        }
+
+        return $origin;
+    }
+
+
+    /**
+     * Parse allowed REST origins from textarea or array input.
+     *
+     * @param mixed $input Raw input (string with newlines/commas, or array).
+     * @return array{valid: string[], invalid: string[]} Normalized unique origins and rejected entries.
+     */
+    function wp_theme_parse_rest_allowed_origins( $input ): array {
+        $lines = array();
+
+        if (is_string( $input )) {
+            $lines = preg_split( '/[\s,]+/', $input ) ?: array();
+        } elseif (is_array( $input )) {
+            $lines = $input;
+        }
+
+        $valid   = array();
+        $invalid = array();
+
+        foreach ($lines as $line) {
+            $line = trim( sanitize_text_field( (string) $line ) );
+
+            if ('' === $line) {
+                continue;
+            }
+
+            $origin = wp_theme_normalize_http_origin( $line, true );
+
+            if ('' === $origin) {
+                $invalid[] = $line;
+            } else {
+                $valid[] = $origin;
+            }
+        }
+
+        return array(
+            'valid'   => array_values( array_unique( $valid ) ),
+            'invalid' => array_values( array_unique( $invalid ) ),
+        );
+    }
+
+
+    /**
+     * Human-readable state of the REST CORS allowlist (shown on the settings page).
+     */
+    function wp_theme_get_rest_cors_status(): string {
+        $settings = wp_theme_get_settings();
+
+        if (empty( $settings['headless'] )) {
+            return __( 'Inactive: Headless CMS mode is off.', 'wp-theme' );
+        }
+
+        // Use the same source as the allowlist itself (settings + wp_theme_rest_allowed_origins filter).
+        $origins = wp_theme_get_rest_allowed_origins();
+
+        if ($origins === []) {
+            return __( 'Inactive: the list is empty, so the WordPress default applies (any browser origin can use the API). For production, add your frontend domain.', 'wp-theme' );
+        }
+
+        /* translators: %d: number of allowed origins. */
+        return sprintf( __( 'Active: only this site and %d listed origin(s) receive Access-Control-Allow-Origin.', 'wp-theme' ), count( $origins ) );
     }
 
 
@@ -521,6 +694,24 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         }
 
         $output['search_exclude_slugs_list'] = array_values(array_filter($exclude_slugs, fn($slug): bool => $slug !== ''));
+
+        // Headless REST CORS origins and robots.txt
+        $parsed_origins = wp_theme_parse_rest_allowed_origins( $output['rest_allowed_origins'] ?? '' );
+        $output['rest_allowed_origins'] = $parsed_origins['valid'];
+
+        if (! empty( $parsed_origins['invalid'] ) && function_exists( 'add_settings_error' )) {
+            add_settings_error(
+                'wp_theme_settings',
+                'wp_theme_invalid_origins',
+                /* translators: %s: comma-separated list of rejected entries. */
+                sprintf( __( 'Ignored invalid origins: %s', 'wp-theme' ), esc_html( implode( ', ', $parsed_origins['invalid'] ) ) ),
+                'warning'
+            );
+        }
+
+        $output['headless_robots_txt'] = sanitize_textarea_field(
+            (string) ( $output['headless_robots_txt'] ?? '' )
+        );
 
         // Numeric settings sanitization
         $numeric_settings = [
@@ -661,6 +852,40 @@ add_action('update_option_wp_theme_settings', 'wp_theme_clear_settings_cache');
         'polylang_rest_api' => '<b>' . __('Polylang REST API language detection', 'wp-theme') . '</b> - ' . __('Automatically detects language from Accept-Language header in REST API requests', 'wp-theme'),
         ];
         wp_theme_render_checkboxes($features, $opts);
+    }
+
+
+    function wp_theme_headless_section_callback(): void {
+        echo '<p>' . esc_html__('Applies only when Headless CMS mode is enabled.', 'wp-theme') . '</p>';
+    }
+
+
+    function wp_theme_render_headless_origins_field(): void {
+        $opts    = wp_theme_get_settings();
+        $origins = is_array( $opts['rest_allowed_origins'] ?? null ) ? $opts['rest_allowed_origins'] : array();
+
+        printf(
+            '<textarea id="wp_theme_headless_origins" name="wp_theme_settings[rest_allowed_origins]" rows="3" class="large-text code" placeholder="%s">%s</textarea>',
+            esc_attr( 'https://www.example.com' ),
+            esc_textarea( implode( "\n", $origins ) )
+        );
+        echo '<p class="description">' . esc_html__(
+            'One per line; a domain without a scheme is saved as https. An empty list keeps the WordPress default (any browser origin is allowed). Fill the list to restrict REST CORS to these origins plus this site.',
+            'wp-theme'
+        ) . '</p>';
+        echo '<p class="description"><strong>' . esc_html( wp_theme_get_rest_cors_status() ) . '</strong></p>';
+    }
+
+
+    function wp_theme_render_headless_robots_field(): void {
+        $opts = wp_theme_get_settings();
+
+        printf(
+            '<textarea id="wp_theme_headless_robots" name="wp_theme_settings[headless_robots_txt]" rows="3" class="large-text code" placeholder="%s">%s</textarea>',
+            esc_attr( "User-agent: *\nDisallow: /" ),
+            esc_textarea( (string) ( $opts['headless_robots_txt'] ?? '' ) )
+        );
+        echo '<p class="description">' . esc_html__( 'Leave empty to block all crawlers (Disallow: /).', 'wp-theme' ) . '</p>';
     }
 
 

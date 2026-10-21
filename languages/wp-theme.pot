@@ -1358,3 +1358,47 @@ msgstr ""
 #: template-parts/content-none.php:20
 msgid "It seems we can't find what you're looking for. Perhaps searching can help."
 msgstr ""
+
+#: inc/theme-features.php:308
+msgid "Headless CMS"
+msgstr ""
+
+#: inc/theme-features.php:314
+msgid "Allowed frontend origins"
+msgstr ""
+
+#: inc/theme-features.php:321
+msgid "robots.txt"
+msgstr ""
+
+#: inc/theme-features.php:828
+msgid "Applies only when Headless CMS mode is enabled."
+msgstr ""
+
+#: inc/theme-features.php:841
+msgid "One per line; a domain without a scheme is saved as https. An empty list keeps the WordPress default (any browser origin is allowed). Fill the list to restrict REST CORS to these origins plus this site."
+msgstr ""
+
+#: inc/theme-features.php:854
+msgid "Leave empty to block all crawlers (Disallow: /)."
+msgstr ""
+
+#: inc/theme-features.php:567
+msgid "Inactive: Headless CMS mode is off."
+msgstr ""
+
+#: inc/theme-features.php:573
+msgid "Inactive: the list is empty, so the WordPress default applies (any browser origin can use the API). For production, add your frontend domain."
+msgstr ""
+
+#. translators: %d: number of allowed origins.
+#: inc/theme-features.php:577
+#, php-format
+msgid "Active: only this site and %d listed origin(s) receive Access-Control-Allow-Origin."
+msgstr ""
+
+#. translators: %s: comma-separated list of rejected entries.
+#: inc/theme-features.php:676
+#, php-format
+msgid "Ignored invalid origins: %s"
+msgstr ""
