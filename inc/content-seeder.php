@@ -1439,7 +1439,7 @@ function wp_theme_content_seed_render_admin_page(): void {
             <?php wp_nonce_field('wp_theme_content_seed'); ?>
             <input type="hidden" name="action" value="wp_theme_content_seed">
 
-            <table class="form-table" role="presentation">
+            <table class="form-table" role="none">
                 <tr>
                     <th scope="row"><?php esc_html_e('Options', 'wp-theme'); ?></th>
                     <td>

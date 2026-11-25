@@ -90,8 +90,6 @@ function wp_theme_get_acf_editor_screen_context(): ?array {
         $post_id = absint(wp_unslash($_GET['post'])); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
     }
 
-    $post_type = '';
-
     if ($post_id > 0) {
         $post = get_post($post_id);
 
